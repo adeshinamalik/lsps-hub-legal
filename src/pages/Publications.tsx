@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
@@ -80,6 +81,7 @@ const categories = [
 const Publications = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const navigate = useNavigate();
   
   // Filter articles based on search query and selected category
   const filteredArticles = allArticles.filter(article => {
@@ -186,6 +188,7 @@ const Publications = () => {
                     <Button 
                       variant="ghost" 
                       className="text-law-DEFAULT hover:text-law-accent justify-start pl-0 w-fit group"
+                      onClick={() => navigate(`/publications/${article.id}`)}
                     >
                       Read more
                       <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

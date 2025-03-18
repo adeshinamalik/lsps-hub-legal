@@ -96,7 +96,7 @@ const NewsHighlights = ({ className, items }: NewsHighlightsProps) => {
                 <Button 
                   variant="ghost" 
                   className="text-law-DEFAULT hover:text-law-accent justify-start pl-0 w-fit group"
-                  onClick={() => navigate(`/news/${item.id}`)}
+                  onClick={() => navigate(`/news/${item.type === 'event' ? 'events' : 'news'}/${item.id}`)}
                 >
                   Read more
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
