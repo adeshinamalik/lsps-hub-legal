@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
@@ -94,6 +95,7 @@ const eventItems = [
 
 const News = () => {
   const [activeTab, setActiveTab] = useState("all");
+  const navigate = useNavigate();
   
   // Combine and filter items based on active tab
   const filteredItems = activeTab === "all" 
@@ -184,6 +186,8 @@ interface NewsEventCardProps {
 }
 
 const NewsEventCard = ({ item, index }: NewsEventCardProps) => {
+  const navigate = useNavigate();
+  
   return (
     <Card 
       className="overflow-hidden border-none bg-white shadow-subtle transition-all duration-300 hover:shadow-glass h-full flex flex-col animate-fade-up"
@@ -245,6 +249,7 @@ const NewsEventCard = ({ item, index }: NewsEventCardProps) => {
         <Button 
           variant="ghost" 
           className="text-law-DEFAULT hover:text-law-accent justify-start pl-0 w-fit group"
+          onClick={() => navigate(`/news/${item.type === 'event' ? 'events' : 'news'}/${item.id}`)}
         >
           Read more
           <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
