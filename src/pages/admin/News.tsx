@@ -8,7 +8,7 @@ import {
   Trash2,
   FilterX,
   Filter,
-  News as NewsIcon
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -191,7 +191,7 @@ const AdminNews = () => {
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8">
                       <div className="flex flex-col items-center justify-center text-gray-500">
-                        <NewsIcon className="h-12 w-12 mb-2 opacity-20" />
+                        <FileText className="h-12 w-12 mb-2 opacity-20" />
                         <p className="text-lg font-medium">No items found</p>
                         <p className="text-sm">
                           Try adjusting your search or add a new item
@@ -265,7 +265,7 @@ const AdminNews = () => {
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8">
                       <div className="flex flex-col items-center justify-center text-gray-500">
-                        <NewsIcon className="h-12 w-12 mb-2 opacity-20" />
+                        <FileText className="h-12 w-12 mb-2 opacity-20" />
                         <p className="text-lg font-medium">No news found</p>
                         <p className="text-sm">
                           Try adjusting your search or add a new news item
