@@ -1,104 +1,165 @@
+import { useState } from "react";
+import { Link, NavLink as RouterNavLink } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-import { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { Menu, X } from 'lucide-react';
+interface MobileNavLinkProps {
+  to: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+
+const MobileNavLink = ({ to, children, onClick }: MobileNavLinkProps) => {
+  return (
+    <Link to={to} onClick={onClick} className="block text-lg font-medium text-gray-700 hover:text-law-DEFAULT transition-colors">
+      {children}
+    </Link>
+  );
+};
+
+interface NavLinkProps {
+  to: string;
+  children: React.ReactNode;
+}
+
+const NavLink = ({ to, children }: NavLinkProps) => {
+  return (
+    <RouterNavLink
+      to={to}
+      className={({ isActive }) =>
+        cn(
+          "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-gray-700 hover:text-law-DEFAULT",
+          isActive ? "text-law-DEFAULT" : "text-gray-700"
+        )
+      }
+    >
+      {children}
+    </RouterNavLink>
+  );
+};
 
 const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname]);
-
-  const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'About', path: '/about' },
-    { name: 'Publications', path: '/publications' },
-    { name: 'News & Events', path: '/news' },
-    { name: 'Contact', path: '/contact' },
-  ];
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   return (
-    <header
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out py-4 px-6 md:px-10 lg:px-20',
-        isScrolled
-          ? 'bg-white/80 backdrop-blur-sm shadow-subtle'
-          : 'bg-transparent'
-      )}
-    >
-      <div className="container mx-auto">
-        <div className="flex items-center justify-between">
-          <NavLink 
-            to="/" 
-            className="text-law-DEFAULT text-xl md:text-2xl font-serif font-bold tracking-tight transition-opacity hover:opacity-90"
-          >
-            LSPS
-          </NavLink>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm">
+      <div className="container mx-auto px-6 md:px-10 lg:px-20">
+        <div className="flex items-center justify-between h-20">
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="font-serif text-2xl font-bold text-law-DEFAULT">LSPS</div>
+          </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) =>
-                  cn(
-                    'text-sm font-medium py-1 transition-all relative',
-                    isActive 
-                      ? 'text-law-DEFAULT after:content-[""] after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-full after:bg-law-accent after:transform after:scale-x-100 after:origin-bottom-left after:transition-transform'
-                      : 'text-gray-600 hover:text-law-DEFAULT after:content-[""] after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-full after:bg-law-accent after:transform after:scale-x-0 after:origin-bottom-right after:transition-transform hover:after:scale-x-100 hover:after:origin-bottom-left'
-                  )
-                }
-              >
-                {link.name}
-              </NavLink>
-            ))}
+          <nav className="hidden md:flex items-center gap-8">
+            <ul className="flex items-center gap-8">
+              <li>
+                <NavLink to="/">Home</NavLink>
+              </li>
+              <li>
+                <NavLink to="/about">About</NavLink>
+              </li>
+              <li>
+                <NavLink to="/publications">Publications</NavLink>
+              </li>
+              <li>
+                <NavLink to="/news">News & Events</NavLink>
+              </li>
+              <li>
+                <NavLink to="/gallery">Gallery</NavLink>
+              </li>
+              <li>
+                <NavLink to="/resources">Resources</NavLink>
+              </li>
+              <li>
+                <NavLink to="/contact">Contact</NavLink>
+              </li>
+            </ul>
+            <Button asChild className="bg-law-DEFAULT hover:bg-law-light">
+              <Link to="/join-us">Join Us</Link>
+            </Button>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden text-law-DEFAULT" 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleMobileMenu}
+              className="h-10 w-10 text-law-DEFAULT"
+              aria-label="Menu"
+            >
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-md animate-slide-in-right">
-          <nav className="flex flex-col py-4 px-6">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) =>
-                  cn(
-                    'py-3 text-base font-medium transition-colors border-b border-gray-100 last:border-b-0',
-                    isActive ? 'text-law-DEFAULT' : 'text-gray-600 hover:text-law-DEFAULT'
-                  )
-                }
+      {/* Mobile menu */}
+      <div
+        className={cn(
+          "fixed inset-x-0 top-20 bg-white shadow-md md:hidden transition-all duration-300 ease-in-out overflow-hidden",
+          isMobileMenuOpen
+            ? "max-h-screen opacity-100"
+            : "max-h-0 opacity-0"
+        )}
+      >
+        <div className="container mx-auto px-6 py-5">
+          <ul className="flex flex-col gap-4">
+            <li>
+              <MobileNavLink to="/" onClick={closeMobileMenu}>
+                Home
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/about" onClick={closeMobileMenu}>
+                About
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/publications" onClick={closeMobileMenu}>
+                Publications
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/news" onClick={closeMobileMenu}>
+                News & Events
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/gallery" onClick={closeMobileMenu}>
+                Gallery
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/resources" onClick={closeMobileMenu}>
+                Resources
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/contact" onClick={closeMobileMenu}>
+                Contact
+              </MobileNavLink>
+            </li>
+            <li>
+              <Button
+                asChild
+                className="w-full mt-2 bg-law-DEFAULT hover:bg-law-light"
               >
-                {link.name}
-              </NavLink>
-            ))}
-          </nav>
+                <Link to="/join-us" onClick={closeMobileMenu}>
+                  Join Us
+                </Link>
+              </Button>
+            </li>
+          </ul>
         </div>
-      )}
+      </div>
     </header>
   );
 };
