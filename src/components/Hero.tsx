@@ -19,7 +19,7 @@ const Hero = ({
   subtitle,
   ctaText,
   ctaLink,
-  imageUrl,
+  imageUrl = "https://images.unsplash.com/photo-1589391886645-d51941baf7fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
 }: HeroProps) => {
   const navigate = useNavigate();
 
@@ -31,21 +31,23 @@ const Hero = ({
       )}
     >
       {/* Background Image with Overlay */}
-      {imageUrl && (
-        <div className="absolute inset-0 -z-10 bg-black/10">
-          <div 
-            className="absolute inset-0 bg-gradient-to-b from-law-DEFAULT/40 to-black/30 mix-blend-multiply"
-            aria-hidden="true"
-          />
-          <img
-            src={imageUrl}
-            alt="Background"
-            className="w-full h-full object-cover object-center"
-            loading="lazy"
-            aria-hidden="true"
-          />
-        </div>
-      )}
+      <div className="absolute inset-0 -z-10 bg-black/10">
+        <div 
+          className="absolute inset-0 bg-gradient-to-b from-law-DEFAULT/40 to-black/30 mix-blend-multiply"
+          aria-hidden="true"
+        />
+        <img
+          src={imageUrl}
+          alt="Background"
+          className="w-full h-full object-cover object-center"
+          loading="lazy"
+          aria-hidden="true"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "https://images.unsplash.com/photo-1589391886645-d51941baf7fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80";
+          }}
+        />
+      </div>
 
       <div className="container mx-auto px-6 md:px-10 lg:px-20">
         <div className="max-w-3xl animate-fade-up">
