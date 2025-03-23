@@ -7,7 +7,7 @@ import Publications from './pages/Publications';
 import PublicationDetail from './pages/PublicationDetail';
 import News from './pages/News';
 import NewsEventDetail from './pages/NewsEventDetail';
-import AdminLayout from './pages/admin/AdminLayout';
+import AdminLayout from './components/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
 import AdminPublications from './pages/admin/Publications';
 import AdminNews from './pages/admin/News';
