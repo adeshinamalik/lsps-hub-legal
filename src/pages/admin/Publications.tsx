@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   FileText, 
@@ -40,8 +39,8 @@ import {
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { DatePicker } from "@/components/DatePicker";
 
-// Dummy data for publications
 const publications = [
   {
     id: "1",
@@ -90,6 +89,7 @@ const AdminPublications = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedPublication, setSelectedPublication] = useState<string | null>(null);
+  const [publishDate, setPublishDate] = useState<Date | undefined>(undefined);
   const [newPublication, setNewPublication] = useState({
     title: "",
     category: "",
@@ -103,14 +103,12 @@ const AdminPublications = () => {
   );
 
   const handleAddPublication = () => {
-    // In a real app, this would make an API call to add the publication
     toast.success("Publication added successfully!");
     setIsAddDialogOpen(false);
     setNewPublication({ title: "", category: "", content: "" });
   };
 
   const handleDeletePublication = () => {
-    // In a real app, this would make an API call to delete the publication
     toast.success("Publication deleted successfully!");
     setIsDeleteDialogOpen(false);
     setSelectedPublication(null);
@@ -234,7 +232,6 @@ const AdminPublications = () => {
         </Table>
       </div>
 
-      {/* Add Publication Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
@@ -284,6 +281,12 @@ const AdminPublications = () => {
                 }
               />
             </div>
+            <DatePicker 
+              date={publishDate} 
+              onDateChange={setPublishDate} 
+              label="Schedule Publication" 
+              placeholder="Select when to publish" 
+            />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
@@ -294,7 +297,6 @@ const AdminPublications = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
