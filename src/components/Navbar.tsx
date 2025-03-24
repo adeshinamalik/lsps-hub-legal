@@ -1,7 +1,6 @@
-
 import { useState } from "react";
-import { Link, NavLink as RouterNavLink } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Link, NavLink as RouterNavLink, useNavigate } from "react-router-dom";
+import { Menu, X, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -12,6 +11,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MobileNavLinkProps {
   to: string;
@@ -50,6 +50,8 @@ const NavLink = ({ to, children }: NavLinkProps) => {
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -57,6 +59,11 @@ const Navbar = () => {
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  const handleAdminRedirect = () => {
+    navigate(currentUser ? '/admin' : '/login');
+    closeMobileMenu();
   };
 
   return (
@@ -125,9 +132,20 @@ const Navbar = () => {
                 <NavLink to="/contact">Contact</NavLink>
               </li>
             </ul>
-            <Button asChild className="bg-law-light hover:bg-law-light">
-              <Link to="/join-us">Join Us</Link>
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button asChild className="bg-law-light hover:bg-law-light">
+                <Link to="/join-us">Join Us</Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={handleAdminRedirect}
+                title={currentUser ? "Go to Admin Dashboard" : "Admin Login"}
+                className="rounded-full bg-white border-gray-200 hover:bg-gray-100"
+              >
+                <ShieldCheck className="h-5 w-5 text-law-DEFAULT" />
+              </Button>
+            </div>
           </nav>
 
           <div className="md:hidden">
@@ -203,6 +221,15 @@ const Navbar = () => {
                 <Link to="/join-us" onClick={closeMobileMenu}>
                   Join Us
                 </Link>
+              </Button>
+            </li>
+            <li>
+              <Button
+                onClick={handleAdminRedirect}
+                className="w-full mt-2 flex items-center justify-center gap-2 border border-gray-200 bg-white text-law-DEFAULT hover:bg-gray-50"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                {currentUser ? "Admin Dashboard" : "Admin Login"}
               </Button>
             </li>
           </ul>
