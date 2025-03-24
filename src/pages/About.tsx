@@ -9,30 +9,30 @@ import { Users, PenTool, BookOpen } from "lucide-react";
 const About = () => {
   const navigate = useNavigate();
   
-  // Mock team data
+  // Team data using the provided images
   const teamMembers = [
     {
-      name: "Amina Oladapo",
+      name: "Aisha Hassan",
       position: "President",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
+      image: "public/lovable-uploads/f52082c9-0acc-485d-a83f-013640bc0231.png",
       bio: "Final year law student with a passion for human rights law and legal journalism."
     },
     {
-      name: "Daniel Ehigiator",
+      name: "Fatima Abdullahi",
       position: "Editor-in-Chief",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
+      image: "public/lovable-uploads/36ef7f79-059f-45be-afa7-4bf2788e172d.png",
       bio: "Penultimate year student with extensive experience in editorial work and legal research."
     },
     {
-      name: "Sarah Nwafor",
+      name: "Amina Ibrahim",
       position: "Secretary",
-      image: "https://images.unsplash.com/photo-1573497019236-61f323342eb9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
+      image: "public/lovable-uploads/f67f9f3d-612f-46cc-ab7e-1fab15f564e8.png",
       bio: "Third year student specializing in corporate law and administrative management."
     },
     {
-      name: "Michael Adebayo",
+      name: "Zainab Mohammed",
       position: "Public Relations Officer",
-      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
+      image: "public/lovable-uploads/0d858fae-e70c-48a1-b635-ed313e1e2925.png",
       bio: "Fourth year student with skills in communications and event management."
     }
   ];
@@ -79,9 +79,9 @@ const About = () => {
             
             <div className="order-1 lg:order-2 relative">
               <img
-                src="https://images.unsplash.com/photo-1589994965851-a8f479c573a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                alt="LSPS Team"
-                className="rounded-lg shadow-subtle w-full h-auto object-cover animate-fade-up"
+                src="public/lovable-uploads/eedd66e1-c2d9-49d3-814f-a415331d2a90.png"
+                alt="LSPS Logo"
+                className="rounded-lg shadow-subtle w-4/5 mx-auto h-auto object-contain animate-fade-up bg-white p-8"
               />
               <div className="absolute -bottom-6 -right-6 w-36 h-36 bg-law-accent rounded-lg -z-10"></div>
               <div className="absolute -top-6 -left-6 w-36 h-36 bg-law-DEFAULT rounded-lg -z-10"></div>
@@ -154,6 +154,10 @@ const About = () => {
                     src={member.image}
                     alt={member.name}
                     className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1589391886645-d51941baf7fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80";
+                    }}
                   />
                 </div>
                 <div className="p-6">
