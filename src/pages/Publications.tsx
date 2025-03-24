@@ -9,6 +9,25 @@ import { Input } from "@/components/ui/input";
 import { ArrowRight, Search, Calendar, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+
+
+
+
+////////////////////////////////////////////////////////////////////
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/Firebase';
+
+export const fetchArticles = async () => {
+  const querySnapshot = await getDocs(collection(db, 'articles'));
+  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
 // Mock data for articles
 const allArticles = [
   {
@@ -82,22 +101,23 @@ const Publications = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const navigate = useNavigate();
-  
+
   // Filter articles based on search query and selected category
   const filteredArticles = allArticles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                        article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                        article.author.toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      article.author.toLowerCase().includes(searchQuery.toLowerCase());
+
     const matchesCategory = selectedCategory === "All Categories" || article.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
+  console.log(filteredArticles);
 
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <div className="pt-28 pb-16 md:pt-32 md:pb-20 px-6 md:px-10 lg:px-20 bg-law-muted">
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center">
@@ -108,13 +128,13 @@ const Publications = () => {
           </div>
         </div>
       </div>
-      
+
       <section className="py-16 md:py-20 px-6 md:px-10 lg:px-20">
         <div className="container mx-auto">
           <div className="mb-12">
             <div className="flex flex-col md:flex-row gap-4 mb-8">
               <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Search className="absolute left-3 top-5 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <Input
                   type="text"
                   placeholder="Search articles..."
@@ -123,7 +143,7 @@ const Publications = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              
+
               <div className="flex flex-wrap gap-3">
                 {categories.map(category => (
                   <Button
@@ -131,7 +151,7 @@ const Publications = () => {
                     variant="outline"
                     className={cn(
                       "rounded-full border border-gray-200 bg-white",
-                      selectedCategory === category && "bg-law-DEFAULT text-white border-law-DEFAULT hover:bg-law-light"
+                      selectedCategory === category && "bg-law-light text-white border-law-DEFAULT hover:bg-law-light"
                     )}
                     onClick={() => setSelectedCategory(category)}
                   >
@@ -140,21 +160,21 @@ const Publications = () => {
                 ))}
               </div>
             </div>
-            
+
             <div className="text-gray-600">
               Showing {filteredArticles.length} {filteredArticles.length === 1 ? "result" : "results"}
               {selectedCategory !== "All Categories" && ` in ${selectedCategory}`}
               {searchQuery && ` for "${searchQuery}"`}
             </div>
           </div>
-          
+
           {filteredArticles.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredArticles.map((article, index) => (
-                <Card 
+                <Card
                   key={article.id}
                   className="overflow-hidden border-none bg-white shadow-subtle transition-all duration-300 hover:shadow-glass h-full flex flex-col animate-fade-up"
-                  style={{ 
+                  style={{
                     animationDelay: `${index * 100}ms`,
                     animationFillMode: 'both',
                   }}
@@ -185,8 +205,8 @@ const Publications = () => {
                     </div>
                     <h3 className="text-xl font-bold text-law-DEFAULT mb-3 line-clamp-2">{article.title}</h3>
                     <p className="text-law-text-light mb-6 line-clamp-3 flex-grow">{article.excerpt}</p>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="text-law-DEFAULT hover:text-law-accent justify-start pl-0 w-fit group"
                       onClick={() => navigate(`/publications/${article.id}`)}
                     >
@@ -201,8 +221,8 @@ const Publications = () => {
             <div className="text-center py-16">
               <h3 className="text-2xl font-bold text-law-DEFAULT mb-3">No articles found</h3>
               <p className="text-gray-600 mb-6">Try adjusting your search criteria or browse all categories.</p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="border-law-DEFAULT text-law-DEFAULT hover:bg-law-DEFAULT hover:text-white"
                 onClick={() => {
                   setSearchQuery("");
@@ -215,7 +235,7 @@ const Publications = () => {
           )}
         </div>
       </section>
-      
+
       <Footer />
     </div>
   );
