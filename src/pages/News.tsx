@@ -124,13 +124,13 @@ const News = () => {
           <Tabs defaultValue="all" onValueChange={setActiveTab} className="mb-12">
             <div className="flex justify-center">
               <TabsList className="grid grid-cols-3 w-full max-w-md bg-law-muted">
-                <TabsTrigger value="all" className="data-[state=active]:bg-law-DEFAULT data-[state=active]:text-white">
+                <TabsTrigger value="all" className="data-[state=active]:bg-law-light data-[state=active]:text-white">
                   All
                 </TabsTrigger>
-                <TabsTrigger value="news" className="data-[state=active]:bg-law-DEFAULT data-[state=active]:text-white">
+                <TabsTrigger value="news" className="data-[state=active]:bg-law-light data-[state=active]:text-white">
                   News
                 </TabsTrigger>
-                <TabsTrigger value="events" className="data-[state=active]:bg-law-DEFAULT data-[state=active]:text-white">
+                <TabsTrigger value="events" className="data-[state=active]:bg-law-light data-[state=active]:text-white">
                   Events
                 </TabsTrigger>
               </TabsList>

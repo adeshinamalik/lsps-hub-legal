@@ -125,7 +125,7 @@ const Navbar = () => {
                 <NavLink to="/contact">Contact</NavLink>
               </li>
             </ul>
-            <Button asChild className="bg-law-DEFAULT hover:bg-law-light">
+            <Button asChild className="bg-law-light hover:bg-law-light">
               <Link to="/join-us">Join Us</Link>
             </Button>
           </nav>

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import "../testing.css"
 
 interface HeroProps {
   className?: string;
@@ -31,7 +32,7 @@ const Hero = ({
       )}
     >
       {/* Background Image with Overlay */}
-      <div className="absolute inset-0 -z-10 bg-black/10">
+      <div className="absolute inset-0 -z-10 bg-black/10 testing">
         <div 
           className="absolute inset-0 bg-gradient-to-b from-law-DEFAULT/40 to-black/30 mix-blend-multiply"
           aria-hidden="true"

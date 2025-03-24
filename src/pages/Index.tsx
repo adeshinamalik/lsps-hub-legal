@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Users, Calendar, ArrowRight } from "lucide-react";
+import { myImages } from "@/images";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -38,7 +39,8 @@ const Index = () => {
       date: "March 10, 2023",
       author: "Michael Ibrahim",
       category: "Legal Technology",
-      imageSrc: "https://images.unsplash.com/photo-1551725301-5183dceda5cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+      imageSrc: myImages.image2
+    
     },
   ];
 
@@ -52,8 +54,7 @@ const Index = () => {
       type: "event" as const,
       eventDate: "July 20, 2023",
       location: "Faculty of Law Auditorium",
-      imageSrc: "https://images.unsplash.com/photo-1560523159-4a9692f3f7bd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-    },
+      imageSrc: myImages.image3},
     {
       id: "2",
       title: "LSPS Welcomes New Editorial Board",
