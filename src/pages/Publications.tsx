@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Search, Calendar, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from "@/components/ui/pagination";
 
 
 
@@ -100,6 +108,8 @@ const categories = [
 const Publications = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
   const navigate = useNavigate();
 
   // Filter articles based on search query and selected category
@@ -112,7 +122,17 @@ const Publications = () => {
 
     return matchesSearch && matchesCategory;
   });
-  console.log(filteredArticles);
+  
+  // Calculate pagination values
+  const totalItems = filteredArticles.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedArticles = filteredArticles.slice(startIndex, startIndex + itemsPerPage);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen">
@@ -140,7 +160,10 @@ const Publications = () => {
                   placeholder="Search articles..."
                   className="pl-10 bg-white border-gray-200"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1); // Reset to first page on search
+                  }}
                 />
               </div>
 
@@ -153,7 +176,10 @@ const Publications = () => {
                       "rounded-full border border-gray-200 bg-white",
                       selectedCategory === category && "bg-law-light text-white border-law-DEFAULT hover:bg-law-light"
                     )}
-                    onClick={() => setSelectedCategory(category)}
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      setCurrentPage(1); // Reset to first page on category change
+                    }}
                   >
                     {category}
                   </Button>
@@ -162,15 +188,16 @@ const Publications = () => {
             </div>
 
             <div className="text-gray-600">
-              Showing {filteredArticles.length} {filteredArticles.length === 1 ? "result" : "results"}
+              Showing {paginatedArticles.length} {paginatedArticles.length === 1 ? "result" : "results"}
               {selectedCategory !== "All Categories" && ` in ${selectedCategory}`}
               {searchQuery && ` for "${searchQuery}"`}
+              {totalItems > itemsPerPage && ` (page ${currentPage} of ${totalPages})`}
             </div>
           </div>
 
           {filteredArticles.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredArticles.map((article, index) => (
+              {paginatedArticles.map((article, index) => (
                 <Card
                   key={article.id}
                   className="overflow-hidden border-none bg-white shadow-subtle transition-all duration-300 hover:shadow-glass h-full flex flex-col animate-fade-up"
@@ -227,11 +254,61 @@ const Publications = () => {
                 onClick={() => {
                   setSearchQuery("");
                   setSelectedCategory("All Categories");
+                  setCurrentPage(1);
                 }}
               >
                 Reset filters
               </Button>
             </div>
+          )}
+
+          {totalPages > 1 && (
+            <Pagination className="mt-12">
+              <PaginationContent>
+                {currentPage > 1 && (
+                  <PaginationItem>
+                    <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
+                  </PaginationItem>
+                )}
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  // Show current page, first page, last page, and pages adjacent to current page
+                  if (
+                    page === 1 || 
+                    page === totalPages || 
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+                  ) {
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          isActive={page === currentPage}
+                          onClick={() => handlePageChange(page)}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                  
+                  // Show ellipsis for page gaps
+                  if (page === 2 && currentPage > 3) {
+                    return <PaginationItem key="ellipsis-start">...</PaginationItem>;
+                  }
+                  
+                  if (page === totalPages - 1 && currentPage < totalPages - 2) {
+                    return <PaginationItem key="ellipsis-end">...</PaginationItem>;
+                  }
+                  
+                  return null;
+                })}
+
+                {currentPage < totalPages && (
+                  <PaginationItem>
+                    <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
+                  </PaginationItem>
+                )}
+              </PaginationContent>
+            </Pagination>
           )}
         </div>
       </section>
@@ -242,3 +319,4 @@ const Publications = () => {
 };
 
 export default Publications;
+
