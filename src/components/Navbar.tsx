@@ -1,8 +1,17 @@
+
 import { useState } from "react";
 import { Link, NavLink as RouterNavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
 interface MobileNavLinkProps {
   to: string;
@@ -58,8 +67,8 @@ const Navbar = () => {
             <div className="font-serif text-2xl font-bold text-law-DEFAULT">LSPS</div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
-            <ul className="flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-6">
+            <ul className="flex items-center gap-6">
               <li>
                 <NavLink to="/">Home</NavLink>
               </li>
@@ -70,7 +79,41 @@ const Navbar = () => {
                 <NavLink to="/publications">Publications</NavLink>
               </li>
               <li>
-                <NavLink to="/news">News & Events</NavLink>
+                <NavigationMenu>
+                  <NavigationMenuList>
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="bg-transparent">News & Events</NavigationMenuTrigger>
+                      <NavigationMenuContent>
+                        <ul className="grid w-[200px] gap-3 p-4">
+                          <li>
+                            <Link 
+                              to="/news"
+                              className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                              onClick={closeMobileMenu}
+                            >
+                              <div className="text-sm font-medium leading-none">News</div>
+                              <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                Latest updates and announcements
+                              </p>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link 
+                              to="/events"
+                              className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                              onClick={closeMobileMenu}
+                            >
+                              <div className="text-sm font-medium leading-none">Events</div>
+                              <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                Upcoming workshops and activities
+                              </p>
+                            </Link>
+                          </li>
+                        </ul>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                  </NavigationMenuList>
+                </NavigationMenu>
               </li>
               <li>
                 <NavLink to="/gallery">Gallery</NavLink>
@@ -129,7 +172,12 @@ const Navbar = () => {
             </li>
             <li>
               <MobileNavLink to="/news" onClick={closeMobileMenu}>
-                News & Events
+                News
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/events" onClick={closeMobileMenu}>
+                Events
               </MobileNavLink>
             </li>
             <li>
