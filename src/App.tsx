@@ -17,38 +17,51 @@ import AdminNews from './pages/admin/News';
 import AdminUsers from './pages/admin/Users';
 import AdminMedia from './pages/admin/Media';
 import NotFound from './pages/NotFound';
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
 import JoinUs from './pages/JoinUs';
 import Gallery from './pages/Gallery';
 import Resources from './pages/Resources';
+import Login from './pages/Login';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
   return (
     <BrowserRouter>
-      <main className="min-h-screen bg-white flex flex-col">
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/publications" element={<Publications />} />
-          <Route path="/publications/:id" element={<PublicationDetail />} />
-          <Route path="/news" element={<NewsPage />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/news/:id" element={<NewsEventDetail />} />
-          <Route path="/join-us" element={<JoinUs />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="publications" element={<AdminPublications />} />
-            <Route path="news" element={<AdminNews />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="media" element={<AdminMedia />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-      </main>
+      <AuthProvider>
+        <main className="min-h-screen bg-white flex flex-col">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/publications" element={<Publications />} />
+            <Route path="/publications/:id" element={<PublicationDetail />} />
+            <Route path="/news" element={<NewsPage />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/news/:id" element={<NewsEventDetail />} />
+            <Route path="/join-us" element={<JoinUs />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/login" element={<Login />} />
+            
+            {/* Protected Admin Routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="publications" element={<AdminPublications />} />
+              <Route path="news" element={<AdminNews />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="media" element={<AdminMedia />} />
+            </Route>
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </main>
+      </AuthProvider>
     </BrowserRouter>
   );
 };
