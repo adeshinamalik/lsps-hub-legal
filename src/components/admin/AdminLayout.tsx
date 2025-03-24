@@ -12,13 +12,14 @@ import {
   Image,
   LogOut 
 } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AdminLayout = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
+  const { logout, currentUser } = useAuth();
   
   const isActive = (path: string) => location.pathname === path;
   
@@ -46,9 +47,12 @@ const AdminLayout = () => {
     </Link>
   );
   
-  const handleLogout = () => {
-    // In a real app, this would handle logout logic
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
   
   return (
@@ -70,6 +74,9 @@ const AdminLayout = () => {
               <h2 className="text-lg font-semibold text-law-DEFAULT">
                 LSPS Admin
               </h2>
+              {currentUser && (
+                <p className="text-sm text-gray-500">{currentUser.email}</p>
+              )}
             </div>
             <nav className="flex-1 space-y-1 p-4">
               {navigation.map((item) => (
@@ -97,6 +104,9 @@ const AdminLayout = () => {
             <h2 className="text-lg font-semibold text-law-DEFAULT">
               LSPS Admin
             </h2>
+            {currentUser && (
+              <p className="text-sm text-gray-500">{currentUser.email}</p>
+            )}
           </div>
           <nav className="flex-1 space-y-1 p-4">
             {navigation.map((item) => (
