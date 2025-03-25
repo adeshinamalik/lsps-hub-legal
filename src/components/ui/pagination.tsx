@@ -107,6 +107,98 @@ const PaginationEllipsis = ({
 )
 PaginationEllipsis.displayName = "PaginationEllipsis"
 
+// New addition: PaginationControls component for easier implementation
+interface PaginationControlsProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  className?: string;
+}
+
+const PaginationControls = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  className,
+}: PaginationControlsProps) => {
+  // Helper function to generate page numbers with ellipsis
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const showEllipsisStart = currentPage > 3;
+    const showEllipsisEnd = currentPage < totalPages - 2;
+
+    // Always show first page
+    pageNumbers.push(1);
+
+    // Show ellipsis at start if needed
+    if (showEllipsisStart) {
+      pageNumbers.push('ellipsis-start');
+    }
+
+    // Show current page and adjacent pages
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      if (i === 1 || i === totalPages) continue; // Skip first and last page (already added)
+      pageNumbers.push(i);
+    }
+
+    // Show ellipsis at end if needed
+    if (showEllipsisEnd) {
+      pageNumbers.push('ellipsis-end');
+    }
+
+    // Always show last page if there is more than one page
+    if (totalPages > 1) {
+      pageNumbers.push(totalPages);
+    }
+
+    return pageNumbers;
+  };
+
+  if (totalPages <= 1) {
+    return null;
+  }
+
+  return (
+    <Pagination className={className}>
+      <PaginationContent>
+        {currentPage > 1 && (
+          <PaginationItem>
+            <PaginationPrevious onClick={() => onPageChange(currentPage - 1)} />
+          </PaginationItem>
+        )}
+
+        {getPageNumbers().map((page, index) => {
+          if (page === 'ellipsis-start' || page === 'ellipsis-end') {
+            return (
+              <PaginationItem key={`${page}-${index}`}>
+                <PaginationEllipsis />
+              </PaginationItem>
+            );
+          }
+
+          return (
+            <PaginationItem key={`page-${page}`}>
+              <PaginationLink
+                isActive={currentPage === page}
+                onClick={() => onPageChange(Number(page))}
+              >
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        })}
+
+        {currentPage < totalPages && (
+          <PaginationItem>
+            <PaginationNext onClick={() => onPageChange(currentPage + 1)} />
+          </PaginationItem>
+        )}
+      </PaginationContent>
+    </Pagination>
+  );
+};
+PaginationControls.displayName = "PaginationControls";
+
 export {
   Pagination,
   PaginationContent,
@@ -115,4 +207,5 @@ export {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
+  PaginationControls
 }
