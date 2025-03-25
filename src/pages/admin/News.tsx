@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Calendar,
   Plus,
@@ -8,7 +7,9 @@ import {
   Trash2,
   FilterX,
   Filter,
-  FileText
+  FileText,
+  ImagePlus,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,15 +43,19 @@ import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { addDoc, collection } from "firebase/firestore";
+import { useAuth } from "@/contexts/AuthContext";
+import { db, storage } from "@/firebase/Firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-// Dummy data for news
-const newsItems = [
+const newsItemsStatic = [
   {
     id: "1",
     title: "LSPS Announces New Editorial Board",
     type: "News",
     author: "Admin",
     date: "2023-05-15",
+    imageSrc: "",
   },
   {
     id: "2",
@@ -58,6 +63,7 @@ const newsItems = [
     type: "Event",
     author: "Admin",
     date: "2023-06-10",
+    imageSrc: "",
   },
   {
     id: "3",
@@ -65,6 +71,7 @@ const newsItems = [
     type: "News",
     author: "Admin",
     date: "2023-05-05",
+    imageSrc: "",
   },
   {
     id: "4",
@@ -72,6 +79,7 @@ const newsItems = [
     type: "Event",
     author: "Admin",
     date: "2023-07-12",
+    imageSrc: "",
   },
   {
     id: "5",
@@ -79,6 +87,7 @@ const newsItems = [
     type: "News",
     author: "Admin",
     date: "2023-04-28",
+    imageSrc: "",
   },
 ];
 
@@ -93,7 +102,14 @@ const AdminNews = () => {
     type: "News",
     content: "",
     date: "",
+    imageSrc: "",
   });
+  const [newsItems, setNewsItems] = useState(newsItemsStatic);
+  const { currentUser } = useAuth();
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredItems = newsItems.filter(
     (item) =>
@@ -104,11 +120,83 @@ const AdminNews = () => {
         item.author.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleAddItem = () => {
-    // In a real app, this would make an API call to add the news item
-    toast.success(`${newItem.type} added successfully!`);
-    setIsAddDialogOpen(false);
-    setNewItem({ title: "", type: "News", content: "", date: "" });
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      
+      // Create a preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const uploadImage = async (): Promise<string> => {
+    if (!imageFile) return "";
+    
+    try {
+      setIsUploading(true);
+      const storageRef = ref(storage, `news/${Date.now()}_${imageFile.name}`);
+      const snapshot = await uploadBytes(storageRef, imageFile);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to upload image");
+      return "";
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleAddItem = async () => {
+    if (!currentUser) {
+      toast.error("You must be logged in to add items.");
+      return;
+    }
+
+    if (!newItem.title || !newItem.date || !newItem.content) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      // Upload image if available
+      const imageSrc = await uploadImage();
+      
+      const itemToAdd = {
+        ...newItem,
+        imageSrc,
+        author: currentUser.email || "Admin", // Use logged-in user's email or fallback
+        createdAt: new Date().toISOString(),
+      };
+      
+      const docRef = await addDoc(collection(db, "news"), itemToAdd);
+      
+      // Update local state
+      setNewsItems([...newsItems, { id: docRef.id, ...itemToAdd }]);
+      
+      toast.success(`${newItem.type} added successfully!`);
+      setIsAddDialogOpen(false);
+      
+      // Reset form
+      setNewItem({ title: "", type: "News", content: "", date: "", imageSrc: "" });
+      setImageFile(null);
+      setImagePreview(null);
+    } catch (error) {
+      toast.error("Failed to add item: " + error.message);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleDeleteItem = () => {
@@ -205,11 +293,10 @@ const AdminNews = () => {
                       <TableCell className="font-medium">{item.title}</TableCell>
                       <TableCell>
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            item.type === "News"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-purple-100 text-purple-800"
-                          }`}
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${item.type === "News"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-purple-100 text-purple-800"
+                            }`}
                         >
                           {item.type}
                         </span>
@@ -249,7 +336,6 @@ const AdminNews = () => {
         </TabsContent>
 
         <TabsContent value="news" className="mt-4">
-          {/* Same table with filtered news */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -312,7 +398,6 @@ const AdminNews = () => {
         </TabsContent>
 
         <TabsContent value="event" className="mt-4">
-          {/* Same table with filtered events */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -375,7 +460,6 @@ const AdminNews = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Add Item Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
@@ -444,17 +528,69 @@ const AdminNews = () => {
                 }
               />
             </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="image" className="text-right">
+                Image
+              </Label>
+              <div className="col-span-3">
+                {imagePreview ? (
+                  <div className="relative mb-4">
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="w-full h-40 object-cover rounded-md" 
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                      onClick={removeImage}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div 
+                    className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <ImagePlus className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        Click to upload image
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        PNG, JPG, GIF up to 10MB
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="image"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleAddItem}>Save Item</Button>
+            <Button 
+              onClick={handleAddItem} 
+              disabled={isUploading}
+            >
+              {isUploading ? "Uploading..." : "Save Item"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
