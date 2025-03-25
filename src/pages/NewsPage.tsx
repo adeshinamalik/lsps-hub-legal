@@ -212,7 +212,7 @@ const NewsPage = () => {
                     
                     <Button 
                       variant="ghost" 
-                      className="text-law-DEFAULT hover:text-law-accent justify-start pl-0 w-fit group"
+                      className="text-law-DEFAULT hover:text-white justify-start pl-2 w-fit group"
                       onClick={() => navigate(`/news/${item.id}`)}
                     >
                       Read Full Story

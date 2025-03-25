@@ -95,7 +95,7 @@ const NewsHighlights = ({ className, items }: NewsHighlightsProps) => {
                 
                 <Button 
                   variant="ghost" 
-                  className="text-law-DEFAULT hover:text-law-accent justify-start pl-0 w-fit group"
+                  className="text-law-DEFAULT hover:text-white justify-center pl-2 w-fit group"
                   onClick={() => navigate(`/news/${item.type === 'event' ? 'events' : 'news'}/${item.id}`)}
                 >
                   Read more

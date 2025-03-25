@@ -40,7 +40,7 @@ const Index = () => {
       author: "Michael Ibrahim",
       category: "Legal Technology",
       imageSrc: myImages.image2
-    
+
     },
   ];
 
@@ -54,7 +54,8 @@ const Index = () => {
       type: "event" as const,
       eventDate: "July 20, 2023",
       location: "Faculty of Law Auditorium",
-      imageSrc: myImages.image3},
+      imageSrc: myImages.image3
+    },
     {
       id: "2",
       title: "LSPS Welcomes New Editorial Board",
@@ -78,7 +79,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <Hero
         title="The Voice of Law Students"
         subtitle="Promoting legal journalism, fostering intellectual discourse, and nurturing the next generation of legal writers."
@@ -86,7 +87,7 @@ const Index = () => {
         ctaLink="/publications"
         imageUrl="https://images.unsplash.com/photo-1589994965851-a8f479c573a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
       />
-      
+
       <section className="py-20 px-6 md:px-10 lg:px-20">
         <div className="container mx-auto">
           <div className="text-center mb-16 max-w-3xl mx-auto">
@@ -95,7 +96,7 @@ const Index = () => {
               The Law Students' Press Society (LSPS) is the official media body of the Faculty of Law, University of Ilorin. We are dedicated to promoting legal journalism, fostering intellectual discourse, and nurturing the next generation of legal writers.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-lg shadow-subtle hover:shadow-glass transition-all duration-300 text-center group animate-fade-up">
               <div className="w-16 h-16 bg-law-muted rounded-full flex items-center justify-center mx-auto mb-6 text-law-DEFAULT group-hover:bg-law-accent/10 transition-colors duration-300">
@@ -105,16 +106,16 @@ const Index = () => {
               <p className="text-law-text-light mb-6">
                 Discover thought-provoking articles, case analyses, and legal opinions written by law students.
               </p>
-              <Button 
-                variant="ghost" 
-                className="text-law-DEFAULT group-hover:text-law-accent transition-colors"
+              <Button
+                variant="ghost"
+                className="text-law-DEFAULT hover:text-white transition-colors"
                 onClick={() => navigate('/publications')}
               >
                 Explore Publications
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </div>
-            
+
             <div className="bg-white p-8 rounded-lg shadow-subtle hover:shadow-glass transition-all duration-300 text-center group animate-fade-up" style={{ animationDelay: '100ms' }}>
               <div className="w-16 h-16 bg-law-muted rounded-full flex items-center justify-center mx-auto mb-6 text-law-DEFAULT group-hover:bg-law-accent/10 transition-colors duration-300">
                 <Users className="h-7 w-7" />
@@ -123,16 +124,16 @@ const Index = () => {
               <p className="text-law-text-light mb-6">
                 Join our community of aspiring legal journalists and writers to develop your skills and network.
               </p>
-              <Button 
-                variant="ghost" 
-                className="text-law-DEFAULT group-hover:text-law-accent transition-colors"
+              <Button
+                variant="ghost"
+                className="text-law-DEFAULT hover:text-white transition-colors"
                 onClick={() => navigate('/about')}
               >
                 Learn More
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </div>
-            
+
             <div className="bg-white p-8 rounded-lg shadow-subtle hover:shadow-glass transition-all duration-300 text-center group animate-fade-up" style={{ animationDelay: '200ms' }}>
               <div className="w-16 h-16 bg-law-muted rounded-full flex items-center justify-center mx-auto mb-6 text-law-DEFAULT group-hover:bg-law-accent/10 transition-colors duration-300">
                 <Calendar className="h-7 w-7" />
@@ -141,9 +142,9 @@ const Index = () => {
               <p className="text-law-text-light mb-6">
                 Participate in workshops, seminars, and conferences organized by LSPS throughout the academic year.
               </p>
-              <Button 
-                variant="ghost" 
-                className="text-law-DEFAULT group-hover:text-law-accent transition-colors"
+              <Button
+                variant="ghost"
+                className="text-law-DEFAULT hover:text-white transition-colors"
                 onClick={() => navigate('/news')}
               >
                 View Events
@@ -153,11 +154,11 @@ const Index = () => {
           </div>
         </div>
       </section>
-      
+
       <FeaturedArticles articles={featuredArticles} />
-      
+
       <NewsHighlights items={newsEvents} />
-      
+
       <Footer />
     </div>
   );

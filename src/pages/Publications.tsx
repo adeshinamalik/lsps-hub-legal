@@ -174,7 +174,7 @@ const Publications = () => {
                     variant="outline"
                     className={cn(
                       "rounded-full border border-gray-200 bg-white",
-                      selectedCategory === category && "bg-law-light text-white border-law-DEFAULT hover:bg-law-light"
+                      selectedCategory === category && "bg-law-light text-white border-law-DEFAULT hover:bg-law-light text-white"
                     )}
                     onClick={() => {
                       setSelectedCategory(category);
@@ -234,7 +234,7 @@ const Publications = () => {
                     <p className="text-law-text-light mb-6 line-clamp-3 flex-grow">{article.excerpt}</p>
                     <Button
                       variant="ghost"
-                      className="text-law-DEFAULT hover:text-law-accent justify-start pl-0 w-fit group"
+                      className="text-law-DEFAULT hover:text-white justify-start pl-0 w-fit group"
                       onClick={() => navigate(`/publications/${article.id}`)}
                     >
                       Read more

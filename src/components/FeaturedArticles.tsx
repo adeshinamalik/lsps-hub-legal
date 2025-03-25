@@ -78,7 +78,7 @@ const FeaturedArticles = ({ className, articles }: FeaturedArticlesProps) => {
                 <p className="text-law-text-light mb-6 line-clamp-3 flex-grow">{article.excerpt}</p>
                 <Button 
                   variant="ghost" 
-                  className="text-law-DEFAULT hover:text-law-accent justify-start pl-0 w-fit group"
+                  className="text-law-DEFAULT hover:text-white justify-start pl-2 w-fit group"
                   onClick={() => navigate(`/publications/${article.id}`)}
                 >
                   Read more
