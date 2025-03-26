@@ -48,31 +48,40 @@ import { db } from "@/firebase/Firebase"; // Keep Firestore
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/supabase/supabase";
 
+interface NewsItem {
+  id: string;
+  title: string;
+  type: string;
+  author: string;
+  date: string;
+  content?: string;
+  imageUrl?: string;
+  createdAt?: string;
+}
 
-
-
-// Static news items
-const newsItemsStatic = [
-  { id: "1", title: "LSPS Announces New Editorial Board", type: "News", author: "Admin", date: "2023-05-15" },
-  { id: "2", title: "Annual Law Students Conference", type: "Event", author: "Admin", date: "2023-06-10" },
-  { id: "3", title: "New Journal Publication Released", type: "News", author: "Admin", date: "2023-05-05" },
-  { id: "4", title: "Moot Court Competition", type: "Event", author: "Admin", date: "2023-07-12" },
-  { id: "5", title: "Partnership with Law Firm Announced", type: "News", author: "Admin", date: "2023-04-28" },
+const newsItemsStatic: NewsItem[] = [
+  { id: "1", title: "LSPS Announces New Editorial Board", type: "News", author: "Admin", date: "2023-05-15", imageUrl: "" },
+  { id: "2", title: "Annual Law Students Conference", type: "Event", author: "Admin", date: "2023-06-10", imageUrl: "" },
+  { id: "3", title: "New Journal Publication Released", type: "News", author: "Admin", date: "2023-05-05", imageUrl: "" },
+  { id: "4", title: "Moot Court Competition", type: "Event", author: "Admin", date: "2023-07-12", imageUrl: "" },
+  { id: "5", title: "Partnership with Law Firm Announced", type: "News", author: "Admin", date: "2023-04-28", imageUrl: "" },
 ];
 
 const AdminNews = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [newsItems, setNewsItems] = useState(newsItemsStatic);
+  const [editItem, setEditItem] = useState<NewsItem | null>(null);
+  const [newsItems, setNewsItems] = useState<NewsItem[]>(newsItemsStatic);
   const [newItem, setNewItem] = useState({
     title: "",
     type: "News",
     content: "",
     date: "",
-    imageSrc: "",
+    imageUrl: "",
   });
   const { currentUser } = useAuth();
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -80,17 +89,16 @@ const AdminNews = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch Firestore items on mount and merge with static data
   useEffect(() => {
     const fetchNews = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "news"));
         const firestoreItems = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
-        }));
+          ...doc.data()
+        })) as NewsItem[];
         setNewsItems([...newsItemsStatic, ...firestoreItems]);
-      } catch (error) {
+      } catch (error: any) {
         toast.error("Failed to fetch news items: " + error.message);
       }
     };
@@ -142,7 +150,7 @@ const AdminNews = () => {
         .from("news-images")
         .getPublicUrl(fileName);
       return urlData.publicUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error uploading image to Supabase:", error);
       toast.error(`Failed to upload image: ${error.message}`);
       return "";
@@ -168,16 +176,16 @@ const AdminNews = () => {
         ...newItem,
         author: currentUser.email || "Admin",
         createdAt: new Date().toISOString(),
-        imageUrl: imageUrl || null,
+        imageUrl: imageUrl || "",
       };
       const docRef = await addDoc(collection(db, "news"), itemToAdd);
       const newItemWithId = { id: docRef.id, ...itemToAdd };
       setNewsItems([...newsItems, newItemWithId]);
       toast.success(`${newItem.type} added successfully!`);
       setIsAddDialogOpen(false);
-      setNewItem({ title: "", type: "News", content: "", date: "" });
+      setNewItem({ title: "", type: "News", content: "", date: "", imageUrl: "" });
       removeImage();
-    } catch (error) {
+    } catch (error: any) {
       toast.error(`Failed to add item: ${error.message}`);
     } finally {
       setIsUploading(false);
@@ -190,12 +198,18 @@ const AdminNews = () => {
       await deleteDoc(doc(db, "news", selectedItem));
       setNewsItems(newsItems.filter((item) => item.id !== selectedItem));
       toast.success("Item deleted successfully!");
-    } catch (error) {
+    } catch (error: any) {
       toast.error(`Failed to delete item: ${error.message}`);
     } finally {
       setIsDeleteDialogOpen(false);
       setSelectedItem(null);
     }
+  };
+
+  const openEditDialog = (item: NewsItem) => {
+    setEditItem(item);
+    setImagePreview(item.imageUrl || null);
+    setIsEditDialogOpen(true);
   };
 
   return (
@@ -534,6 +548,116 @@ const AdminNews = () => {
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleAddItem} disabled={isUploading}>
               {isUploading ? "Uploading..." : "Save Item"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>Edit Item</DialogTitle>
+            <DialogDescription>Update the details of the selected item.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="type" className="text-right">Type</Label>
+              <div className="col-span-3">
+                <select
+                  id="type"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={editItem?.type || newItem.type}
+                  onChange={(e) => setEditItem({ ...editItem, type: e.target.value })}
+                >
+                  <option value="News">News</option>
+                  <option value="Event">Event</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">Title</Label>
+              <Input
+                id="title"
+                className="col-span-3"
+                value={editItem?.title || newItem.title}
+                onChange={(e) => setEditItem({ ...editItem, title: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="date" className="text-right">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                className="col-span-3"
+                value={editItem?.date || newItem.date}
+                onChange={(e) => setEditItem({ ...editItem, date: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="content" className="text-right">Content</Label>
+              <Textarea
+                id="content"
+                className="col-span-3"
+                rows={5}
+                value={editItem?.content || newItem.content}
+                onChange={(e) => setEditItem({ ...editItem, content: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="image" className="text-right">Image</Label>
+              <div className="col-span-3">
+                {imagePreview ? (
+                  <div className="relative mb-4">
+                    <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-md" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                      onClick={removeImage}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <ImagePlus className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">Click to upload image</p>
+                      <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF up to 10MB</p>
+                    </div>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="image"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => {
+              if (!editItem) return;
+              const updatedItem = {
+                ...editItem,
+                author: currentUser.email || "Admin",
+                imageUrl: imagePreview || editItem?.imageUrl || "",
+              };
+              setNewsItems(newsItems.map(item => item.id === editItem.id ? updatedItem : item));
+              toast.success("Item updated successfully!");
+              setIsEditDialogOpen(false);
+              setEditItem(null);
+              removeImage();
+            }} disabled={isUploading}>
+              {isUploading ? "Updating..." : "Save Item"}
             </Button>
           </DialogFooter>
         </DialogContent>
