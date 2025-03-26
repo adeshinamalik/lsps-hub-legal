@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -32,6 +31,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import CommentSection from "@/components/CommentSection";
 
 // Mock data for resources
 const resources = [
@@ -390,6 +390,12 @@ const Resources = () => {
           </Tabs>
         </div>
       </section>
+      
+      <div className="container mx-auto px-6 lg:px-8 py-16">
+        <div className="max-w-4xl mx-auto mt-8">
+          <CommentSection itemId="resources-page" itemType="publication" />
+        </div>
+      </div>
       
       <Footer />
     </div>
