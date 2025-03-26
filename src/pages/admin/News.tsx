@@ -72,6 +72,7 @@ const AdminNews = () => {
     type: "News",
     content: "",
     date: "",
+    imageSrc: "",
   });
   const { currentUser } = useAuth();
   const [imageFile, setImageFile] = useState<File | null>(null);

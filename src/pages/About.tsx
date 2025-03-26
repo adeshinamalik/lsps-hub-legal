@@ -1,10 +1,10 @@
-
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Users, PenTool, BookOpen } from "lucide-react";
+import CommentSection from "@/components/CommentSection";
 
 const About = () => {
   const navigate = useNavigate();
@@ -170,6 +170,12 @@ const About = () => {
           </div>
         </div>
       </section>
+      
+      <div className="container mx-auto px-6 lg:px-8 py-16">
+        <div className="max-w-4xl mx-auto mt-16">
+          <CommentSection itemId="about-page" itemType="publication" />
+        </div>
+      </div>
       
       <Footer />
     </div>
