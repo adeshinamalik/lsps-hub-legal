@@ -355,7 +355,7 @@ const NewsEventDetail = () => {
         <div className="container mx-auto">
           <Button 
             variant="ghost" 
-            className="mb-6 text-law-DEFAULT hover:text-law-accent pl-0"
+            className="mb-6 text-law-DEFAULT hover:text-white pl-3"
             onClick={() => navigate('/news')}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

@@ -201,7 +201,7 @@ const Gallery = () => {
                   variant="outline"
                   className={cn(
                     "rounded-full border border-gray-200 bg-white",
-                    selectedCategory === category && "bg-law-DEFAULT text-white border-law-DEFAULT hover:bg-law-light"
+                    selectedCategory === category && "bg-law-light text-white border-law-DEFAULT hover:bg-law-light"
                   )}
                   onClick={() => setSelectedCategory(category)}
                 >

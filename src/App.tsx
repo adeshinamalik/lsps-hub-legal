@@ -43,7 +43,7 @@ const App = () => {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/login" element={<Login />} />
-            
+
             {/* Protected Admin Routes */}
             <Route path="/admin" element={
               <ProtectedRoute>
@@ -56,7 +56,7 @@ const App = () => {
               <Route path="users" element={<AdminUsers />} />
               <Route path="media" element={<AdminMedia />} />
             </Route>
-            
+
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />

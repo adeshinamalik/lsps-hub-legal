@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Calendar,
   Plus,
@@ -8,7 +7,9 @@ import {
   Trash2,
   FilterX,
   Filter,
-  FileText
+  FileText,
+  ImagePlus,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,44 +43,21 @@ import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { addDoc, collection, deleteDoc, doc, getDocs } from "firebase/firestore";
+import { db } from "@/firebase/Firebase"; // Keep Firestore
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/supabase/supabase";
 
-// Dummy data for news
-const newsItems = [
-  {
-    id: "1",
-    title: "LSPS Announces New Editorial Board",
-    type: "News",
-    author: "Admin",
-    date: "2023-05-15",
-  },
-  {
-    id: "2",
-    title: "Annual Law Students Conference",
-    type: "Event",
-    author: "Admin",
-    date: "2023-06-10",
-  },
-  {
-    id: "3",
-    title: "New Journal Publication Released",
-    type: "News",
-    author: "Admin",
-    date: "2023-05-05",
-  },
-  {
-    id: "4",
-    title: "Moot Court Competition",
-    type: "Event",
-    author: "Admin",
-    date: "2023-07-12",
-  },
-  {
-    id: "5",
-    title: "Partnership with Law Firm Announced",
-    type: "News",
-    author: "Admin",
-    date: "2023-04-28",
-  },
+
+
+
+// Static news items
+const newsItemsStatic = [
+  { id: "1", title: "LSPS Announces New Editorial Board", type: "News", author: "Admin", date: "2023-05-15" },
+  { id: "2", title: "Annual Law Students Conference", type: "Event", author: "Admin", date: "2023-06-10" },
+  { id: "3", title: "New Journal Publication Released", type: "News", author: "Admin", date: "2023-05-05" },
+  { id: "4", title: "Moot Court Competition", type: "Event", author: "Admin", date: "2023-07-12" },
+  { id: "5", title: "Partnership with Law Firm Announced", type: "News", author: "Admin", date: "2023-04-28" },
 ];
 
 const AdminNews = () => {
@@ -88,46 +66,143 @@ const AdminNews = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [newsItems, setNewsItems] = useState(newsItemsStatic);
   const [newItem, setNewItem] = useState({
     title: "",
     type: "News",
     content: "",
     date: "",
   });
+  const { currentUser } = useAuth();
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch Firestore items on mount and merge with static data
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "news"));
+        const firestoreItems = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setNewsItems([...newsItemsStatic, ...firestoreItems]);
+      } catch (error) {
+        toast.error("Failed to fetch news items: " + error.message);
+      }
+    };
+    fetchNews();
+  }, []);
 
   const filteredItems = newsItems.filter(
     (item) =>
-      (activeTab === "all" ||
-        item.type.toLowerCase() === activeTab.toLowerCase()) &&
+      (activeTab === "all" || item.type.toLowerCase() === activeTab.toLowerCase()) &&
       (item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.author.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleAddItem = () => {
-    // In a real app, this would make an API call to add the news item
-    toast.success(`${newItem.type} added successfully!`);
-    setIsAddDialogOpen(false);
-    setNewItem({ title: "", type: "News", content: "", date: "" });
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error("Image file size exceeds 10MB limit.");
+        return;
+      }
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      setImageFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
   };
 
-  const handleDeleteItem = () => {
-    // In a real app, this would make an API call to delete the news item
-    toast.success("Item deleted successfully!");
-    setIsDeleteDialogOpen(false);
-    setSelectedItem(null);
+  const removeImage = () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const uploadImage = async (): Promise<string> => {
+    if (!imageFile) return "";
+    try {
+      setIsUploading(true);
+      const fileName = `${Date.now()}_${imageFile.name}`;
+      console.log("Uploading:", fileName, imageFile);
+      const { data, error } = await supabase.storage
+        .from("news-images") // Your bucket name
+        .upload(fileName, imageFile);
+      if (error) throw error;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from("news-images")
+        .getPublicUrl(fileName);
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error("Error uploading image to Supabase:", error);
+      toast.error(`Failed to upload image: ${error.message}`);
+      return "";
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleAddItem = async () => {
+    if (!currentUser) {
+      toast.error("You must be logged in to add items.");
+      return;
+    }
+    if (!newItem.title || !newItem.date) {
+      toast.error("Title and Date are required fields.");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const imageUrl = await uploadImage();
+      const itemToAdd = {
+        ...newItem,
+        author: currentUser.email || "Admin",
+        createdAt: new Date().toISOString(),
+        imageUrl: imageUrl || null,
+      };
+      const docRef = await addDoc(collection(db, "news"), itemToAdd);
+      const newItemWithId = { id: docRef.id, ...itemToAdd };
+      setNewsItems([...newsItems, newItemWithId]);
+      toast.success(`${newItem.type} added successfully!`);
+      setIsAddDialogOpen(false);
+      setNewItem({ title: "", type: "News", content: "", date: "" });
+      removeImage();
+    } catch (error) {
+      toast.error(`Failed to add item: ${error.message}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteItem = async () => {
+    if (!selectedItem) return;
+    try {
+      await deleteDoc(doc(db, "news", selectedItem));
+      setNewsItems(newsItems.filter((item) => item.id !== selectedItem));
+      toast.success("Item deleted successfully!");
+    } catch (error) {
+      toast.error(`Failed to delete item: ${error.message}`);
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setSelectedItem(null);
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-law-DEFAULT">
-            News & Events
-          </h1>
-          <p className="text-muted-foreground">
-            Manage news articles and upcoming events
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-law-DEFAULT">News & Events</h1>
+          <p className="text-muted-foreground">Manage news articles and upcoming events</p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -135,19 +210,13 @@ const AdminNews = () => {
         </Button>
       </div>
 
-      <Tabs
-        defaultValue="all"
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="w-full"
-      >
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex flex-col gap-4 md:flex-row md:items-center">
           <TabsList className="grid w-full grid-cols-3 md:w-auto">
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="news">News</TabsTrigger>
             <TabsTrigger value="event">Events</TabsTrigger>
           </TabsList>
-
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
             <Input
@@ -158,12 +227,7 @@ const AdminNews = () => {
             />
           </div>
           {searchTerm && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSearchTerm("")}
-              className="gap-2"
-            >
+            <Button variant="outline" size="sm" onClick={() => setSearchTerm("")} className="gap-2">
               <FilterX className="h-4 w-4" />
               Clear Filter
             </Button>
@@ -183,19 +247,18 @@ const AdminNews = () => {
                   <TableHead>Type</TableHead>
                   <TableHead>Author</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Image</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    <TableCell colSpan={6} className="text-center py-8">
                       <div className="flex flex-col items-center justify-center text-gray-500">
                         <FileText className="h-12 w-12 mb-2 opacity-20" />
                         <p className="text-lg font-medium">No items found</p>
-                        <p className="text-sm">
-                          Try adjusting your search or add a new item
-                        </p>
+                        <p className="text-sm">Try adjusting your search or add a new item</p>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -205,24 +268,24 @@ const AdminNews = () => {
                       <TableCell className="font-medium">{item.title}</TableCell>
                       <TableCell>
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            item.type === "News"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-purple-100 text-purple-800"
-                          }`}
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${item.type === "News" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
+                            }`}
                         >
                           {item.type}
                         </span>
                       </TableCell>
                       <TableCell>{item.author}</TableCell>
                       <TableCell>{item.date}</TableCell>
+                      <TableCell>
+                        {item.imageUrl ? (
+                          <img src={item.imageUrl} alt={item.title} className="w-16 h-16 object-cover rounded" />
+                        ) : (
+                          "No Image"
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-blue-500"
-                          >
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500">
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                           </Button>
@@ -249,7 +312,6 @@ const AdminNews = () => {
         </TabsContent>
 
         <TabsContent value="news" className="mt-4">
-          {/* Same table with filtered news */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -257,19 +319,18 @@ const AdminNews = () => {
                   <TableHead>Title</TableHead>
                   <TableHead>Author</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Image</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">
+                    <TableCell colSpan={5} className="text-center py-8">
                       <div className="flex flex-col items-center justify-center text-gray-500">
                         <FileText className="h-12 w-12 mb-2 opacity-20" />
                         <p className="text-lg font-medium">No news found</p>
-                        <p className="text-sm">
-                          Try adjusting your search or add a new news item
-                        </p>
+                        <p className="text-sm">Try adjusting your search or add a new news item</p>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -279,13 +340,16 @@ const AdminNews = () => {
                       <TableCell className="font-medium">{item.title}</TableCell>
                       <TableCell>{item.author}</TableCell>
                       <TableCell>{item.date}</TableCell>
+                      <TableCell>
+                        {item.imageUrl ? (
+                          <img src={item.imageUrl} alt={item.title} className="w-16 h-16 object-cover rounded" />
+                        ) : (
+                          "No Image"
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-blue-500"
-                          >
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500">
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                           </Button>
@@ -312,7 +376,6 @@ const AdminNews = () => {
         </TabsContent>
 
         <TabsContent value="event" className="mt-4">
-          {/* Same table with filtered events */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -320,19 +383,18 @@ const AdminNews = () => {
                   <TableHead>Title</TableHead>
                   <TableHead>Author</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Image</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">
+                    <TableCell colSpan={5} className="text-center py-8">
                       <div className="flex flex-col items-center justify-center text-gray-500">
                         <Calendar className="h-12 w-12 mb-2 opacity-20" />
                         <p className="text-lg font-medium">No events found</p>
-                        <p className="text-sm">
-                          Try adjusting your search or add a new event
-                        </p>
+                        <p className="text-sm">Try adjusting your search or add a new event</p>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -342,13 +404,16 @@ const AdminNews = () => {
                       <TableCell className="font-medium">{item.title}</TableCell>
                       <TableCell>{item.author}</TableCell>
                       <TableCell>{item.date}</TableCell>
+                      <TableCell>
+                        {item.imageUrl ? (
+                          <img src={item.imageUrl} alt={item.title} className="w-16 h-16 object-cover rounded" />
+                        ) : (
+                          "No Image"
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-blue-500"
-                          >
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500">
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                           </Button>
@@ -375,28 +440,21 @@ const AdminNews = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Add Item Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>Add New Item</DialogTitle>
-            <DialogDescription>
-              Create a new news article or event for the LSPS website.
-            </DialogDescription>
+            <DialogDescription>Create a new news article or event for the LSPS website.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="type" className="text-right">
-                Type
-              </Label>
+              <Label htmlFor="type" className="text-right">Type</Label>
               <div className="col-span-3">
                 <select
                   id="type"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   value={newItem.type}
-                  onChange={(e) =>
-                    setNewItem({ ...newItem, type: e.target.value })
-                  }
+                  onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
                 >
                   <option value="News">News</option>
                   <option value="Event">Event</option>
@@ -404,75 +462,93 @@ const AdminNews = () => {
               </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
-                Title
-              </Label>
+              <Label htmlFor="title" className="text-right">Title</Label>
               <Input
                 id="title"
                 className="col-span-3"
                 value={newItem.title}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, title: e.target.value })
-                }
+                onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="date" className="text-right">
-                Date
-              </Label>
+              <Label htmlFor="date" className="text-right">Date</Label>
               <Input
                 id="date"
                 type="date"
                 className="col-span-3"
                 value={newItem.date}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, date: e.target.value })
-                }
+                onChange={(e) => setNewItem({ ...newItem, date: e.target.value })}
               />
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="content" className="text-right">
-                Content
-              </Label>
+              <Label htmlFor="content" className="text-right">Content</Label>
               <Textarea
                 id="content"
                 className="col-span-3"
                 rows={5}
                 value={newItem.content}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, content: e.target.value })
-                }
+                onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
               />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="image" className="text-right">Image</Label>
+              <div className="col-span-3">
+                {imagePreview ? (
+                  <div className="relative mb-4">
+                    <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-md" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                      onClick={removeImage}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <ImagePlus className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">Click to upload image</p>
+                      <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF up to 10MB</p>
+                    </div>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="image"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-              Cancel
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddItem} disabled={isUploading}>
+              {isUploading ? "Uploading..." : "Save Item"}
             </Button>
-            <Button onClick={handleAddItem}>Save Item</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this
-              item from the database.
+              This action cannot be undone. This will permanently delete this item from the database.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteItem}
-              className="bg-red-500 text-white hover:bg-red-600"
-            >
+            <AlertDialogAction onClick={handleDeleteItem} className="bg-red-500 text-white hover:bg-red-600">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
