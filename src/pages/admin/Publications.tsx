@@ -55,8 +55,22 @@ import { db } from "@/firebase/Firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/supabase/supabase";
 
+// Define a proper interface for Publication
+interface Publication {
+  id: string;
+  title: string;
+  category: string;
+  author: string;
+  status: string;
+  date: string;
+  content?: string;
+  imageUrl: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // Static publications data
-const publicationsStatic = [
+const publicationsStatic: Publication[] = [
   {
     id: "1",
     title: "The Evolution of Nigerian Constitutional Law",
@@ -124,8 +138,8 @@ const AdminPublications = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedPublication, setSelectedPublication] = useState<string | null>(null);
-  const [editPublication, setEditPublication] = useState<any>(null);
-  const [publications, setPublications] = useState(publicationsStatic);
+  const [editPublication, setEditPublication] = useState<Publication | null>(null);
+  const [publications, setPublications] = useState<Publication[]>(publicationsStatic);
   const [publishDate, setPublishDate] = useState<Date | undefined>(undefined);
   const [newPublication, setNewPublication] = useState({
     title: "",
@@ -149,9 +163,9 @@ const AdminPublications = () => {
         const firestoreItems = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        }));
+        })) as Publication[];
         setPublications([...publicationsStatic, ...firestoreItems]);
-      } catch (error) {
+      } catch (error: any) {
         toast.error("Failed to fetch publications: " + error.message);
       }
     };
@@ -200,7 +214,7 @@ const AdminPublications = () => {
         .getPublicUrl(fileName);
       console.log("Public URL:", urlData.publicUrl);
       return urlData.publicUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error uploading image to Supabase:", error);
       toast.error(`Failed to upload image: ${error.message}`);
       return "";
@@ -233,14 +247,14 @@ const AdminPublications = () => {
       };
       
       const docRef = await addDoc(collection(db, "publications"), publicationToAdd);
-      const newPublicationWithId = { id: docRef.id, ...publicationToAdd };
+      const newPublicationWithId = { id: docRef.id, ...publicationToAdd } as Publication;
       console.log("New publication added:", newPublicationWithId);
 
       const querySnapshot = await getDocs(collection(db, "publications"));
       const firestoreItems = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
+      })) as Publication[];
       setPublications([...publicationsStatic, ...firestoreItems]);
 
       toast.success("Publication added successfully!");
@@ -255,7 +269,7 @@ const AdminPublications = () => {
       });
       setPublishDate(undefined);
       removeImage();
-    } catch (error) {
+    } catch (error: any) {
       toast.error(`Failed to add publication: ${error.message}`);
     } finally {
       setIsUploading(false);
@@ -272,7 +286,7 @@ const AdminPublications = () => {
       }
       setPublications(publications.filter((pub) => pub.id !== selectedPublication));
       toast.success("Publication deleted successfully!");
-    } catch (error) {
+    } catch (error: any) {
       toast.error(`Failed to delete publication: ${error.message}`);
     } finally {
       setIsDeleteDialogOpen(false);
@@ -281,7 +295,7 @@ const AdminPublications = () => {
   };
 
   const handleEditPublication = async () => {
-    if (!currentUser) {
+    if (!currentUser || !editPublication) {
       toast.error("You must be logged in to edit publications.");
       return;
     }
@@ -313,21 +327,21 @@ const AdminPublications = () => {
       const firestoreItems = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
+      })) as Publication[];
       setPublications([...publicationsStatic, ...firestoreItems]);
 
       toast.success("Publication updated successfully!");
       setIsEditDialogOpen(false);
       setEditPublication(null);
       removeImage();
-    } catch (error) {
+    } catch (error: any) {
       toast.error(`Failed to update publication: ${error.message}`);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const openEditDialog = (publication: any) => {
+  const openEditDialog = (publication: Publication) => {
     setEditPublication(publication);
     setImagePreview(publication.imageUrl || null);
     setIsEditDialogOpen(true);
