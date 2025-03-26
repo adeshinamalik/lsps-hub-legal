@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { 
   FileText, 
@@ -55,7 +54,6 @@ import { db } from "@/firebase/Firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/supabase/supabase";
 
-// Define a proper interface for Publication
 interface Publication {
   id: string;
   title: string;
@@ -69,7 +67,6 @@ interface Publication {
   updatedAt?: string;
 }
 
-// Static publications data
 const publicationsStatic: Publication[] = [
   {
     id: "1",
@@ -118,7 +115,6 @@ const publicationsStatic: Publication[] = [
   },
 ];
 
-// Available categories for publications
 const categories = [
   "Constitutional Law",
   "Criminal Law",
@@ -155,7 +151,6 @@ const AdminPublications = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch publications on mount
   useEffect(() => {
     const fetchPublications = async () => {
       try {
@@ -181,7 +176,7 @@ const AdminPublications = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
         toast.error("Image file size exceeds 10MB limit.");
         return;
       }
@@ -204,7 +199,6 @@ const AdminPublications = () => {
     try {
       setIsUploading(true);
       const fileName = `${Date.now()}_${imageFile.name}`;
-      console.log("Uploading to Supabase:", { fileName, fileSize: imageFile.size, fileType: imageFile.type });
       const { data, error } = await supabase.storage
         .from("publication-images")
         .upload(fileName, imageFile);
@@ -212,10 +206,8 @@ const AdminPublications = () => {
       const { data: urlData } = supabase.storage
         .from("publication-images")
         .getPublicUrl(fileName);
-      console.log("Public URL:", urlData.publicUrl);
       return urlData.publicUrl;
     } catch (error: any) {
-      console.error("Error uploading image to Supabase:", error);
       toast.error(`Failed to upload image: ${error.message}`);
       return "";
     } finally {
@@ -248,7 +240,6 @@ const AdminPublications = () => {
       
       const docRef = await addDoc(collection(db, "publications"), publicationToAdd);
       const newPublicationWithId = { id: docRef.id, ...publicationToAdd } as Publication;
-      console.log("New publication added:", newPublicationWithId);
 
       const querySnapshot = await getDocs(collection(db, "publications"));
       const firestoreItems = querySnapshot.docs.map((doc) => ({
@@ -281,7 +272,6 @@ const AdminPublications = () => {
     try {
       const isStaticItem = publicationsStatic.some((pub) => pub.id === selectedPublication);
       if (!isStaticItem) {
-        // Only delete from Firestore if it's not a static item
         await deleteDoc(doc(db, "publications", selectedPublication));
       }
       setPublications(publications.filter((pub) => pub.id !== selectedPublication));
@@ -319,7 +309,6 @@ const AdminPublications = () => {
       };
 
       if (!isStaticItem) {
-        // Update Firestore if it's not a static item
         await updateDoc(doc(db, "publications", editPublication.id), updatedPublication);
       }
 
@@ -351,12 +340,8 @@ const AdminPublications = () => {
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-law-DEFAULT">
-            Publications
-          </h1>
-          <p className="text-muted-foreground">
-            Manage articles, case notes, and essays
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-law-DEFAULT">Publications</h1>
+          <p className="text-muted-foreground">Manage articles, case notes, and essays</p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -411,9 +396,7 @@ const AdminPublications = () => {
                   <div className="flex flex-col items-center justify-center text-gray-500">
                     <FileText className="h-12 w-12 mb-2 opacity-20" />
                     <p className="text-lg font-medium">No publications found</p>
-                    <p className="text-sm">
-                      Try adjusting your search or add a new publication
-                    </p>
+                    <p className="text-sm">Try adjusting your search or add a new publication</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -482,9 +465,8 @@ const AdminPublications = () => {
         </Table>
       </div>
 
-      {/* Add Publication Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[550px] max-h-[85vh] overflow-y-auto" style={{ zIndex: 100 }}>
           <DialogHeader>
             <DialogTitle>Add New Publication</DialogTitle>
             <DialogDescription>
@@ -552,7 +534,7 @@ const AdminPublications = () => {
               <Label htmlFor="content">Content</Label>
               <Textarea
                 id="content"
-                rows={10}
+                rows={6}
                 value={newPublication.content}
                 onChange={(e) =>
                   setNewPublication({
@@ -610,7 +592,7 @@ const AdminPublications = () => {
               </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="sticky bottom-0 pt-2 bg-background">
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               Cancel
             </Button>
@@ -621,9 +603,8 @@ const AdminPublications = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Publication Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[550px] max-h-[85vh] overflow-y-auto" style={{ zIndex: 100 }}>
           <DialogHeader>
             <DialogTitle>Edit Publication</DialogTitle>
             <DialogDescription>
@@ -756,7 +737,7 @@ const AdminPublications = () => {
               </div>
             </div>
           )}
-          <DialogFooter>
+          <DialogFooter className="sticky bottom-0 pt-2 bg-background">
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
               Cancel
             </Button>
