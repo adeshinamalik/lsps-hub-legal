@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Calendar, ArrowRight, MapPin } from "lucide-react";
+import { myImages } from "@/images";
 
 const Events = () => {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const Events = () => {
       title: "Career Fair: Legal Profession",
       date: "September 15, 2023",
       description: "Connect with potential employers from leading law firms, corporations, NGOs, and government agencies. Bring your CV and be prepared for on-the-spot interviews and networking opportunities.",
-      imageSrc: "https://images.unsplash.com/photo-1559223607-a43f990c095d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      imageSrc: myImages.image8,
       location: "University Main Hall",
       eventDate: "September 15, 2023 | 10:00 AM - 4:00 PM"
     },
@@ -53,7 +54,7 @@ const Events = () => {
       title: "Guest Lecture: Chief Justice of Nigeria",
       date: "October 7, 2023",
       description: "An exclusive opportunity to hear from the Chief Justice of Nigeria on 'The Role of Young Lawyers in Advancing Justice Reform in Nigeria'. Limited seats available.",
-      imageSrc: "https://images.unsplash.com/photo-1560523159-4a9692d222f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      imageSrc: myImages.image9,
       location: "University Auditorium",
       eventDate: "October 7, 2023 | 2:00 PM - 4:00 PM"
     }

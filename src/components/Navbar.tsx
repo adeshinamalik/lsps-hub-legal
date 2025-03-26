@@ -21,7 +21,7 @@ interface MobileNavLinkProps {
 
 const MobileNavLink = ({ to, children, onClick }: MobileNavLinkProps) => {
   return (
-    <Link to={to} onClick={onClick} className="block text-lg font-medium text-gray-700 hover:text-law-DEFAULT transition-colors">
+    <Link to={to} onClick={onClick} className="block text-lg font-medium text-gray-700 hover:text-law-DEFAULT transition-colors focus:text-accent-foreground">
       {children}
     </Link>
   );
@@ -89,11 +89,11 @@ const Navbar = () => {
                 <NavigationMenu>
                   <NavigationMenuList>
                     <NavigationMenuItem>
-                      <NavigationMenuTrigger className="bg-transparent">News & Events</NavigationMenuTrigger>
+                      <NavigationMenuTrigger className="bg-transparent text-gray-700">News & Events</NavigationMenuTrigger>
                       <NavigationMenuContent>
                         <ul className="grid w-[200px] gap-3 p-4">
                           <li>
-                            <Link 
+                            <Link
                               to="/news"
                               className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                               onClick={closeMobileMenu}
@@ -105,7 +105,7 @@ const Navbar = () => {
                             </Link>
                           </li>
                           <li>
-                            <Link 
+                            <Link
                               to="/events"
                               className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                               onClick={closeMobileMenu}
@@ -136,8 +136,8 @@ const Navbar = () => {
               <Button asChild className="bg-law-light hover:bg-law-light">
                 <Link to="/join-us">Join Us</Link>
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="icon"
                 onClick={handleAdminRedirect}
                 title={currentUser ? "Go to Admin Dashboard" : "Admin Login"}

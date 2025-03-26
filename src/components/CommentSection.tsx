@@ -74,9 +74,9 @@ const CommentSection = ({ itemId, itemType, className }: CommentSectionProps) =>
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
         />
-        <Button 
-          onClick={handleSubmitComment} 
-          className="bg-law-DEFAULT hover:bg-law-light"
+        <Button
+          onClick={handleSubmitComment}
+          className="hover:bg-law-light"
         >
           Post Comment
         </Button>

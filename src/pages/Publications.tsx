@@ -24,6 +24,7 @@ import {
 ////////////////////////////////////////////////////////////////////
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/Firebase';
+import { myImages } from "@/images";
 
 export const fetchArticles = async () => {
   const querySnapshot = await getDocs(collection(db, 'articles'));
@@ -63,7 +64,7 @@ const allArticles = [
     date: "March 10, 2023",
     author: "Michael Ibrahim",
     category: "Legal Technology",
-    imageSrc: "https://images.unsplash.com/photo-1551725301-5183dceda5cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+    imageSrc: myImages.image4
   },
   {
     id: "4",
@@ -90,7 +91,7 @@ const allArticles = [
     date: "December 5, 2022",
     author: "Victoria Nwankwo",
     category: "Intellectual Property",
-    imageSrc: "https://images.unsplash.com/photo-1611101679995-b8309fc743cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+    imageSrc: myImages.image5
   },
 ];
 
@@ -234,7 +235,7 @@ const Publications = () => {
                     <p className="text-law-text-light mb-6 line-clamp-3 flex-grow">{article.excerpt}</p>
                     <Button
                       variant="ghost"
-                      className="text-law-DEFAULT hover:text-white justify-start pl-0 w-fit group"
+                      className="text-law-DEFAULT hover:text-white justify-start pl-2 w-fit group"
                       onClick={() => navigate(`/publications/${article.id}`)}
                     >
                       Read more

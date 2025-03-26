@@ -80,7 +80,7 @@ const Login = () => {
             </div>
             <Button
               type="submit"
-              className="w-full bg-law-DEFAULT hover:bg-law-DEFAULT/90"
+              className="w-full hover:bg-law-DEFAULT/90"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
