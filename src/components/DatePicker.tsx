@@ -10,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import "../testing.css"
 
 interface DatePickerProps {
   date: Date | undefined;
@@ -18,17 +19,17 @@ interface DatePickerProps {
   placeholder?: string;
 }
 
-export function DatePicker({ 
-  date, 
-  onDateChange, 
-  label = "Schedule publication", 
-  placeholder = "Select a date" 
+export function DatePicker({
+  date,
+  onDateChange,
+  label = "Schedule publication",
+  placeholder = "Select a date"
 }: DatePickerProps) {
   return (
     <div className="space-y-2">
       {label && <div className="text-sm font-medium">{label}</div>}
       <Popover>
-        <PopoverTrigger asChild>
+        <PopoverTrigger asChild className="">
           <Button
             variant={"outline"}
             className={cn(
@@ -40,7 +41,7 @@ export function DatePicker({
             {date ? format(date, "PPP") : <span>{placeholder}</span>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 zindex" align="start">
           <Calendar
             mode="single"
             selected={date}
