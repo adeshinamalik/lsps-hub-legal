@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import {
   Calendar,
@@ -49,7 +48,6 @@ import { db } from "@/firebase/Firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/supabase/supabase";
 
-// Define the NewsItem type
 interface NewsItem {
   id: string;
   title: string;
@@ -62,13 +60,12 @@ interface NewsItem {
   updatedAt?: any;
 }
 
-// Static news items
-const newsItemsStatic = [
-  { id: "1", title: "LSPS Announces New Editorial Board", type: "News", author: "Admin", date: "2023-05-15", imageUrl: "" },
-  { id: "2", title: "Annual Law Students Conference", type: "Event", author: "Admin", date: "2023-06-10", imageUrl: "" },
-  { id: "3", title: "New Journal Publication Released", type: "News", author: "Admin", date: "2023-05-05", imageUrl: "" },
-  { id: "4", title: "Moot Court Competition", type: "Event", author: "Admin", date: "2023-07-12", imageUrl: "" },
-  { id: "5", title: "Partnership with Law Firm Announced", type: "News", author: "Admin", date: "2023-04-28", imageUrl: "" },
+const newsItemsStatic: NewsItem[] = [
+  { id: "1", title: "LSPS Announces New Editorial Board", type: "News", content: "", author: "Admin", date: "2023-05-15", imageUrl: "" },
+  { id: "2", title: "Annual Law Students Conference", type: "Event", content: "", author: "Admin", date: "2023-06-10", imageUrl: "" },
+  { id: "3", title: "New Journal Publication Released", type: "News", content: "", author: "Admin", date: "2023-05-05", imageUrl: "" },
+  { id: "4", title: "Moot Court Competition", type: "Event", content: "", author: "Admin", date: "2023-07-12", imageUrl: "" },
+  { id: "5", title: "Partnership with Law Firm Announced", type: "News", content: "", author: "Admin", date: "2023-04-28", imageUrl: "" },
 ];
 
 const AdminNews = () => {
@@ -99,7 +96,8 @@ const AdminNews = () => {
         const querySnapshot = await getDocs(collection(db, "news"));
         const firestoreItems = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          content: doc.data().content || ""
         })) as NewsItem[];
         setNewsItems([...newsItemsStatic, ...firestoreItems]);
       } catch (error: any) {
@@ -189,6 +187,7 @@ const AdminNews = () => {
       const firestoreItems = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
+        content: doc.data().content || ""
       })) as NewsItem[];
       setNewsItems([...newsItemsStatic, ...firestoreItems]);
 
@@ -208,7 +207,6 @@ const AdminNews = () => {
     try {
       const isStaticItem = newsItemsStatic.some((item) => item.id === selectedItem);
       if (!isStaticItem) {
-        // Only delete from Firestore if it's not a static item
         await deleteDoc(doc(db, "news", selectedItem));
       }
       setNewsItems(newsItems.filter((item) => item.id !== selectedItem));
@@ -247,7 +245,6 @@ const AdminNews = () => {
       };
 
       if (!isStaticItem) {
-        // Update Firestore if it's not a static item
         await updateDoc(doc(db, "news", editItem.id), updatedItem);
       }
 
@@ -255,6 +252,7 @@ const AdminNews = () => {
       const firestoreItems = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
+        content: doc.data().content || ""
       })) as NewsItem[];
       setNewsItems([...newsItemsStatic, ...firestoreItems]);
 
@@ -402,7 +400,6 @@ const AdminNews = () => {
           </div>
         </TabsContent>
 
-        {/* Repeat similar updates for "news" and "event" TabsContent */}
         <TabsContent value="news" className="mt-4">
           <div className="rounded-md border">
             <Table>
@@ -558,7 +555,6 @@ const AdminNews = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Add Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
@@ -657,7 +653,6 @@ const AdminNews = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
@@ -758,7 +753,6 @@ const AdminNews = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

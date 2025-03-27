@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -8,21 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Search, Calendar, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationItem, 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious
 } from "@/components/ui/pagination";
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../firebase/Firebase';
 import { supabase } from "@/supabase/supabase";
 import { myImages } from "@/images";
 import { toast } from "sonner";
 
-// Interface for article data
 interface Article {
   id: string;
   title: string;
@@ -32,9 +30,9 @@ interface Article {
   author: string;
   category: string;
   imageSrc: string;
+  createdAt?: string;
 }
 
-// Mock data for articles
 const allArticles = [
   {
     id: "1",
@@ -92,7 +90,6 @@ const allArticles = [
   },
 ];
 
-// Categories for filtering
 const categories = [
   "All Categories",
   "Constitutional Law",
@@ -117,12 +114,23 @@ const Publications = () => {
     const fetchFirebaseData = async () => {
       try {
         setIsLoading(true);
-        const articlesQuery = query(
-          collection(db, 'publications'),
-          where('status', '==', 'Published')
-        );
+        let articlesQuery;
+        try {
+          articlesQuery = query(
+            collection(db, 'publications'),
+            where('status', '==', 'Published'),
+            orderBy('createdAt', 'desc')
+          );
+        } catch (error) {
+          console.warn("Ordering by createdAt requires an index. Falling back to default query.");
+          articlesQuery = query(
+            collection(db, 'publications'),
+            where('status', '==', 'Published')
+          );
+        }
         
         const querySnapshot = await getDocs(articlesQuery);
+        
         const firestoreItems = querySnapshot.docs.map(doc => {
           const data = doc.data();
           return {
@@ -133,12 +141,19 @@ const Publications = () => {
             author: data.author || "Unknown",
             category: data.category || "Uncategorized",
             imageSrc: data.imageUrl || "https://via.placeholder.com/640x360",
-            content: data.content
+            content: data.content,
+            createdAt: data.createdAt || new Date().toISOString()
           } as Article;
         });
         
-        setFirebaseArticles(firestoreItems);
-        console.log("Firebase articles loaded:", firestoreItems.length);
+        const sortedItems = firestoreItems.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+        
+        setFirebaseArticles(sortedItems);
+        console.log("Firebase articles loaded:", sortedItems.length);
       } catch (error: any) {
         console.error("Error fetching Firebase articles:", error);
         toast.error("Error loading publications: " + error.message);
@@ -152,7 +167,8 @@ const Publications = () => {
         const { data, error } = await supabase
           .from('articles')
           .select('*')
-          .eq('status', 'Published');
+          .eq('status', 'Published')
+          .order('created_at', { ascending: false });
           
         if (error) throw error;
         
@@ -165,7 +181,8 @@ const Publications = () => {
             author: item.author || "Unknown",
             category: item.category || "Uncategorized",
             imageSrc: item.image_url || "https://via.placeholder.com/640x360",
-            content: item.content
+            content: item.content,
+            createdAt: item.created_at || new Date().toISOString()
           })) as Article[];
           
           setSupabaseArticles(mappedData);
@@ -181,11 +198,20 @@ const Publications = () => {
     fetchSupabaseData();
   }, []);
 
-  // Combine all articles from different sources
-  const combinedArticles = [...allArticles, ...firebaseArticles, ...supabaseArticles];
+  const staticArticlesWithDates = allArticles.map((article, index) => ({
+    ...article,
+    createdAt: new Date(2022, index, 1).toISOString()
+  }));
 
-  // Filter articles based on search query and selected category
-  const filteredArticles = combinedArticles.filter(article => {
+  const combinedArticles = [...staticArticlesWithDates, ...firebaseArticles, ...supabaseArticles];
+
+  const sortedArticles = [...combinedArticles].sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateB - dateA;
+  });
+
+  const filteredArticles = sortedArticles.filter(article => {
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.author.toLowerCase().includes(searchQuery.toLowerCase());
@@ -195,7 +221,6 @@ const Publications = () => {
     return matchesSearch && matchesCategory;
   });
   
-  // Calculate pagination values
   const totalItems = filteredArticles.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -234,7 +259,7 @@ const Publications = () => {
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
-                    setCurrentPage(1); // Reset to first page on search
+                    setCurrentPage(1);
                   }}
                 />
               </div>
@@ -250,7 +275,7 @@ const Publications = () => {
                     )}
                     onClick={() => {
                       setSelectedCategory(category);
-                      setCurrentPage(1); // Reset to first page on category change
+                      setCurrentPage(1);
                     }}
                   >
                     {category}
@@ -369,7 +394,6 @@ const Publications = () => {
                 )}
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                  // Show current page, first page, last page, and pages adjacent to current page
                   if (
                     page === 1 || 
                     page === totalPages || 
@@ -387,7 +411,6 @@ const Publications = () => {
                     );
                   }
                   
-                  // Show ellipsis for page gaps
                   if (page === 2 && currentPage > 3) {
                     return <PaginationItem key="ellipsis-start">...</PaginationItem>;
                   }
