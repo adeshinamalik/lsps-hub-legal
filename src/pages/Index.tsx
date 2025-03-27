@@ -1,4 +1,4 @@
-
+import { useState, useEffect } from "react";
 import Hero from "@/components/Hero";
 import FeaturedArticles from "@/components/FeaturedArticles";
 import NewsHighlights from "@/components/NewsHighlights";
@@ -8,12 +8,40 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Users, Calendar, ArrowRight } from "lucide-react";
 import { myImages } from "@/images";
+import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+import { db } from '@/firebase/Firebase';
+import { supabase } from "@/supabase/supabase";
+
+interface Article {
+  id: string;
+  title: string;
+  excerpt: string;
+  content?: string;
+  date: string;
+  author: string;
+  category: string;
+  imageSrc: string;
+}
+
+interface NewsEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  type: 'news' | 'event';
+  eventDate?: string;
+  location?: string;
+  imageSrc: string;
+}
 
 const Index = () => {
   const navigate = useNavigate();
+  const [featuredFirebaseArticles, setFeaturedFirebaseArticles] = useState<Article[]>([]);
+  const [featuredSupabaseArticles, setFeaturedSupabaseArticles] = useState<Article[]>([]);
+  const [firebaseNewsEvents, setFirebaseNewsEvents] = useState<NewsEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Mock data for featured articles
-  const featuredArticles = [
+  const staticFeaturedArticles = [
     {
       id: "1",
       title: "The Evolution of Constitutional Law in Nigeria: A Critical Analysis",
@@ -40,12 +68,10 @@ const Index = () => {
       author: "Michael Ibrahim",
       category: "Legal Technology",
       imageSrc: myImages.image2
-
     },
   ];
 
-  // Mock data for news and events
-  const newsEvents = [
+  const staticNewsEvents = [
     {
       id: "1",
       title: "LSPS Annual Legal Writing Workshop",
@@ -75,6 +101,95 @@ const Index = () => {
       imageSrc: "https://images.unsplash.com/photo-1505664194779-8beaceb93744?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
     },
   ];
+
+  useEffect(() => {
+    const fetchFeaturedArticles = async () => {
+      setIsLoading(true);
+      try {
+        const articlesQuery = query(
+          collection(db, 'publications'),
+          where('status', '==', 'Published'),
+          orderBy('createdAt', 'desc'),
+          limit(3)
+        );
+        
+        const querySnapshot = await getDocs(articlesQuery);
+        const firestoreArticles = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title || "Untitled",
+            excerpt: data.content?.substring(0, 150) + "..." || "No content available",
+            date: data.date || new Date().toISOString().split('T')[0],
+            author: data.author || "Unknown",
+            category: data.category || "Uncategorized",
+            imageSrc: data.imageUrl || "https://via.placeholder.com/640x360"
+          } as Article;
+        });
+        
+        setFeaturedFirebaseArticles(firestoreArticles);
+        console.log("Firebase featured articles loaded:", firestoreArticles.length);
+
+        const { data, error } = await supabase
+          .from('articles')
+          .select('*')
+          .eq('status', 'Published')
+          .order('created_at', { ascending: false })
+          .limit(3);
+          
+        if (error) throw error;
+        
+        if (data) {
+          const supabaseArticles = data.map(item => ({
+            id: item.id,
+            title: item.title || "Untitled",
+            excerpt: item.excerpt || item.content?.substring(0, 150) + "..." || "No content available",
+            date: item.published_date || new Date().toISOString().split('T')[0],
+            author: item.author || "Unknown",
+            category: item.category || "Uncategorized",
+            imageSrc: item.image_url || "https://via.placeholder.com/640x360"
+          })) as Article[];
+          
+          setFeaturedSupabaseArticles(supabaseArticles);
+          console.log("Supabase featured articles loaded:", supabaseArticles.length);
+        }
+
+        const newsEventsQuery = query(
+          collection(db, 'newsEvents'),
+          where('status', '==', 'Published'),
+          orderBy('createdAt', 'desc'),
+          limit(3)
+        );
+        
+        const newsEventsSnapshot = await getDocs(newsEventsQuery);
+        const firestoreNewsEvents = newsEventsSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title || "Untitled",
+            description: data.summary || "No description available",
+            date: `Posted on ${data.date || new Date().toISOString().split('T')[0]}`,
+            type: data.type || "news",
+            eventDate: data.eventDate,
+            location: data.location,
+            imageSrc: data.imageSrc || "https://via.placeholder.com/640x360"
+          } as NewsEvent;
+        });
+        
+        setFirebaseNewsEvents(firestoreNewsEvents);
+        console.log("Firebase news events loaded:", firestoreNewsEvents.length);
+      } catch (error) {
+        console.error("Error fetching featured content:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFeaturedArticles();
+  }, []);
+
+  const combinedFeaturedArticles = [...staticFeaturedArticles, ...featuredFirebaseArticles, ...featuredSupabaseArticles].slice(0, 6);
+  const combinedNewsEvents = [...staticNewsEvents, ...firebaseNewsEvents].slice(0, 6);
 
   return (
     <div className="min-h-screen">
@@ -155,9 +270,9 @@ const Index = () => {
         </div>
       </section>
 
-      <FeaturedArticles articles={featuredArticles} />
+      <FeaturedArticles articles={combinedFeaturedArticles} />
 
-      <NewsHighlights items={newsEvents} />
+      <NewsHighlights items={combinedNewsEvents} />
 
       <Footer />
     </div>

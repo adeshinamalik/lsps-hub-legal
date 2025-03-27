@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -16,26 +16,23 @@ import {
   PaginationNext,
   PaginationPrevious
 } from "@/components/ui/pagination";
-
-
-
-
-
-////////////////////////////////////////////////////////////////////
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase/Firebase';
+import { supabase } from "@/supabase/supabase";
 import { myImages } from "@/images";
+import { toast } from "sonner";
 
-export const fetchArticles = async () => {
-  const querySnapshot = await getDocs(collection(db, 'articles'));
-  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-};
-////////////////////////////////////////////////////////////////////
-
-
-
-
-
+// Interface for article data
+interface Article {
+  id: string;
+  title: string;
+  excerpt: string;
+  content?: string;
+  date: string;
+  author: string;
+  category: string;
+  imageSrc: string;
+}
 
 // Mock data for articles
 const allArticles = [
@@ -110,11 +107,85 @@ const Publications = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [currentPage, setCurrentPage] = useState(1);
+  const [firebaseArticles, setFirebaseArticles] = useState<Article[]>([]);
+  const [supabaseArticles, setSupabaseArticles] = useState<Article[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 6;
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchFirebaseData = async () => {
+      try {
+        setIsLoading(true);
+        const articlesQuery = query(
+          collection(db, 'publications'),
+          where('status', '==', 'Published')
+        );
+        
+        const querySnapshot = await getDocs(articlesQuery);
+        const firestoreItems = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title || "Untitled",
+            excerpt: data.content?.substring(0, 150) + "..." || "No content available",
+            date: data.date || new Date().toISOString().split('T')[0],
+            author: data.author || "Unknown",
+            category: data.category || "Uncategorized",
+            imageSrc: data.imageUrl || "https://via.placeholder.com/640x360",
+            content: data.content
+          } as Article;
+        });
+        
+        setFirebaseArticles(firestoreItems);
+        console.log("Firebase articles loaded:", firestoreItems.length);
+      } catch (error: any) {
+        console.error("Error fetching Firebase articles:", error);
+        toast.error("Error loading publications: " + error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const fetchSupabaseData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('articles')
+          .select('*')
+          .eq('status', 'Published');
+          
+        if (error) throw error;
+        
+        if (data) {
+          const mappedData = data.map(item => ({
+            id: item.id,
+            title: item.title || "Untitled",
+            excerpt: item.excerpt || item.content?.substring(0, 150) + "..." || "No content available",
+            date: item.published_date || new Date().toISOString().split('T')[0],
+            author: item.author || "Unknown",
+            category: item.category || "Uncategorized",
+            imageSrc: item.image_url || "https://via.placeholder.com/640x360",
+            content: item.content
+          })) as Article[];
+          
+          setSupabaseArticles(mappedData);
+          console.log("Supabase articles loaded:", mappedData.length);
+        }
+      } catch (error: any) {
+        console.error("Error fetching Supabase articles:", error);
+        // Don't show toast for Supabase errors to avoid duplicate error messages
+      }
+    };
+
+    fetchFirebaseData();
+    fetchSupabaseData();
+  }, []);
+
+  // Combine all articles from different sources
+  const combinedArticles = [...allArticles, ...firebaseArticles, ...supabaseArticles];
+
   // Filter articles based on search query and selected category
-  const filteredArticles = allArticles.filter(article => {
+  const filteredArticles = combinedArticles.filter(article => {
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.author.toLowerCase().includes(searchQuery.toLowerCase());
@@ -189,14 +260,36 @@ const Publications = () => {
             </div>
 
             <div className="text-gray-600">
-              Showing {paginatedArticles.length} {paginatedArticles.length === 1 ? "result" : "results"}
-              {selectedCategory !== "All Categories" && ` in ${selectedCategory}`}
-              {searchQuery && ` for "${searchQuery}"`}
-              {totalItems > itemsPerPage && ` (page ${currentPage} of ${totalPages})`}
+              {isLoading ? (
+                "Loading publications..."
+              ) : (
+                <>
+                  Showing {paginatedArticles.length} {paginatedArticles.length === 1 ? "result" : "results"}
+                  {selectedCategory !== "All Categories" && ` in ${selectedCategory}`}
+                  {searchQuery && ` for "${searchQuery}"`}
+                  {totalItems > itemsPerPage && ` (page ${currentPage} of ${totalPages})`}
+                </>
+              )}
             </div>
           </div>
 
-          {filteredArticles.length > 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Card key={i} className="overflow-hidden border-none bg-white shadow-subtle h-full flex flex-col animate-pulse">
+                  <div className="h-56 bg-gray-200"></div>
+                  <div className="p-6 flex flex-col flex-grow">
+                    <div className="h-4 bg-gray-200 rounded mb-4 w-1/2"></div>
+                    <div className="h-6 bg-gray-200 rounded mb-3"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-6 w-3/4"></div>
+                    <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : filteredArticles.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {paginatedArticles.map((article, index) => (
                 <Card
@@ -213,6 +306,9 @@ const Publications = () => {
                       alt={article.title}
                       className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                       loading="lazy"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/640x360?text=Image+Not+Found";
+                      }}
                     />
                     <div className="absolute top-4 left-4">
                       <span className="inline-block bg-white/90 backdrop-blur-xs px-3 py-1 text-xs font-medium text-law-DEFAULT rounded-full">
@@ -320,4 +416,3 @@ const Publications = () => {
 };
 
 export default Publications;
-
