@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { 
   FileText, 
   Plus, 
@@ -6,7 +6,9 @@ import {
   Pencil, 
   Trash2, 
   FilterX,
-  Filter
+  Filter,
+  ImagePlus,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,8 +42,32 @@ import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/DatePicker";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/Firebase";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/supabase/supabase";
 
-const publications = [
+interface Publication {
+  id: string;
+  title: string;
+  category: string;
+  author: string;
+  status: string;
+  date: string;
+  content?: string;
+  imageUrl: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+const publicationsStatic: Publication[] = [
   {
     id: "1",
     title: "The Evolution of Nigerian Constitutional Law",
@@ -49,6 +75,7 @@ const publications = [
     author: "John Doe",
     status: "Published",
     date: "2023-05-15",
+    imageUrl: "",
   },
   {
     id: "2",
@@ -57,6 +84,7 @@ const publications = [
     author: "Jane Smith",
     status: "Draft",
     date: "2023-05-10",
+    imageUrl: "",
   },
   {
     id: "3",
@@ -65,6 +93,7 @@ const publications = [
     author: "Robert Johnson",
     status: "Published",
     date: "2023-05-05",
+    imageUrl: "",
   },
   {
     id: "4",
@@ -73,6 +102,7 @@ const publications = [
     author: "Sarah Williams",
     status: "Published",
     date: "2023-04-28",
+    imageUrl: "",
   },
   {
     id: "5",
@@ -81,20 +111,61 @@ const publications = [
     author: "Michael Brown",
     status: "Draft",
     date: "2023-04-20",
+    imageUrl: "",
   },
+];
+
+const categories = [
+  "Constitutional Law",
+  "Criminal Law",
+  "Property Law",
+  "International Law",
+  "Human Rights Law",
+  "Administrative Law",
+  "Commercial Law",
+  "Environmental Law",
+  "Family Law",
+  "Intellectual Property Law"
 ];
 
 const AdminPublications = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedPublication, setSelectedPublication] = useState<string | null>(null);
+  const [editPublication, setEditPublication] = useState<Publication | null>(null);
+  const [publications, setPublications] = useState<Publication[]>(publicationsStatic);
   const [publishDate, setPublishDate] = useState<Date | undefined>(undefined);
   const [newPublication, setNewPublication] = useState({
     title: "",
     category: "",
     content: "",
+    date: "",
+    status: "Draft",
+    imageUrl: "",
   });
+  const { currentUser } = useAuth();
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchPublications = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "publications"));
+        const firestoreItems = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Publication[];
+        setPublications([...publicationsStatic, ...firestoreItems]);
+      } catch (error: any) {
+        toast.error("Failed to fetch publications: " + error.message);
+      }
+    };
+    fetchPublications();
+  }, []);
 
   const filteredPublications = publications.filter((pub) =>
     pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -102,28 +173,175 @@ const AdminPublications = () => {
     pub.author.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddPublication = () => {
-    toast.success("Publication added successfully!");
-    setIsAddDialogOpen(false);
-    setNewPublication({ title: "", category: "", content: "" });
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("Image file size exceeds 10MB limit.");
+        return;
+      }
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      setImageFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
   };
 
-  const handleDeletePublication = () => {
-    toast.success("Publication deleted successfully!");
-    setIsDeleteDialogOpen(false);
-    setSelectedPublication(null);
+  const removeImage = () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const uploadImage = async (): Promise<string> => {
+    if (!imageFile) return "";
+    try {
+      setIsUploading(true);
+      const fileName = `${Date.now()}_${imageFile.name}`;
+      const { data, error } = await supabase.storage
+        .from("publication-images")
+        .upload(fileName, imageFile);
+      if (error) throw error;
+      const { data: urlData } = supabase.storage
+        .from("publication-images")
+        .getPublicUrl(fileName);
+      return urlData.publicUrl;
+    } catch (error: any) {
+      toast.error(`Failed to upload image: ${error.message}`);
+      return "";
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleAddPublication = async () => {
+    if (!currentUser) {
+      toast.error("You must be logged in to add publications.");
+      return;
+    }
+    if (!newPublication.title || !newPublication.category) {
+      toast.error("Title and Category are required fields.");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const imageUrl = await uploadImage();
+      const publicationDate = publishDate ? publishDate.toISOString().split('T')[0] : '';
+      
+      const publicationToAdd = {
+        ...newPublication,
+        date: publicationDate || new Date().toISOString().split('T')[0],
+        author: currentUser.email || "Admin",
+        createdAt: new Date().toISOString(),
+        imageUrl: imageUrl || "",
+      };
+      
+      const docRef = await addDoc(collection(db, "publications"), publicationToAdd);
+      const newPublicationWithId = { id: docRef.id, ...publicationToAdd } as Publication;
+
+      const querySnapshot = await getDocs(collection(db, "publications"));
+      const firestoreItems = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Publication[];
+      setPublications([...publicationsStatic, ...firestoreItems]);
+
+      toast.success("Publication added successfully!");
+      setIsAddDialogOpen(false);
+      setNewPublication({ 
+        title: "", 
+        category: "", 
+        content: "", 
+        date: "",
+        status: "Draft",
+        imageUrl: ""
+      });
+      setPublishDate(undefined);
+      removeImage();
+    } catch (error: any) {
+      toast.error(`Failed to add publication: ${error.message}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeletePublication = async () => {
+    if (!selectedPublication) return;
+    try {
+      const isStaticItem = publicationsStatic.some((pub) => pub.id === selectedPublication);
+      if (!isStaticItem) {
+        await deleteDoc(doc(db, "publications", selectedPublication));
+      }
+      setPublications(publications.filter((pub) => pub.id !== selectedPublication));
+      toast.success("Publication deleted successfully!");
+    } catch (error: any) {
+      toast.error(`Failed to delete publication: ${error.message}`);
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setSelectedPublication(null);
+    }
+  };
+
+  const handleEditPublication = async () => {
+    if (!currentUser || !editPublication) {
+      toast.error("You must be logged in to edit publications.");
+      return;
+    }
+    if (!editPublication.title || !editPublication.category) {
+      toast.error("Title and Category are required fields.");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const isStaticItem = publicationsStatic.some((pub) => pub.id === editPublication.id);
+      let updatedImageUrl = editPublication.imageUrl;
+      if (imageFile) {
+        updatedImageUrl = await uploadImage();
+      }
+
+      const updatedPublication = {
+        ...editPublication,
+        imageUrl: updatedImageUrl || "",
+        updatedAt: new Date().toISOString(),
+      };
+
+      if (!isStaticItem) {
+        await updateDoc(doc(db, "publications", editPublication.id), updatedPublication);
+      }
+
+      const querySnapshot = await getDocs(collection(db, "publications"));
+      const firestoreItems = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Publication[];
+      setPublications([...publicationsStatic, ...firestoreItems]);
+
+      toast.success("Publication updated successfully!");
+      setIsEditDialogOpen(false);
+      setEditPublication(null);
+      removeImage();
+    } catch (error: any) {
+      toast.error(`Failed to update publication: ${error.message}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const openEditDialog = (publication: Publication) => {
+    setEditPublication(publication);
+    setImagePreview(publication.imageUrl || null);
+    setIsEditDialogOpen(true);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-law-DEFAULT">
-            Publications
-          </h1>
-          <p className="text-muted-foreground">
-            Manage articles, case notes, and essays
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-law-DEFAULT">Publications</h1>
+          <p className="text-muted-foreground">Manage articles, case notes, and essays</p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -167,19 +385,18 @@ const AdminPublications = () => {
               <TableHead>Author</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Date</TableHead>
+              <TableHead>Image</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredPublications.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   <div className="flex flex-col items-center justify-center text-gray-500">
                     <FileText className="h-12 w-12 mb-2 opacity-20" />
                     <p className="text-lg font-medium">No publications found</p>
-                    <p className="text-sm">
-                      Try adjusting your search or add a new publication
-                    </p>
+                    <p className="text-sm">Try adjusting your search or add a new publication</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -201,12 +418,28 @@ const AdminPublications = () => {
                     </span>
                   </TableCell>
                   <TableCell>{pub.date}</TableCell>
+                  <TableCell>
+                    {pub.imageUrl ? (
+                      <img 
+                        src={pub.imageUrl} 
+                        alt={pub.title} 
+                        className="w-16 h-16 object-cover rounded" 
+                        onError={(e) => {
+                          console.error(`Failed to load image: ${pub.imageUrl}`);
+                          e.currentTarget.src = "https://via.placeholder.com/64";
+                        }}
+                      />
+                    ) : (
+                      "No Image"
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-blue-500"
+                        onClick={() => openEditDialog(pub)}
                       >
                         <Pencil className="h-4 w-4" />
                         <span className="sr-only">Edit</span>
@@ -233,7 +466,7 @@ const AdminPublications = () => {
       </div>
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[550px] max-h-[85vh] overflow-y-auto" style={{ zIndex: 100 }}>
           <DialogHeader>
             <DialogTitle>Add New Publication</DialogTitle>
             <DialogDescription>
@@ -256,22 +489,52 @@ const AdminPublications = () => {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="category">Category</Label>
-              <Input
-                id="category"
-                value={newPublication.category}
-                onChange={(e) =>
+              <Select 
+                value={newPublication.category} 
+                onValueChange={(value) => 
                   setNewPublication({
                     ...newPublication,
-                    category: e.target.value,
+                    category: value,
                   })
                 }
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <Select 
+                value={newPublication.status} 
+                onValueChange={(value) => 
+                  setNewPublication({
+                    ...newPublication,
+                    status: value,
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Draft">Draft</SelectItem>
+                  <SelectItem value="Published">Published</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="content">Content</Label>
               <Textarea
                 id="content"
-                rows={10}
+                rows={6}
                 value={newPublication.content}
                 onChange={(e) =>
                   setNewPublication({
@@ -281,18 +544,206 @@ const AdminPublications = () => {
                 }
               />
             </div>
-            <DatePicker 
-              date={publishDate} 
-              onDateChange={setPublishDate} 
-              label="Schedule Publication" 
-              placeholder="Select when to publish" 
-            />
+            <div className="grid gap-2">
+              <Label>Publication Date</Label>
+              <DatePicker 
+                date={publishDate} 
+                onDateChange={setPublishDate} 
+                label="Publication Date" 
+                placeholder="Select publication date" 
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="image">Cover Image</Label>
+              <div>
+                {imagePreview ? (
+                  <div className="relative mb-4">
+                    <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-md" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                      onClick={removeImage}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <ImagePlus className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">Click to upload image</p>
+                      <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF up to 10MB</p>
+                    </div>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="image"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </div>
+            </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="sticky bottom-0 pt-2 bg-background">
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleAddPublication}>Save Publication</Button>
+            <Button onClick={handleAddPublication} disabled={isUploading}>
+              {isUploading ? "Uploading..." : "Save Publication"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[550px] max-h-[85vh] overflow-y-auto" style={{ zIndex: 100 }}>
+          <DialogHeader>
+            <DialogTitle>Edit Publication</DialogTitle>
+            <DialogDescription>
+              Update an existing publication.
+            </DialogDescription>
+          </DialogHeader>
+          {editPublication && (
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-title">Title</Label>
+                <Input
+                  id="edit-title"
+                  value={editPublication.title}
+                  onChange={(e) =>
+                    setEditPublication({
+                      ...editPublication,
+                      title: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-category">Category</Label>
+                <Select 
+                  value={editPublication.category} 
+                  onValueChange={(value) => 
+                    setEditPublication({
+                      ...editPublication,
+                      category: value,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-status">Status</Label>
+                <Select 
+                  value={editPublication.status} 
+                  onValueChange={(value) => 
+                    setEditPublication({
+                      ...editPublication,
+                      status: value,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Draft">Draft</SelectItem>
+                    <SelectItem value="Published">Published</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-content">Content</Label>
+                <Textarea
+                  id="edit-content"
+                  rows={10}
+                  value={editPublication.content}
+                  onChange={(e) =>
+                    setEditPublication({
+                      ...editPublication,
+                      content: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-date">Publication Date</Label>
+                <Input
+                  id="edit-date"
+                  type="date"
+                  value={editPublication.date}
+                  onChange={(e) =>
+                    setEditPublication({
+                      ...editPublication,
+                      date: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-image">Cover Image</Label>
+                <div>
+                  {imagePreview ? (
+                    <div className="relative mb-4">
+                      <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-md" />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                        onClick={removeImage}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div
+                      className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <ImagePlus className="mx-auto h-12 w-12 text-gray-400" />
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-500">Click to upload image</p>
+                        <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF up to 10MB</p>
+                      </div>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    id="edit-image"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="sticky bottom-0 pt-2 bg-background">
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditPublication} disabled={isUploading}>
+              {isUploading ? "Uploading..." : "Save Changes"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
