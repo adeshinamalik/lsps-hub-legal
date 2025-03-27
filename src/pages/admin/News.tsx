@@ -62,6 +62,7 @@ const AdminNews = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<any>(null);
@@ -71,6 +72,7 @@ const AdminNews = () => {
     type: "News",
     content: "",
     date: "",
+    imageUrl: "",
     imageUrl: "",
   });
   const { currentUser } = useAuth();
@@ -85,10 +87,10 @@ const AdminNews = () => {
         const querySnapshot = await getDocs(collection(db, "news"));
         const firestoreItems = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
-        }));
+          ...doc.data()
+        })) as NewsItem[];
         setNewsItems([...newsItemsStatic, ...firestoreItems]);
-      } catch (error) {
+      } catch (error: any) {
         toast.error("Failed to fetch news items: " + error.message);
       }
     };
@@ -139,7 +141,7 @@ const AdminNews = () => {
         .getPublicUrl(fileName);
       console.log("Public URL:", urlData.publicUrl);
       return urlData.publicUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error uploading image to Supabase:", error);
       toast.error(`Failed to upload image: ${error.message}`);
       return "";
@@ -166,6 +168,7 @@ const AdminNews = () => {
         author: currentUser.email || "Admin",
         createdAt: new Date().toISOString(),
         imageUrl: imageUrl || "",
+        imageUrl: imageUrl || "",
       };
       const docRef = await addDoc(collection(db, "news"), itemToAdd);
       const newItemWithId = { id: docRef.id, ...itemToAdd };
@@ -181,8 +184,9 @@ const AdminNews = () => {
       toast.success(`${newItem.type} added successfully!`);
       setIsAddDialogOpen(false);
       setNewItem({ title: "", type: "News", content: "", date: "", imageUrl: "" });
+      setNewItem({ title: "", type: "News", content: "", date: "", imageUrl: "" });
       removeImage();
-    } catch (error) {
+    } catch (error: any) {
       toast.error(`Failed to add item: ${error.message}`);
     } finally {
       setIsUploading(false);
@@ -199,7 +203,7 @@ const AdminNews = () => {
       }
       setNewsItems(newsItems.filter((item) => item.id !== selectedItem));
       toast.success("Item deleted successfully!");
-    } catch (error) {
+    } catch (error: any) {
       toast.error(`Failed to delete item: ${error.message}`);
     } finally {
       setIsDeleteDialogOpen(false);
