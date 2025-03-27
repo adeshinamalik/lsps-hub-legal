@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Search, Calendar, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationItem, 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious
@@ -121,8 +121,9 @@ const Publications = () => {
           collection(db, 'publications'),
           where('status', '==', 'Published')
         );
-        
+
         const querySnapshot = await getDocs(articlesQuery);
+
         const firestoreItems = querySnapshot.docs.map(doc => {
           const data = doc.data();
           return {
@@ -136,7 +137,7 @@ const Publications = () => {
             content: data.content
           } as Article;
         });
-        
+
         setFirebaseArticles(firestoreItems);
         console.log("Firebase articles loaded:", firestoreItems.length);
       } catch (error: any) {
@@ -153,9 +154,9 @@ const Publications = () => {
           .from('articles')
           .select('*')
           .eq('status', 'Published');
-          
+
         if (error) throw error;
-        
+
         if (data) {
           const mappedData = data.map(item => ({
             id: item.id,
@@ -167,7 +168,7 @@ const Publications = () => {
             imageSrc: item.image_url || "https://via.placeholder.com/640x360",
             content: item.content
           })) as Article[];
-          
+
           setSupabaseArticles(mappedData);
           console.log("Supabase articles loaded:", mappedData.length);
         }
@@ -194,7 +195,7 @@ const Publications = () => {
 
     return matchesSearch && matchesCategory;
   });
-  
+
   // Calculate pagination values
   const totalItems = filteredArticles.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -371,8 +372,8 @@ const Publications = () => {
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
                   // Show current page, first page, last page, and pages adjacent to current page
                   if (
-                    page === 1 || 
-                    page === totalPages || 
+                    page === 1 ||
+                    page === totalPages ||
                     (page >= currentPage - 1 && page <= currentPage + 1)
                   ) {
                     return (
@@ -386,16 +387,16 @@ const Publications = () => {
                       </PaginationItem>
                     );
                   }
-                  
+
                   // Show ellipsis for page gaps
                   if (page === 2 && currentPage > 3) {
                     return <PaginationItem key="ellipsis-start">...</PaginationItem>;
                   }
-                  
+
                   if (page === totalPages - 1 && currentPage < totalPages - 2) {
                     return <PaginationItem key="ellipsis-end">...</PaginationItem>;
                   }
-                  
+
                   return null;
                 })}
 
