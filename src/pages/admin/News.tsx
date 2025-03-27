@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import {
   Calendar,
@@ -48,6 +49,19 @@ import { db } from "@/firebase/Firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/supabase/supabase";
 
+// Define the NewsItem type
+interface NewsItem {
+  id: string;
+  title: string;
+  type: string;
+  content: string;
+  author: string;
+  date: string;
+  imageUrl: string;
+  createdAt?: any;
+  updatedAt?: any;
+}
+
 // Static news items
 const newsItemsStatic = [
   { id: "1", title: "LSPS Announces New Editorial Board", type: "News", author: "Admin", date: "2023-05-15", imageUrl: "" },
@@ -64,14 +78,13 @@ const AdminNews = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [editItem, setEditItem] = useState<any>(null);
-  const [newsItems, setNewsItems] = useState(newsItemsStatic);
+  const [editItem, setEditItem] = useState<NewsItem | null>(null);
+  const [newsItems, setNewsItems] = useState<NewsItem[]>(newsItemsStatic);
   const [newItem, setNewItem] = useState({
     title: "",
     type: "News",
     content: "",
     date: "",
-    imageUrl: "",
     imageUrl: "",
   });
   const { currentUser } = useAuth();
@@ -167,7 +180,6 @@ const AdminNews = () => {
         author: currentUser.email || "Admin",
         createdAt: new Date().toISOString(),
         imageUrl: imageUrl || "",
-        imageUrl: imageUrl || "",
       };
       const docRef = await addDoc(collection(db, "news"), itemToAdd);
       const newItemWithId = { id: docRef.id, ...itemToAdd };
@@ -177,12 +189,11 @@ const AdminNews = () => {
       const firestoreItems = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
+      })) as NewsItem[];
       setNewsItems([...newsItemsStatic, ...firestoreItems]);
 
       toast.success(`${newItem.type} added successfully!`);
       setIsAddDialogOpen(false);
-      setNewItem({ title: "", type: "News", content: "", date: "", imageUrl: "" });
       setNewItem({ title: "", type: "News", content: "", date: "", imageUrl: "" });
       removeImage();
     } catch (error: any) {
@@ -215,6 +226,7 @@ const AdminNews = () => {
       toast.error("You must be logged in to edit items.");
       return;
     }
+    if (!editItem) return;
     if (!editItem.title || !editItem.date || !editItem.content) {
       toast.error("Title, Date, and Content are required fields.");
       return;
@@ -243,21 +255,21 @@ const AdminNews = () => {
       const firestoreItems = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
+      })) as NewsItem[];
       setNewsItems([...newsItemsStatic, ...firestoreItems]);
 
       toast.success(`${editItem.type} updated successfully!`);
       setIsEditDialogOpen(false);
       setEditItem(null);
       removeImage();
-    } catch (error) {
+    } catch (error: any) {
       toast.error(`Failed to update item: ${error.message}`);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const openEditDialog = (item: any) => {
+  const openEditDialog = (item: NewsItem) => {
     setEditItem(item);
     setImagePreview(item.imageUrl || null);
     setIsEditDialogOpen(true);
