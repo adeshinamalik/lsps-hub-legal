@@ -15,7 +15,7 @@ import {
   PaginationNext,
   PaginationPrevious
 } from "@/components/ui/pagination";
-import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase/Firebase';
 import { supabase } from "@/supabase/supabase";
 import { myImages } from "@/images";
@@ -30,7 +30,20 @@ interface Article {
   author: string;
   category: string;
   imageSrc: string;
-  createdAt?: string;
+  createdAt?: string | Date;
+}
+
+interface SupabaseArticle {
+  id: string;
+  title: string;
+  excerpt?: string;
+  content?: string;
+  published_date?: string;
+  author?: string;
+  category?: string;
+  image_url?: string;
+  created_at?: string;
+  status?: string;
 }
 
 const allArticles = [
@@ -115,6 +128,7 @@ const Publications = () => {
       try {
         setIsLoading(true);
         let articlesQuery;
+        
         try {
           articlesQuery = query(
             collection(db, 'publications'),
@@ -142,18 +156,14 @@ const Publications = () => {
             category: data.category || "Uncategorized",
             imageSrc: data.imageUrl || "https://via.placeholder.com/640x360",
             content: data.content,
-            createdAt: data.createdAt || new Date().toISOString()
+            createdAt: data.createdAt instanceof Timestamp 
+              ? data.createdAt.toDate().toISOString() 
+              : data.createdAt || new Date().toISOString()
           } as Article;
         });
         
-        const sortedItems = firestoreItems.sort((a, b) => {
-          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return dateB - dateA;
-        });
-        
-        setFirebaseArticles(sortedItems);
-        console.log("Firebase articles loaded:", sortedItems.length);
+        setFirebaseArticles(firestoreItems);
+        console.log("Firebase articles loaded:", firestoreItems.length);
       } catch (error: any) {
         console.error("Error fetching Firebase articles:", error);
         toast.error("Error loading publications: " + error.message);
@@ -173,7 +183,7 @@ const Publications = () => {
         if (error) throw error;
         
         if (data) {
-          const mappedData = data.map(item => ({
+          const mappedData = data.map((item: SupabaseArticle) => ({
             id: item.id,
             title: item.title || "Untitled",
             excerpt: item.excerpt || item.content?.substring(0, 150) + "..." || "No content available",
@@ -220,7 +230,7 @@ const Publications = () => {
 
     return matchesSearch && matchesCategory;
   });
-  
+
   const totalItems = filteredArticles.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
