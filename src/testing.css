@@ -1,6 +1,11 @@
 /* .testing{
     border: 10px solid red  !important;
 } */
-*{
+* {
     z-index: 1;
+}
+
+.zindex {
+
+    position: absolute;
 }

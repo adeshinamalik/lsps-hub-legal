@@ -62,7 +62,6 @@ const AdminNews = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<any>(null);
@@ -335,9 +334,8 @@ const AdminNews = () => {
                       <TableCell className="font-medium">{item.title}</TableCell>
                       <TableCell>
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            item.type === "News" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
-                          }`}
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${item.type === "News" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
+                            }`}
                         >
                           {item.type}
                         </span>
@@ -352,7 +350,7 @@ const AdminNews = () => {
                             className="w-16 h-16 object-cover rounded"
                             onError={(e) => {
                               console.error(`Failed to load image: ${item.imageUrl}`);
-                              e.currentTarget.src = "https://via.placeholder.com/64";                              
+                              e.currentTarget.src = "https://via.placeholder.com/64";
                             }}
                           />
                         ) : (

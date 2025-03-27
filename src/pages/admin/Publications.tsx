@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { 
-  FileText, 
-  Plus, 
-  Search, 
-  Pencil, 
-  Trash2, 
+import {
+  FileText,
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
   FilterX,
   Filter,
   ImagePlus,
@@ -42,7 +42,7 @@ import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/DatePicker";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -229,7 +229,7 @@ const AdminPublications = () => {
       setIsUploading(true);
       const imageUrl = await uploadImage();
       const publicationDate = publishDate ? publishDate.toISOString().split('T')[0] : '';
-      
+
       const publicationToAdd = {
         ...newPublication,
         date: publicationDate || new Date().toISOString().split('T')[0],
@@ -237,7 +237,7 @@ const AdminPublications = () => {
         createdAt: new Date().toISOString(),
         imageUrl: imageUrl || "",
       };
-      
+
       const docRef = await addDoc(collection(db, "publications"), publicationToAdd);
       const newPublicationWithId = { id: docRef.id, ...publicationToAdd } as Publication;
 
@@ -250,10 +250,10 @@ const AdminPublications = () => {
 
       toast.success("Publication added successfully!");
       setIsAddDialogOpen(false);
-      setNewPublication({ 
-        title: "", 
-        category: "", 
-        content: "", 
+      setNewPublication({
+        title: "",
+        category: "",
+        content: "",
         date: "",
         status: "Draft",
         imageUrl: ""
@@ -408,11 +408,10 @@ const AdminPublications = () => {
                   <TableCell>{pub.author}</TableCell>
                   <TableCell>
                     <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        pub.status === "Published"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${pub.status === "Published"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                        }`}
                     >
                       {pub.status}
                     </span>
@@ -420,10 +419,10 @@ const AdminPublications = () => {
                   <TableCell>{pub.date}</TableCell>
                   <TableCell>
                     {pub.imageUrl ? (
-                      <img 
-                        src={pub.imageUrl} 
-                        alt={pub.title} 
-                        className="w-16 h-16 object-cover rounded" 
+                      <img
+                        src={pub.imageUrl}
+                        alt={pub.title}
+                        className="w-16 h-16 object-cover rounded"
                         onError={(e) => {
                           console.error(`Failed to load image: ${pub.imageUrl}`);
                           e.currentTarget.src = "https://via.placeholder.com/64";
@@ -489,9 +488,9 @@ const AdminPublications = () => {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="category">Category</Label>
-              <Select 
-                value={newPublication.category} 
-                onValueChange={(value) => 
+              <Select
+                value={newPublication.category}
+                onValueChange={(value) =>
                   setNewPublication({
                     ...newPublication,
                     category: value,
@@ -512,9 +511,9 @@ const AdminPublications = () => {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="status">Status</Label>
-              <Select 
-                value={newPublication.status} 
-                onValueChange={(value) => 
+              <Select
+                value={newPublication.status}
+                onValueChange={(value) =>
                   setNewPublication({
                     ...newPublication,
                     status: value,
@@ -545,12 +544,12 @@ const AdminPublications = () => {
               />
             </div>
             <div className="grid gap-2">
-              <Label>Publication Date</Label>
-              <DatePicker 
-                date={publishDate} 
-                onDateChange={setPublishDate} 
-                label="Publication Date" 
-                placeholder="Select publication date" 
+              {/* <Label>Publication Date</Label> */}
+              <DatePicker
+                date={publishDate}
+                onDateChange={setPublishDate}
+                label="Publication Date"
+                placeholder="Select publication date"
               />
             </div>
             <div className="grid gap-2">
@@ -592,7 +591,7 @@ const AdminPublications = () => {
               </div>
             </div>
           </div>
-          <DialogFooter className="sticky bottom-0 pt-2 bg-background">
+          <DialogFooter className="sticky bottom-0 pt-2 bg-transparent">
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               Cancel
             </Button>
@@ -628,9 +627,9 @@ const AdminPublications = () => {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-category">Category</Label>
-                <Select 
-                  value={editPublication.category} 
-                  onValueChange={(value) => 
+                <Select
+                  value={editPublication.category}
+                  onValueChange={(value) =>
                     setEditPublication({
                       ...editPublication,
                       category: value,
@@ -651,9 +650,9 @@ const AdminPublications = () => {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-status">Status</Label>
-                <Select 
-                  value={editPublication.status} 
-                  onValueChange={(value) => 
+                <Select
+                  value={editPublication.status}
+                  onValueChange={(value) =>
                     setEditPublication({
                       ...editPublication,
                       status: value,
@@ -684,7 +683,7 @@ const AdminPublications = () => {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="edit-date">Publication Date</Label>
+                {/* <Label htmlFor="edit-date">Publication Date</Label> */}
                 <Input
                   id="edit-date"
                   type="date"
