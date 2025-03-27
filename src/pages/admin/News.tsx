@@ -43,36 +43,35 @@ import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { addDoc, collection, deleteDoc, doc, getDocs } from "firebase/firestore";
-import { db } from "@/firebase/Firebase"; // Keep Firestore
+import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/Firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/supabase/supabase";
 
-
-
-
 // Static news items
 const newsItemsStatic = [
-  { id: "1", title: "LSPS Announces New Editorial Board", type: "News", author: "Admin", date: "2023-05-15" },
-  { id: "2", title: "Annual Law Students Conference", type: "Event", author: "Admin", date: "2023-06-10" },
-  { id: "3", title: "New Journal Publication Released", type: "News", author: "Admin", date: "2023-05-05" },
-  { id: "4", title: "Moot Court Competition", type: "Event", author: "Admin", date: "2023-07-12" },
-  { id: "5", title: "Partnership with Law Firm Announced", type: "News", author: "Admin", date: "2023-04-28" },
+  { id: "1", title: "LSPS Announces New Editorial Board", type: "News", author: "Admin", date: "2023-05-15", imageUrl: "" },
+  { id: "2", title: "Annual Law Students Conference", type: "Event", author: "Admin", date: "2023-06-10", imageUrl: "" },
+  { id: "3", title: "New Journal Publication Released", type: "News", author: "Admin", date: "2023-05-05", imageUrl: "" },
+  { id: "4", title: "Moot Court Competition", type: "Event", author: "Admin", date: "2023-07-12", imageUrl: "" },
+  { id: "5", title: "Partnership with Law Firm Announced", type: "News", author: "Admin", date: "2023-04-28", imageUrl: "" },
 ];
 
 const AdminNews = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [editItem, setEditItem] = useState<any>(null);
   const [newsItems, setNewsItems] = useState(newsItemsStatic);
   const [newItem, setNewItem] = useState({
     title: "",
     type: "News",
     content: "",
     date: "",
-    imageSrc: "",
+    imageUrl: "",
   });
   const { currentUser } = useAuth();
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -80,7 +79,6 @@ const AdminNews = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch Firestore items on mount and merge with static data
   useEffect(() => {
     const fetchNews = async () => {
       try {
@@ -108,7 +106,7 @@ const AdminNews = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
         toast.error("Image file size exceeds 10MB limit.");
         return;
       }
@@ -131,16 +129,15 @@ const AdminNews = () => {
     try {
       setIsUploading(true);
       const fileName = `${Date.now()}_${imageFile.name}`;
-      console.log("Uploading:", fileName, imageFile);
+      console.log("Uploading to Supabase:", { fileName, fileSize: imageFile.size, fileType: imageFile.type });
       const { data, error } = await supabase.storage
-        .from("news-images") // Your bucket name
+        .from("news-images")
         .upload(fileName, imageFile);
       if (error) throw error;
-
-      // Get public URL
       const { data: urlData } = supabase.storage
         .from("news-images")
         .getPublicUrl(fileName);
+      console.log("Public URL:", urlData.publicUrl);
       return urlData.publicUrl;
     } catch (error) {
       console.error("Error uploading image to Supabase:", error);
@@ -156,8 +153,8 @@ const AdminNews = () => {
       toast.error("You must be logged in to add items.");
       return;
     }
-    if (!newItem.title || !newItem.date) {
-      toast.error("Title and Date are required fields.");
+    if (!newItem.title || !newItem.date || !newItem.content) {
+      toast.error("Title, Date, and Content are required fields.");
       return;
     }
 
@@ -168,14 +165,22 @@ const AdminNews = () => {
         ...newItem,
         author: currentUser.email || "Admin",
         createdAt: new Date().toISOString(),
-        imageUrl: imageUrl || null,
+        imageUrl: imageUrl || "",
       };
       const docRef = await addDoc(collection(db, "news"), itemToAdd);
       const newItemWithId = { id: docRef.id, ...itemToAdd };
-      setNewsItems([...newsItems, newItemWithId]);
+      console.log("New item added:", newItemWithId);
+
+      const querySnapshot = await getDocs(collection(db, "news"));
+      const firestoreItems = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setNewsItems([...newsItemsStatic, ...firestoreItems]);
+
       toast.success(`${newItem.type} added successfully!`);
       setIsAddDialogOpen(false);
-      setNewItem({ title: "", type: "News", content: "", date: "" });
+      setNewItem({ title: "", type: "News", content: "", date: "", imageUrl: "" });
       removeImage();
     } catch (error) {
       toast.error(`Failed to add item: ${error.message}`);
@@ -187,7 +192,11 @@ const AdminNews = () => {
   const handleDeleteItem = async () => {
     if (!selectedItem) return;
     try {
-      await deleteDoc(doc(db, "news", selectedItem));
+      const isStaticItem = newsItemsStatic.some((item) => item.id === selectedItem);
+      if (!isStaticItem) {
+        // Only delete from Firestore if it's not a static item
+        await deleteDoc(doc(db, "news", selectedItem));
+      }
       setNewsItems(newsItems.filter((item) => item.id !== selectedItem));
       toast.success("Item deleted successfully!");
     } catch (error) {
@@ -196,6 +205,59 @@ const AdminNews = () => {
       setIsDeleteDialogOpen(false);
       setSelectedItem(null);
     }
+  };
+
+  const handleEditItem = async () => {
+    if (!currentUser) {
+      toast.error("You must be logged in to edit items.");
+      return;
+    }
+    if (!editItem.title || !editItem.date || !editItem.content) {
+      toast.error("Title, Date, and Content are required fields.");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const isStaticItem = newsItemsStatic.some((item) => item.id === editItem.id);
+      let updatedImageUrl = editItem.imageUrl;
+      if (imageFile) {
+        updatedImageUrl = await uploadImage();
+      }
+
+      const updatedItem = {
+        ...editItem,
+        imageUrl: updatedImageUrl || "",
+        updatedAt: new Date().toISOString(),
+      };
+
+      if (!isStaticItem) {
+        // Update Firestore if it's not a static item
+        await updateDoc(doc(db, "news", editItem.id), updatedItem);
+      }
+
+      const querySnapshot = await getDocs(collection(db, "news"));
+      const firestoreItems = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setNewsItems([...newsItemsStatic, ...firestoreItems]);
+
+      toast.success(`${editItem.type} updated successfully!`);
+      setIsEditDialogOpen(false);
+      setEditItem(null);
+      removeImage();
+    } catch (error) {
+      toast.error(`Failed to update item: ${error.message}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const openEditDialog = (item: any) => {
+    setEditItem(item);
+    setImagePreview(item.imageUrl || null);
+    setIsEditDialogOpen(true);
   };
 
   return (
@@ -269,8 +331,9 @@ const AdminNews = () => {
                       <TableCell className="font-medium">{item.title}</TableCell>
                       <TableCell>
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${item.type === "News" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
-                            }`}
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            item.type === "News" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
+                          }`}
                         >
                           {item.type}
                         </span>
@@ -279,14 +342,27 @@ const AdminNews = () => {
                       <TableCell>{item.date}</TableCell>
                       <TableCell>
                         {item.imageUrl ? (
-                          <img src={item.imageUrl} alt={item.title} className="w-16 h-16 object-cover rounded" />
+                          <img
+                            src={item.imageUrl}
+                            alt={item.title}
+                            className="w-16 h-16 object-cover rounded"
+                            onError={(e) => {
+                              console.error(`Failed to load image: ${item.imageUrl}`);
+                              e.currentTarget.src = "https://via.placeholder.com/64";                              
+                            }}
+                          />
                         ) : (
                           "No Image"
                         )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-blue-500"
+                            onClick={() => openEditDialog(item)}
+                          >
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                           </Button>
@@ -312,6 +388,7 @@ const AdminNews = () => {
           </div>
         </TabsContent>
 
+        {/* Repeat similar updates for "news" and "event" TabsContent */}
         <TabsContent value="news" className="mt-4">
           <div className="rounded-md border">
             <Table>
@@ -343,14 +420,27 @@ const AdminNews = () => {
                       <TableCell>{item.date}</TableCell>
                       <TableCell>
                         {item.imageUrl ? (
-                          <img src={item.imageUrl} alt={item.title} className="w-16 h-16 object-cover rounded" />
+                          <img
+                            src={item.imageUrl}
+                            alt={item.title}
+                            className="w-16 h-16 object-cover rounded"
+                            onError={(e) => {
+                              console.error(`Failed to load image: ${item.imageUrl}`);
+                              e.currentTarget.src = "https://via.placeholder.com/64";
+                            }}
+                          />
                         ) : (
                           "No Image"
                         )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-blue-500"
+                            onClick={() => openEditDialog(item)}
+                          >
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                           </Button>
@@ -407,14 +497,27 @@ const AdminNews = () => {
                       <TableCell>{item.date}</TableCell>
                       <TableCell>
                         {item.imageUrl ? (
-                          <img src={item.imageUrl} alt={item.title} className="w-16 h-16 object-cover rounded" />
+                          <img
+                            src={item.imageUrl}
+                            alt={item.title}
+                            className="w-16 h-16 object-cover rounded"
+                            onError={(e) => {
+                              console.error(`Failed to load image: ${item.imageUrl}`);
+                              e.currentTarget.src = "https://via.placeholder.com/64";
+                            }}
+                          />
                         ) : (
                           "No Image"
                         )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-blue-500"
+                            onClick={() => openEditDialog(item)}
+                          >
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                           </Button>
@@ -441,6 +544,7 @@ const AdminNews = () => {
         </TabsContent>
       </Tabs>
 
+      {/* Add Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
@@ -539,6 +643,108 @@ const AdminNews = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>Edit Item</DialogTitle>
+            <DialogDescription>Update an existing news article or event.</DialogDescription>
+          </DialogHeader>
+          {editItem && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-type" className="text-right">Type</Label>
+                <div className="col-span-3">
+                  <select
+                    id="edit-type"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={editItem.type}
+                    onChange={(e) => setEditItem({ ...editItem, type: e.target.value })}
+                  >
+                    <option value="News">News</option>
+                    <option value="Event">Event</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-title" className="text-right">Title</Label>
+                <Input
+                  id="edit-title"
+                  className="col-span-3"
+                  value={editItem.title}
+                  onChange={(e) => setEditItem({ ...editItem, title: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-date" className="text-right">Date</Label>
+                <Input
+                  id="edit-date"
+                  type="date"
+                  className="col-span-3"
+                  value={editItem.date}
+                  onChange={(e) => setEditItem({ ...editItem, date: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="edit-content" className="text-right">Content</Label>
+                <Textarea
+                  id="edit-content"
+                  className="col-span-3"
+                  rows={5}
+                  value={editItem.content}
+                  onChange={(e) => setEditItem({ ...editItem, content: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="edit-image" className="text-right">Image</Label>
+                <div className="col-span-3">
+                  {imagePreview ? (
+                    <div className="relative mb-4">
+                      <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-md" />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                        onClick={removeImage}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div
+                      className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <ImagePlus className="mx-auto h-12 w-12 text-gray-400" />
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-500">Click to upload image</p>
+                        <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF up to 10MB</p>
+                      </div>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    id="edit-image"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleEditItem} disabled={isUploading}>
+              {isUploading ? "Uploading..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
