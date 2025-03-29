@@ -13,10 +13,10 @@ import {
   PaginationItem,
   PaginationLink,
   PaginationNext,
-  PaginationPrevious,
+  PaginationPrevious
 } from "@/components/ui/pagination";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../firebase/Firebase";
+import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { db } from '../firebase/Firebase';
 import { supabase } from "@/supabase/supabase";
 import { myImages } from "@/images";
 import { toast } from "sonner";
@@ -30,7 +30,7 @@ interface Article {
   author: string;
   category: string;
   imageSrc: string;
-  createdAt?: string | Date;
+  createdAt?: Date;
 }
 
 interface SupabaseArticle {
@@ -43,7 +43,6 @@ interface SupabaseArticle {
   category?: string;
   image_url?: string;
   created_at?: string;
-  status?: string;
 }
 
 const allArticles = [
@@ -51,7 +50,7 @@ const allArticles = [
     id: "1",
     title: "The Evolution of Constitutional Law in Nigeria: A Critical Analysis",
     excerpt: "This article examines the historical development and contemporary challenges of constitutional law in Nigeria.",
-    date: "2023-05-15", // Converted to ISO format for consistency
+    date: "2023-05-15",
     author: "John Adeyemi",
     category: "Constitutional Law",
     imageSrc: "https://images.unsplash.com/photo-1589391886645-d51941baf7fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
@@ -127,20 +126,25 @@ const Publications = () => {
     const fetchFirebaseData = async () => {
       try {
         setIsLoading(true);
-        const articlesQuery = query(collection(db, "publications"), where("status", "==", "Published"));
+        const articlesQuery = query(
+          collection(db, 'publications'),
+          where('status', '==', 'Published')
+        );
+
         const querySnapshot = await getDocs(articlesQuery);
 
-        const firestoreItems = querySnapshot.docs.map((doc) => {
+        const firestoreItems = querySnapshot.docs.map(doc => {
           const data = doc.data();
           return {
             id: doc.id,
             title: data.title || "Untitled",
             excerpt: data.content?.substring(0, 150) + "..." || "No content available",
-            date: data.date || new Date().toISOString().split("T")[0],
+            date: data.date || new Date().toISOString().split('T')[0],
             author: data.author || "Unknown",
             category: data.category || "Uncategorized",
             imageSrc: data.imageUrl || "https://via.placeholder.com/640x360",
             content: data.content,
+            createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date()
           } as Article;
         });
 
@@ -157,22 +161,23 @@ const Publications = () => {
     const fetchSupabaseData = async () => {
       try {
         const { data, error } = await supabase
-          .from("articles")
-          .select("*")
-          .eq("status", "Published");
+          .from('articles')
+          .select('*')
+          .eq('status', 'Published');
 
         if (error) throw error;
 
         if (data) {
-          const mappedData = data.map((item) => ({
+          const mappedData = data.map((item: SupabaseArticle) => ({
             id: item.id,
             title: item.title || "Untitled",
             excerpt: item.excerpt || item.content?.substring(0, 150) + "..." || "No content available",
-            date: item.published_date || new Date().toISOString().split("T")[0],
+            date: item.published_date || new Date().toISOString().split('T')[0],
             author: item.author || "Unknown",
             category: item.category || "Uncategorized",
             imageSrc: item.image_url || "https://via.placeholder.com/640x360",
             content: item.content,
+            createdAt: item.created_at ? new Date(item.created_at) : new Date()
           })) as Article[];
 
           setSupabaseArticles(mappedData);
@@ -187,17 +192,21 @@ const Publications = () => {
     fetchSupabaseData();
   }, []);
 
-  // Combine and sort articles by date (newest first)
-  const combinedArticles = [...allArticles, ...firebaseArticles, ...supabaseArticles].sort((a, b) => {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    return dateB.getTime() - dateA.getTime(); // Descending order
+  const mockArticlesWithDates = allArticles.map((article, index) => ({
+    ...article,
+    createdAt: new Date(Date.now() - (index + 10) * 24 * 60 * 60 * 1000)
+  }));
+
+  const combinedArticles = [...mockArticlesWithDates, ...firebaseArticles, ...supabaseArticles];
+
+  const sortedArticles = [...combinedArticles].sort((a, b) => {
+    const dateA = a.createdAt || new Date(0);
+    const dateB = b.createdAt || new Date(0);
+    return dateB.getTime() - dateA.getTime();
   });
 
-  // Filter articles based on search query and selected category
-  const filteredArticles = combinedArticles.filter((article) => {
-    const matchesSearch =
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredArticles = sortedArticles.filter(article => {
+    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.author.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -206,7 +215,6 @@ const Publications = () => {
     return matchesSearch && matchesCategory;
   });
 
-  // Calculate pagination values
   const totalItems = filteredArticles.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -214,7 +222,7 @@ const Publications = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
