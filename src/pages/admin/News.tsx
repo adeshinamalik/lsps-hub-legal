@@ -64,8 +64,8 @@ const AdminNews = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [editItem, setEditItem] = useState<any>(null);
-  const [newsItems, setNewsItems] = useState(newsItemsStatic);
+  const [editItem, setEditItem] = useState<NewsItem | null>(null);
+  const [newsItems, setNewsItems] = useState<NewsItem[]>(newsItemsStatic);
   const [newItem, setNewItem] = useState({
     title: "",
     type: "News",
@@ -582,7 +582,6 @@ const AdminNews = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Add Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[550px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -704,7 +703,6 @@ const AdminNews = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[550px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -828,7 +826,6 @@ const AdminNews = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
