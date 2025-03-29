@@ -21,7 +21,6 @@ import { supabase } from "@/supabase/supabase";
 import { myImages } from "@/images";
 import { toast } from "sonner";
 
-// Interface for article data
 interface Article {
   id: string;
   title: string;
@@ -31,9 +30,22 @@ interface Article {
   author: string;
   category: string;
   imageSrc: string;
+  createdAt?: string | Date;
 }
 
-// Mock data for articles
+interface SupabaseArticle {
+  id: string;
+  title: string;
+  excerpt?: string;
+  content?: string;
+  published_date?: string;
+  author?: string;
+  category?: string;
+  image_url?: string;
+  created_at?: string;
+  status?: string;
+}
+
 const allArticles = [
   {
     id: "1",
@@ -91,7 +103,6 @@ const allArticles = [
   },
 ];
 
-// Categories for filtering
 const categories = [
   "All Categories",
   "Constitutional Law",
@@ -385,7 +396,6 @@ const Publications = () => {
                       </PaginationItem>
                     );
                   }
-
                   if (page === 2 && currentPage > 3) {
                     return <PaginationItem key="ellipsis-start">...</PaginationItem>;
                   }
