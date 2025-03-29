@@ -51,9 +51,9 @@ import { supabase } from "@/supabase/supabase";
 // Static news items
 const newsItemsStatic = [
   { id: "1", title: "LSPS Announces New Editorial Board", type: "News", author: "Admin", date: "2023-05-15", imageUrl: "" },
-  { id: "2", title: "Annual Law Students Conference", type: "Event", author: "Admin", date: "2023-06-10", imageUrl: "" },
+  { id: "2", title: "Annual Law Students Conference", type: "Event", author: "Admin", date: "2023-06-10", imageUrl: "", location: "Faculty of Law Auditorium", eventDate: "June 10, 2023 | 10:00 AM - 4:00 PM" },
   { id: "3", title: "New Journal Publication Released", type: "News", author: "Admin", date: "2023-05-05", imageUrl: "" },
-  { id: "4", title: "Moot Court Competition", type: "Event", author: "Admin", date: "2023-07-12", imageUrl: "" },
+  { id: "4", title: "Moot Court Competition", type: "Event", author: "Admin", date: "2023-07-12", imageUrl: "", location: "University Moot Court Room", eventDate: "July 12-14, 2023 | 9:00 AM - 5:00 PM daily" },
   { id: "5", title: "Partnership with Law Firm Announced", type: "News", author: "Admin", date: "2023-04-28", imageUrl: "" },
 ];
 
@@ -72,7 +72,8 @@ const AdminNews = () => {
     content: "",
     date: "",
     imageUrl: "",
-    imageUrl: "",
+    location: "", // For events
+    eventDate: "", // For events, e.g., "October 7, 2023 | 2:00 PM - 4:00 PM"
   });
   const { currentUser } = useAuth();
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -81,19 +82,27 @@ const AdminNews = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const fetchNews = async () => {
+    const fetchItems = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "news"));
-        const firestoreItems = querySnapshot.docs.map((doc) => ({
+        const newsSnapshot = await getDocs(collection(db, "news"));
+        const newsItemsFirestore = newsSnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
-        })) as NewsItem[];
-        setNewsItems([...newsItemsStatic, ...firestoreItems]);
+          ...doc.data(),
+        }));
+
+        const eventsSnapshot = await getDocs(collection(db, "events"));
+        const eventsItemsFirestore = eventsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setNewsItems([...newsItemsStatic, ...newsItemsFirestore, ...eventsItemsFirestore]);
       } catch (error: any) {
-        toast.error("Failed to fetch news items: " + error.message);
+        toast.error("Failed to fetch items: " + error.message);
+        setNewsItems(newsItemsStatic);
       }
     };
-    fetchNews();
+    fetchItems();
   }, []);
 
   const filteredItems = newsItems.filter(
@@ -130,7 +139,6 @@ const AdminNews = () => {
     try {
       setIsUploading(true);
       const fileName = `${Date.now()}_${imageFile.name}`;
-      console.log("Uploading to Supabase:", { fileName, fileSize: imageFile.size, fileType: imageFile.type });
       const { data, error } = await supabase.storage
         .from("news-images")
         .upload(fileName, imageFile);
@@ -138,7 +146,6 @@ const AdminNews = () => {
       const { data: urlData } = supabase.storage
         .from("news-images")
         .getPublicUrl(fileName);
-      console.log("Public URL:", urlData.publicUrl);
       return urlData.publicUrl;
     } catch (error: any) {
       console.error("Error uploading image to Supabase:", error);
@@ -158,32 +165,47 @@ const AdminNews = () => {
       toast.error("Title, Date, and Content are required fields.");
       return;
     }
+    if (newItem.type === "Event" && (!newItem.location || !newItem.eventDate)) {
+      toast.error("Location and Event Date are required for events.");
+      return;
+    }
 
     try {
       setIsUploading(true);
       const imageUrl = await uploadImage();
       const itemToAdd = {
-        ...newItem,
+        title: newItem.title,
+        type: newItem.type,
+        description: newItem.content, // Map content to description
+        date: newItem.date,
+        imageSrc: imageUrl || "", // Map imageUrl to imageSrc
         author: currentUser.email || "Admin",
         createdAt: new Date().toISOString(),
-        imageUrl: imageUrl || "",
-        imageUrl: imageUrl || "",
+        ...(newItem.type === "Event" && {
+          location: newItem.location,
+          eventDate: newItem.eventDate,
+        }),
       };
-      const docRef = await addDoc(collection(db, "news"), itemToAdd);
-      const newItemWithId = { id: docRef.id, ...itemToAdd };
-      console.log("New item added:", newItemWithId);
 
-      const querySnapshot = await getDocs(collection(db, "news"));
-      const firestoreItems = querySnapshot.docs.map((doc) => ({
+      const collectionName = newItem.type === "Event" ? "events" : "news";
+      const docRef = await addDoc(collection(db, collectionName), itemToAdd);
+      const newItemWithId = { id: docRef.id, ...itemToAdd };
+
+      const newsSnapshot = await getDocs(collection(db, "news"));
+      const newsItemsFirestore = newsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setNewsItems([...newsItemsStatic, ...firestoreItems]);
+      const eventsSnapshot = await getDocs(collection(db, "events"));
+      const eventsItemsFirestore = eventsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setNewsItems([...newsItemsStatic, ...newsItemsFirestore, ...eventsItemsFirestore]);
 
       toast.success(`${newItem.type} added successfully!`);
       setIsAddDialogOpen(false);
-      setNewItem({ title: "", type: "News", content: "", date: "", imageUrl: "" });
-      setNewItem({ title: "", type: "News", content: "", date: "", imageUrl: "" });
+      setNewItem({ title: "", type: "News", content: "", date: "", imageUrl: "", location: "", eventDate: "" });
       removeImage();
     } catch (error: any) {
       toast.error(`Failed to add item: ${error.message}`);
@@ -197,8 +219,9 @@ const AdminNews = () => {
     try {
       const isStaticItem = newsItemsStatic.some((item) => item.id === selectedItem);
       if (!isStaticItem) {
-        // Only delete from Firestore if it's not a static item
-        await deleteDoc(doc(db, "news", selectedItem));
+        const itemToDelete = newsItems.find((item) => item.id === selectedItem);
+        const collectionName = itemToDelete?.type === "Event" ? "events" : "news";
+        await deleteDoc(doc(db, collectionName, selectedItem));
       }
       setNewsItems(newsItems.filter((item) => item.id !== selectedItem));
       toast.success("Item deleted successfully!");
@@ -215,42 +238,51 @@ const AdminNews = () => {
       toast.error("You must be logged in to edit items.");
       return;
     }
-    if (!editItem.title || !editItem.date || !editItem.content) {
-      toast.error("Title, Date, and Content are required fields.");
+    if (!editItem.title || !editItem.date || !editItem.description) {
+      toast.error("Title, Date, and Description are required fields.");
+      return;
+    }
+    if (editItem.type === "Event" && (!editItem.location || !editItem.eventDate)) {
+      toast.error("Location and Event Date are required for events.");
       return;
     }
 
     try {
       setIsUploading(true);
       const isStaticItem = newsItemsStatic.some((item) => item.id === editItem.id);
-      let updatedImageUrl = editItem.imageUrl;
+      let updatedImageUrl = editItem.imageSrc; // Use imageSrc
       if (imageFile) {
         updatedImageUrl = await uploadImage();
       }
 
       const updatedItem = {
         ...editItem,
-        imageUrl: updatedImageUrl || "",
+        imageSrc: updatedImageUrl || "",
         updatedAt: new Date().toISOString(),
       };
 
       if (!isStaticItem) {
-        // Update Firestore if it's not a static item
-        await updateDoc(doc(db, "news", editItem.id), updatedItem);
+        const collectionName = editItem.type === "Event" ? "events" : "news";
+        await updateDoc(doc(db, collectionName, editItem.id), updatedItem);
       }
 
-      const querySnapshot = await getDocs(collection(db, "news"));
-      const firestoreItems = querySnapshot.docs.map((doc) => ({
+      const newsSnapshot = await getDocs(collection(db, "news"));
+      const newsItemsFirestore = newsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setNewsItems([...newsItemsStatic, ...firestoreItems]);
+      const eventsSnapshot = await getDocs(collection(db, "events"));
+      const eventsItemsFirestore = eventsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setNewsItems([...newsItemsStatic, ...newsItemsFirestore, ...eventsItemsFirestore]);
 
       toast.success(`${editItem.type} updated successfully!`);
       setIsEditDialogOpen(false);
       setEditItem(null);
       removeImage();
-    } catch (error) {
+    } catch (error: any) {
       toast.error(`Failed to update item: ${error.message}`);
     } finally {
       setIsUploading(false);
@@ -258,8 +290,8 @@ const AdminNews = () => {
   };
 
   const openEditDialog = (item: any) => {
-    setEditItem(item);
-    setImagePreview(item.imageUrl || null);
+    setEditItem({ ...item, content: item.description }); // Map description back to content for editing
+    setImagePreview(item.imageSrc || null); // Use imageSrc
     setIsEditDialogOpen(true);
   };
 
@@ -334,8 +366,9 @@ const AdminNews = () => {
                       <TableCell className="font-medium">{item.title}</TableCell>
                       <TableCell>
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${item.type === "News" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
-                            }`}
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            item.type === "News" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
+                          }`}
                         >
                           {item.type}
                         </span>
@@ -343,13 +376,13 @@ const AdminNews = () => {
                       <TableCell>{item.author}</TableCell>
                       <TableCell>{item.date}</TableCell>
                       <TableCell>
-                        {item.imageUrl ? (
+                        {item.imageSrc ? (
                           <img
-                            src={item.imageUrl}
+                            src={item.imageSrc}
                             alt={item.title}
                             className="w-16 h-16 object-cover rounded"
                             onError={(e) => {
-                              console.error(`Failed to load image: ${item.imageUrl}`);
+                              console.error(`Failed to load image: ${item.imageSrc}`);
                               e.currentTarget.src = "https://via.placeholder.com/64";
                             }}
                           />
@@ -390,7 +423,6 @@ const AdminNews = () => {
           </div>
         </TabsContent>
 
-        {/* Repeat similar updates for "news" and "event" TabsContent */}
         <TabsContent value="news" className="mt-4">
           <div className="rounded-md border">
             <Table>
@@ -421,13 +453,13 @@ const AdminNews = () => {
                       <TableCell>{item.author}</TableCell>
                       <TableCell>{item.date}</TableCell>
                       <TableCell>
-                        {item.imageUrl ? (
+                        {item.imageSrc ? (
                           <img
-                            src={item.imageUrl}
+                            src={item.imageSrc}
                             alt={item.title}
                             className="w-16 h-16 object-cover rounded"
                             onError={(e) => {
-                              console.error(`Failed to load image: ${item.imageUrl}`);
+                              console.error(`Failed to load image: ${item.imageSrc}`);
                               e.currentTarget.src = "https://via.placeholder.com/64";
                             }}
                           />
@@ -476,6 +508,8 @@ const AdminNews = () => {
                   <TableHead>Title</TableHead>
                   <TableHead>Author</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Event Date</TableHead>
                   <TableHead>Image</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -483,7 +517,7 @@ const AdminNews = () => {
               <TableBody>
                 {filteredItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    <TableCell colSpan={7} className="text-center py-8">
                       <div className="flex flex-col items-center justify-center text-gray-500">
                         <Calendar className="h-12 w-12 mb-2 opacity-20" />
                         <p className="text-lg font-medium">No events found</p>
@@ -497,14 +531,16 @@ const AdminNews = () => {
                       <TableCell className="font-medium">{item.title}</TableCell>
                       <TableCell>{item.author}</TableCell>
                       <TableCell>{item.date}</TableCell>
+                      <TableCell>{item.location || "N/A"}</TableCell>
+                      <TableCell>{item.eventDate || "N/A"}</TableCell>
                       <TableCell>
-                        {item.imageUrl ? (
+                        {item.imageSrc ? (
                           <img
-                            src={item.imageUrl}
+                            src={item.imageSrc}
                             alt={item.title}
                             className="w-16 h-16 object-cover rounded"
                             onError={(e) => {
-                              console.error(`Failed to load image: ${item.imageUrl}`);
+                              console.error(`Failed to load image: ${item.imageSrc}`);
                               e.currentTarget.src = "https://via.placeholder.com/64";
                             }}
                           />
@@ -548,7 +584,7 @@ const AdminNews = () => {
 
       {/* Add Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[550px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Item</DialogTitle>
             <DialogDescription>Create a new news article or event for the LSPS website.</DialogDescription>
@@ -587,8 +623,31 @@ const AdminNews = () => {
                 onChange={(e) => setNewItem({ ...newItem, date: e.target.value })}
               />
             </div>
+            {newItem.type === "Event" && (
+              <>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="location" className="text-right">Location</Label>
+                  <Input
+                    id="location"
+                    className="col-span-3"
+                    value={newItem.location}
+                    onChange={(e) => setNewItem({ ...newItem, location: e.target.value })}
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="eventDate" className="text-right">Event Date</Label>
+                  <Input
+                    id="eventDate"
+                    className="col-span-3"
+                    value={newItem.eventDate}
+                    onChange={(e) => setNewItem({ ...newItem, eventDate: e.target.value })}
+                    placeholder="e.g., October 7, 2023 | 2:00 PM - 4:00 PM"
+                  />
+                </div>
+              </>
+            )}
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="content" className="text-right">Content</Label>
+              <Label htmlFor="content" className="text-right">Description</Label>
               <Textarea
                 id="content"
                 className="col-span-3"
@@ -647,7 +706,7 @@ const AdminNews = () => {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[550px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Item</DialogTitle>
             <DialogDescription>Update an existing news article or event.</DialogDescription>
@@ -687,14 +746,37 @@ const AdminNews = () => {
                   onChange={(e) => setEditItem({ ...editItem, date: e.target.value })}
                 />
               </div>
+              {editItem.type === "Event" && (
+                <>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit-location" className="text-right">Location</Label>
+                    <Input
+                      id="edit-location"
+                      className="col-span-3"
+                      value={editItem.location || ""}
+                      onChange={(e) => setEditItem({ ...editItem, location: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit-eventDate" className="text-right">Event Date</Label>
+                    <Input
+                      id="edit-eventDate"
+                      className="col-span-3"
+                      value={editItem.eventDate || ""}
+                      onChange={(e) => setEditItem({ ...editItem, eventDate: e.target.value })}
+                      placeholder="e.g., October 7, 2023 | 2:00 PM - 4:00 PM"
+                    />
+                  </div>
+                </>
+              )}
               <div className="grid grid-cols-4 items-start gap-4">
-                <Label htmlFor="edit-content" className="text-right">Content</Label>
+                <Label htmlFor="edit-content" className="text-right">Description</Label>
                 <Textarea
                   id="edit-content"
                   className="col-span-3"
                   rows={5}
-                  value={editItem.content}
-                  onChange={(e) => setEditItem({ ...editItem, content: e.target.value })}
+                  value={editItem.description}
+                  onChange={(e) => setEditItem({ ...editItem, description: e.target.value })}
                 />
               </div>
               <div className="grid grid-cols-4 items-start gap-4">

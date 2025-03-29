@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -14,10 +13,10 @@ import {
   PaginationItem,
   PaginationLink,
   PaginationNext,
-  PaginationPrevious
+  PaginationPrevious,
 } from "@/components/ui/pagination";
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../firebase/Firebase';
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../firebase/Firebase";
 import { supabase } from "@/supabase/supabase";
 import { myImages } from "@/images";
 import { toast } from "sonner";
@@ -39,56 +38,56 @@ const allArticles = [
   {
     id: "1",
     title: "The Evolution of Constitutional Law in Nigeria: A Critical Analysis",
-    excerpt: "This article examines the historical development and contemporary challenges of constitutional law in Nigeria, with a focus on judicial interpretations and legislative amendments.",
-    date: "May 15, 2023",
+    excerpt: "This article examines the historical development and contemporary challenges of constitutional law in Nigeria.",
+    date: "2023-05-15", // Converted to ISO format for consistency
     author: "John Adeyemi",
     category: "Constitutional Law",
-    imageSrc: "https://images.unsplash.com/photo-1589391886645-d51941baf7fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+    imageSrc: "https://images.unsplash.com/photo-1589391886645-d51941baf7fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
   },
   {
     id: "2",
     title: "Human Rights Protection Under the African Charter: Progress and Challenges",
-    excerpt: "A comprehensive review of the effectiveness of the African Charter on Human and Peoples' Rights in protecting fundamental human rights across the continent.",
-    date: "April 22, 2023",
+    excerpt: "A comprehensive review of the effectiveness of the African Charter on Human and Peoples' Rights.",
+    date: "2023-04-22",
     author: "Sarah Okonkwo",
     category: "Human Rights",
-    imageSrc: "https://images.unsplash.com/photo-1591291621164-2c6367723315?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80"
+    imageSrc: "https://images.unsplash.com/photo-1591291621164-2c6367723315?ixlib=rb-4.0.3&auto=format&fit=crop&w=1471&q=80",
   },
   {
     id: "3",
     title: "Legal Technology and the Future of Legal Practice in Africa",
-    excerpt: "This paper explores how technological innovations are reshaping legal practice in Africa, with implications for legal education, access to justice, and professional ethics.",
-    date: "March 10, 2023",
+    excerpt: "This paper explores how technological innovations are reshaping legal practice in Africa.",
+    date: "2023-03-10",
     author: "Michael Ibrahim",
     category: "Legal Technology",
-    imageSrc: myImages.image4
+    imageSrc: myImages.image4,
   },
   {
     id: "4",
     title: "The Role of International Law in Addressing Climate Change",
-    excerpt: "This article examines the international legal framework for climate change mitigation and adaptation, including key treaties, enforcement mechanisms, and emerging legal doctrines.",
-    date: "February 28, 2023",
+    excerpt: "This article examines the international legal framework for climate change mitigation and adaptation.",
+    date: "2023-02-28",
     author: "Fatima Ahmed",
     category: "International Law",
-    imageSrc: "https://images.unsplash.com/photo-1534269222346-5a896154c41d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+    imageSrc: "https://images.unsplash.com/photo-1534269222346-5a896154c41d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
   },
   {
     id: "5",
     title: "Criminal Justice Reform in Nigeria: Challenges and Prospects",
-    excerpt: "A critical assessment of recent criminal justice reforms in Nigeria, focusing on the Administration of Criminal Justice Act and its implementation across different states.",
-    date: "January 17, 2023",
+    excerpt: "A critical assessment of recent criminal justice reforms in Nigeria.",
+    date: "2023-01-17",
     author: "Emmanuel Okocha",
     category: "Criminal Law",
-    imageSrc: "https://images.unsplash.com/photo-1589578228447-e1a4e481c6c8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+    imageSrc: "https://images.unsplash.com/photo-1589578228447-e1a4e481c6c8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
   },
   {
     id: "6",
     title: "Intellectual Property Rights in the Digital Age: Implications for Nigerian Creators",
-    excerpt: "This article discusses the challenges of protecting intellectual property rights in the digital era, with a focus on copyright, patents, and trademarks in Nigeria.",
-    date: "December 5, 2022",
+    excerpt: "This article discusses the challenges of protecting intellectual property rights in the digital era.",
+    date: "2022-12-05",
     author: "Victoria Nwankwo",
     category: "Intellectual Property",
-    imageSrc: myImages.image5
+    imageSrc: myImages.image5,
   },
 ];
 
@@ -100,7 +99,7 @@ const categories = [
   "Legal Technology",
   "International Law",
   "Criminal Law",
-  "Intellectual Property"
+  "Intellectual Property",
 ];
 
 const Publications = () => {
@@ -117,24 +116,20 @@ const Publications = () => {
     const fetchFirebaseData = async () => {
       try {
         setIsLoading(true);
-        const articlesQuery = query(
-          collection(db, 'publications'),
-          where('status', '==', 'Published')
-        );
-
+        const articlesQuery = query(collection(db, "publications"), where("status", "==", "Published"));
         const querySnapshot = await getDocs(articlesQuery);
 
-        const firestoreItems = querySnapshot.docs.map(doc => {
+        const firestoreItems = querySnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
             id: doc.id,
             title: data.title || "Untitled",
             excerpt: data.content?.substring(0, 150) + "..." || "No content available",
-            date: data.date || new Date().toISOString().split('T')[0],
+            date: data.date || new Date().toISOString().split("T")[0],
             author: data.author || "Unknown",
             category: data.category || "Uncategorized",
             imageSrc: data.imageUrl || "https://via.placeholder.com/640x360",
-            content: data.content
+            content: data.content,
           } as Article;
         });
 
@@ -151,22 +146,22 @@ const Publications = () => {
     const fetchSupabaseData = async () => {
       try {
         const { data, error } = await supabase
-          .from('articles')
-          .select('*')
-          .eq('status', 'Published');
+          .from("articles")
+          .select("*")
+          .eq("status", "Published");
 
         if (error) throw error;
 
         if (data) {
-          const mappedData = data.map(item => ({
+          const mappedData = data.map((item) => ({
             id: item.id,
             title: item.title || "Untitled",
             excerpt: item.excerpt || item.content?.substring(0, 150) + "..." || "No content available",
-            date: item.published_date || new Date().toISOString().split('T')[0],
+            date: item.published_date || new Date().toISOString().split("T")[0],
             author: item.author || "Unknown",
             category: item.category || "Uncategorized",
             imageSrc: item.image_url || "https://via.placeholder.com/640x360",
-            content: item.content
+            content: item.content,
           })) as Article[];
 
           setSupabaseArticles(mappedData);
@@ -174,7 +169,6 @@ const Publications = () => {
         }
       } catch (error: any) {
         console.error("Error fetching Supabase articles:", error);
-        // Don't show toast for Supabase errors to avoid duplicate error messages
       }
     };
 
@@ -182,12 +176,17 @@ const Publications = () => {
     fetchSupabaseData();
   }, []);
 
-  // Combine all articles from different sources
-  const combinedArticles = [...allArticles, ...firebaseArticles, ...supabaseArticles];
+  // Combine and sort articles by date (newest first)
+  const combinedArticles = [...allArticles, ...firebaseArticles, ...supabaseArticles].sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateB.getTime() - dateA.getTime(); // Descending order
+  });
 
   // Filter articles based on search query and selected category
-  const filteredArticles = combinedArticles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredArticles = combinedArticles.filter((article) => {
+    const matchesSearch =
+      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.author.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -204,7 +203,7 @@ const Publications = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -235,13 +234,13 @@ const Publications = () => {
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
-                    setCurrentPage(1); // Reset to first page on search
+                    setCurrentPage(1);
                   }}
                 />
               </div>
 
               <div className="flex flex-wrap gap-3">
-                {categories.map(category => (
+                {categories.map((category) => (
                   <Button
                     key={category}
                     variant="outline"
@@ -251,7 +250,7 @@ const Publications = () => {
                     )}
                     onClick={() => {
                       setSelectedCategory(category);
-                      setCurrentPage(1); // Reset to first page on category change
+                      setCurrentPage(1);
                     }}
                   >
                     {category}
@@ -298,7 +297,7 @@ const Publications = () => {
                   className="overflow-hidden border-none bg-white shadow-subtle transition-all duration-300 hover:shadow-glass h-full flex flex-col animate-fade-up"
                   style={{
                     animationDelay: `${index * 100}ms`,
-                    animationFillMode: 'both',
+                    animationFillMode: "both",
                   }}
                 >
                   <div className="relative h-56 overflow-hidden">
@@ -370,7 +369,6 @@ const Publications = () => {
                 )}
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                  // Show current page, first page, last page, and pages adjacent to current page
                   if (
                     page === 1 ||
                     page === totalPages ||
@@ -388,7 +386,6 @@ const Publications = () => {
                     );
                   }
 
-                  // Show ellipsis for page gaps
                   if (page === 2 && currentPage > 3) {
                     return <PaginationItem key="ellipsis-start">...</PaginationItem>;
                   }
