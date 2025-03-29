@@ -1,11 +1,16 @@
+
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
 import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
+import { fetchArticleById } from "@/firebase/firebaseService";
+import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Mock data - in a real app, this would come from an API or database
+// Mock data - as fallback if Firebase fetch fails
 const allArticles = [
   {
     id: "1",
@@ -118,9 +123,92 @@ const allArticles = [
 const PublicationDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [article, setArticle] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Find the article with the matching ID
-  const article = allArticles.find(article => article.id === id);
+  useEffect(() => {
+    const fetchArticleData = async () => {
+      if (!id) return;
+      
+      setIsLoading(true);
+      try {
+        // Try to fetch from Firebase
+        const firebaseArticle = await fetchArticleById(id);
+        
+        if (firebaseArticle) {
+          setArticle(firebaseArticle);
+        } else {
+          // If not found in Firebase, check static data
+          const staticArticle = allArticles.find(a => a.id === id);
+          
+          if (staticArticle) {
+            setArticle(staticArticle);
+          } else {
+            toast.error("Publication not found");
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching publication:", error);
+        toast.error("Failed to load publication details");
+        
+        // Fallback to static data
+        const staticArticle = allArticles.find(a => a.id === id);
+        if (staticArticle) {
+          setArticle(staticArticle);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchArticleData();
+  }, [id]);
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="pt-28 pb-16 md:pt-32 md:pb-20 px-6 md:px-10 lg:px-20 bg-law-muted">
+          <div className="container mx-auto">
+            <Button 
+              variant="ghost" 
+              className="mb-6 text-law-DEFAULT hover:text-law-accent pl-0"
+              onClick={() => navigate('/publications')}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Publications
+            </Button>
+            
+            <div className="max-w-4xl mx-auto">
+              <Skeleton className="h-8 w-1/3 mb-4" />
+              <Skeleton className="h-12 w-full mb-6" />
+              <div className="flex flex-wrap gap-4">
+                <Skeleton className="h-6 w-36" />
+                <Skeleton className="h-6 w-48" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="py-12 px-6 md:px-10 lg:px-20">
+          <div className="container mx-auto">
+            <div className="max-w-4xl mx-auto">
+              <Skeleton className="w-full h-[400px] rounded-lg mb-10" />
+              <div className="space-y-4 mb-12">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <Footer />
+      </div>
+    );
+  }
   
   // If no article is found, show a message and a button to go back
   if (!article) {
@@ -187,10 +275,13 @@ const PublicationDetail = () => {
           <div className="max-w-4xl mx-auto">
             <div className="mb-10">
               <img 
-                src={article.imageSrc} 
+                src={article.imageSrc || article.imageUrl} 
                 alt={article.title} 
                 className="w-full h-[400px] object-cover rounded-lg shadow-md"
                 loading="lazy"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://via.placeholder.com/800x400?text=Publication+Image+Not+Found";
+                }}
               />
             </div>
             
@@ -203,14 +294,15 @@ const PublicationDetail = () => {
                   References & Citations
                 </h3>
                 <ul className="list-disc list-inside space-y-2 text-law-text-light">
-                  {article.references.map((reference, index) => (
+                  {article.references.map((reference: string, index: number) => (
                     <li key={index}>{reference}</li>
                   ))}
                 </ul>
               </div>
             )}
             
-            <CommentSection itemId={article.id} itemType="publication" />
+            {/* Comment Section */}
+            <CommentSection itemId={id || ""} itemType="publication" />
           </div>
         </div>
       </article>

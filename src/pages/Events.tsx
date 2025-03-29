@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { Calendar, ArrowRight, MapPin } from "lucide-react";
 import { myImages } from "@/images";
 import { db } from "@/firebase/Firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, Timestamp } from "firebase/firestore";
 
 const Events = () => {
   const navigate = useNavigate();
@@ -82,10 +83,21 @@ const Events = () => {
           id: doc.id,
           ...doc.data(),
           imageSrc: doc.data().imageUrl || doc.data().imageSrc, // Normalize to imageSrc for UI consistency
+          createdAt: doc.data().createdAt instanceof Timestamp ? doc.data().createdAt.toDate() : new Date()
         }));
 
-        // Combine Firestore events (newest first) with static events
-        setEvents([...firestoreEvents, ...staticEvents]);
+        // Add dates to static events for proper sorting
+        const staticEventsWithDates = staticEvents.map((event, index) => ({
+          ...event,
+          createdAt: new Date(Date.now() - (index + 10) * 24 * 60 * 60 * 1000) // Older dates for static content
+        }));
+
+        // Combine Firestore events and static events, then sort by createdAt
+        const allEvents = [...firestoreEvents, ...staticEventsWithDates].sort(
+          (a, b) => b.createdAt.getTime() - a.createdAt.getTime() // Sort by date, newest first
+        );
+
+        setEvents(allEvents);
       } catch (error) {
         console.error("Failed to fetch events from Firestore:", error);
         // Fallback to static events if Firestore fetch fails
@@ -164,7 +176,7 @@ const Events = () => {
                   <Button
                     variant="ghost"
                     className="text-law-DEFAULT hover:text-white justify-start pl-2 w-fit group"
-                    onClick={() => navigate(`/news/${event.id}`)}
+                    onClick={() => navigate(`/events/${event.id}`)}
                   >
                     View Details
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
