@@ -24,6 +24,8 @@ import Resources from './pages/Resources';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import NewsDetail from './pages/NewsDetail';
+import EventDetail from './pages/EventDetail';
 
 const App = () => {
   return (
@@ -38,7 +40,8 @@ const App = () => {
             <Route path="/publications/:id" element={<PublicationDetail />} />
             <Route path="/news" element={<NewsPage />} />
             <Route path="/events" element={<Events />} />
-            <Route path="/news/:id" element={<NewsEventDetail />} />
+            <Route path="/news/:id" element={<NewsDetail />} />
+            <Route path="/events/:id" element={<EventDetail />} />
             <Route path="/join-us" element={<JoinUs />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/resources" element={<Resources />} />
