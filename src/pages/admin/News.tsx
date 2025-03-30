@@ -105,14 +105,30 @@ const AdminNews = () => {
         const newsSnapshot = await getDocs(collection(db, "news"));
         const newsItemsFirestore = newsSnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
-        }));
+          title: doc.data().title || "",
+          type: doc.data().type || "News",
+          description: doc.data().description || "",
+          date: doc.data().date || "",
+          author: doc.data().author || "Admin",
+          imageSrc: doc.data().imageSrc || "",
+          createdAt: doc.data().createdAt || "",
+          updatedAt: doc.data().updatedAt || "",
+        } as NewsItem));
 
         const eventsSnapshot = await getDocs(collection(db, "events"));
         const eventsItemsFirestore = eventsSnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
-        }));
+          title: doc.data().title || "",
+          type: doc.data().type || "Event",
+          description: doc.data().description || "",
+          date: doc.data().date || "",
+          author: doc.data().author || "Admin",
+          imageSrc: doc.data().imageSrc || "",
+          location: doc.data().location || "",
+          eventDate: doc.data().eventDate || "",
+          createdAt: doc.data().createdAt || "",
+          updatedAt: doc.data().updatedAt || "",
+        } as NewsItem));
 
         setNewsItems([...newsItemsStatic, ...newsItemsFirestore, ...eventsItemsFirestore]);
       } catch (error: any) {
@@ -207,18 +223,36 @@ const AdminNews = () => {
 
       const collectionName = newItem.type === "Event" ? "events" : "news";
       const docRef = await addDoc(collection(db, collectionName), itemToAdd);
-      const newItemWithId = { id: docRef.id, ...itemToAdd };
+      const newItemWithId = { id: docRef.id, ...itemToAdd } as NewsItem;
 
       const newsSnapshot = await getDocs(collection(db, "news"));
       const newsItemsFirestore = newsSnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data(),
-      }));
+        title: doc.data().title || "",
+        type: doc.data().type || "News",
+        description: doc.data().description || "",
+        date: doc.data().date || "",
+        author: doc.data().author || "Admin",
+        imageSrc: doc.data().imageSrc || "",
+        createdAt: doc.data().createdAt || "",
+        updatedAt: doc.data().updatedAt || "",
+      } as NewsItem));
+      
       const eventsSnapshot = await getDocs(collection(db, "events"));
       const eventsItemsFirestore = eventsSnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data(),
-      }));
+        title: doc.data().title || "",
+        type: doc.data().type || "Event",
+        description: doc.data().description || "",
+        date: doc.data().date || "",
+        author: doc.data().author || "Admin",
+        imageSrc: doc.data().imageSrc || "",
+        location: doc.data().location || "",
+        eventDate: doc.data().eventDate || "",
+        createdAt: doc.data().createdAt || "",
+        updatedAt: doc.data().updatedAt || "",
+      } as NewsItem));
+      
       setNewsItems([...newsItemsStatic, ...newsItemsFirestore, ...eventsItemsFirestore]);
 
       toast.success(`${newItem.type} added successfully!`);
@@ -256,7 +290,7 @@ const AdminNews = () => {
       toast.error("You must be logged in to edit items.");
       return;
     }
-    if (!editItem.title || !editItem.date || !editItem.description) {
+    if (!editItem?.title || !editItem?.date || !editItem?.description) {
       toast.error("Title, Date, and Description are required fields.");
       return;
     }
@@ -267,8 +301,8 @@ const AdminNews = () => {
 
     try {
       setIsUploading(true);
-      const isStaticItem = newsItemsStatic.some((item) => item.id === editItem.id);
-      let updatedImageUrl = editItem.imageSrc; // Use imageSrc
+      const isStaticItem = newsItemsStatic.some((item) => item.id === editItem?.id);
+      let updatedImageUrl = editItem?.imageSrc; // Use imageSrc
       if (imageFile) {
         updatedImageUrl = await uploadImage();
       }
@@ -279,7 +313,7 @@ const AdminNews = () => {
         updatedAt: new Date().toISOString(),
       };
 
-      if (!isStaticItem) {
+      if (!isStaticItem && editItem) {
         const collectionName = editItem.type === "Event" ? "events" : "news";
         await updateDoc(doc(db, collectionName, editItem.id), updatedItem);
       }
@@ -287,16 +321,34 @@ const AdminNews = () => {
       const newsSnapshot = await getDocs(collection(db, "news"));
       const newsItemsFirestore = newsSnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data(),
-      }));
+        title: doc.data().title || "",
+        type: doc.data().type || "News",
+        description: doc.data().description || "",
+        date: doc.data().date || "",
+        author: doc.data().author || "Admin",
+        imageSrc: doc.data().imageSrc || "",
+        createdAt: doc.data().createdAt || "",
+        updatedAt: doc.data().updatedAt || "",
+      } as NewsItem));
+      
       const eventsSnapshot = await getDocs(collection(db, "events"));
       const eventsItemsFirestore = eventsSnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data(),
-      }));
+        title: doc.data().title || "",
+        type: doc.data().type || "Event",
+        description: doc.data().description || "",
+        date: doc.data().date || "",
+        author: doc.data().author || "Admin",
+        imageSrc: doc.data().imageSrc || "",
+        location: doc.data().location || "",
+        eventDate: doc.data().eventDate || "",
+        createdAt: doc.data().createdAt || "",
+        updatedAt: doc.data().updatedAt || "",
+      } as NewsItem));
+      
       setNewsItems([...newsItemsStatic, ...newsItemsFirestore, ...eventsItemsFirestore]);
 
-      toast.success(`${editItem.type} updated successfully!`);
+      toast.success(`${editItem?.type} updated successfully!`);
       setIsEditDialogOpen(false);
       setEditItem(null);
       removeImage();
