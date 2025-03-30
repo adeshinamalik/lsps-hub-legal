@@ -3,13 +3,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { User, MessageSquare } from "lucide-react";
+import { User, MessageSquare, Lock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { collection, addDoc, query, where, orderBy, getDocs, serverTimestamp, Timestamp } from "firebase/firestore";
-import { db } from "@/firebase/Firebase";
+import { db, auth } from "@/firebase/Firebase";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Comment {
   id: string;
@@ -17,6 +18,7 @@ interface Comment {
   content: string;
   timestamp: Date;
   avatarUrl?: string;
+  userId?: string;
 }
 
 interface CommentSectionProps {
@@ -30,6 +32,14 @@ const CommentSection = ({ itemId, itemType, className }: CommentSectionProps) =>
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [authorName, setAuthorName] = useState("");
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    // If user is logged in, prefill the author name
+    if (currentUser) {
+      setAuthorName(currentUser.displayName || currentUser.email?.split('@')[0] || "");
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -51,7 +61,8 @@ const CommentSection = ({ itemId, itemType, className }: CommentSectionProps) =>
             author: data.author,
             content: data.content,
             timestamp: data.timestamp?.toDate() || new Date(),
-            avatarUrl: data.avatarUrl
+            avatarUrl: data.avatarUrl,
+            userId: data.userId
           };
         });
         
@@ -64,7 +75,9 @@ const CommentSection = ({ itemId, itemType, className }: CommentSectionProps) =>
       }
     };
 
-    fetchComments();
+    if (itemId) {
+      fetchComments();
+    }
   }, [itemId, itemType]);
 
   const handleSubmitComment = async () => {
@@ -85,7 +98,8 @@ const CommentSection = ({ itemId, itemType, className }: CommentSectionProps) =>
         itemType,
         author: authorName,
         content: commentText,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
+        userId: currentUser?.uid || null
       });
 
       // Create a new comment object for the UI
@@ -93,7 +107,8 @@ const CommentSection = ({ itemId, itemType, className }: CommentSectionProps) =>
         id: commentRef.id,
         author: authorName,
         content: commentText,
-        timestamp: new Date()
+        timestamp: new Date(),
+        userId: currentUser?.uid || null
       };
 
       setComments([newComment, ...comments]);
@@ -112,26 +127,41 @@ const CommentSection = ({ itemId, itemType, className }: CommentSectionProps) =>
         Comments ({comments.length})
       </h3>
 
-      <div className="mb-8 space-y-4">
-        <Input
-          placeholder="Your Name"
-          className="mb-3"
-          value={authorName}
-          onChange={(e) => setAuthorName(e.target.value)}
-        />
-        <Textarea
-          placeholder="Share your thoughts..."
-          className="mb-3 min-h-[100px]"
-          value={commentText}
-          onChange={(e) => setCommentText(e.target.value)}
-        />
-        <Button
-          onClick={handleSubmitComment}
-          className="hover:bg-law-light"
-        >
-          Post Comment
-        </Button>
-      </div>
+      {currentUser ? (
+        <div className="mb-8 space-y-4">
+          <Input
+            placeholder="Your Name"
+            className="mb-3"
+            value={authorName}
+            onChange={(e) => setAuthorName(e.target.value)}
+            disabled={!!currentUser.displayName}
+          />
+          <Textarea
+            placeholder="Share your thoughts..."
+            className="mb-3 min-h-[100px]"
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+          />
+          <Button
+            onClick={handleSubmitComment}
+            className="hover:bg-law-light"
+          >
+            Post Comment
+          </Button>
+        </div>
+      ) : (
+        <div className="mb-8 p-4 border border-dashed border-law-DEFAULT/50 rounded-md bg-law-muted/30 text-center">
+          <Lock className="mx-auto h-6 w-6 mb-2 text-law-DEFAULT/70" />
+          <p className="text-law-text-light mb-3">Sign in to post comments</p>
+          <Button
+            variant="outline"
+            onClick={() => window.location.href = "/login"}
+            className="border-law-DEFAULT text-law-DEFAULT hover:bg-law-DEFAULT hover:text-white"
+          >
+            Log In
+          </Button>
+        </div>
+      )}
 
       <div className="space-y-6">
         {isLoading ? (

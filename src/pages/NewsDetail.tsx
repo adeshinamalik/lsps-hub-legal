@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
@@ -9,6 +8,8 @@ import { ArrowLeft, Calendar, User } from "lucide-react";
 import { fetchNewsEventById } from "@/firebase/firebaseService";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/firebase/Firebase";
 
 // Mock news data as fallback
 const staticNews = [
@@ -43,9 +44,61 @@ const staticNews = [
       <p>The Law Students Society plans to make the Career Fair an even bigger event next year, with more participating organizations and expanded workshop sessions.</p>
     `,
     imageSrc: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    summary: "The Law Students Society of the University of Ilorin recently hosted its annual Career Fair, bringing together students and potential employers for a day of networking and professional development."
+    summary: "The Law Students Society of the University of Ilorin recently hosted its annual Career Fair, bringing together students and potential employers for a day of networking and professional development.",
+    type: "news"
   },
-  // Additional news items would be here
+  {
+    id: "2",
+    title: "Faculty of Law Announces New Curriculum",
+    date: "April 12, 2023",
+    author: "Academic Committee",
+    content: `
+      <p>The Faculty of Law has announced a comprehensive revision of its curriculum to better prepare students for the evolving legal landscape. The new curriculum, which will be implemented from the next academic session, incorporates modern legal concepts and practical skills training.</p>
+      
+      <h2>Key Changes</h2>
+      <p>The revised curriculum includes several key changes:</p>
+      <ul>
+        <li>Introduction of courses on legal technology and digital law</li>
+        <li>Enhanced clinical legal education program</li>
+        <li>Integration of interdisciplinary studies</li>
+        <li>Expanded elective options for specialized legal fields</li>
+        <li>Mandatory internship program</li>
+      </ul>
+      
+      <h2>Objectives</h2>
+      <p>According to the Dean of the Faculty, the curriculum revision aims to:</p>
+      <ul>
+        <li>Enhance the practical skills of law graduates</li>
+        <li>Prepare students for emerging areas of legal practice</li>
+        <li>Foster interdisciplinary thinking</li>
+        <li>Improve the employability of graduates</li>
+      </ul>
+      
+      <h2>Implementation Timeline</h2>
+      <p>The new curriculum will be implemented in phases:</p>
+      <ul>
+        <li>Phase 1 (2023/2024): Implementation for 100 and 200 level students</li>
+        <li>Phase 2 (2024/2025): Extension to 300 level students</li>
+        <li>Phase 3 (2025/2026): Complete implementation across all levels</li>
+      </ul>
+      
+      <h2>Stakeholder Input</h2>
+      <p>The curriculum revision process involved extensive consultations with various stakeholders, including:</p>
+      <ul>
+        <li>Legal practitioners</li>
+        <li>Judicial officers</li>
+        <li>Academics from other institutions</li>
+        <li>Current students and alumni</li>
+        <li>Employers of law graduates</li>
+      </ul>
+      
+      <p>The Faculty of Law is committed to providing a world-class legal education that equips graduates with the knowledge, skills, and values needed to excel in a rapidly changing legal environment.</p>
+    `,
+    imageSrc: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    summary: "The Faculty of Law has announced a comprehensive revision of its curriculum to better prepare students for the evolving legal landscape.",
+    type: "news"
+  },
+  // Additional static news items would be here
 ];
 
 const NewsDetail = () => {
@@ -60,19 +113,41 @@ const NewsDetail = () => {
       
       setIsLoading(true);
       try {
-        // Try to fetch from Firebase
-        const firebaseNews = await fetchNewsEventById(id);
+        // First try to fetch directly from Firestore
+        const newsRef = collection(db, "news");
+        const q = query(newsRef, where("id", "==", id));
+        const querySnapshot = await getDocs(q);
         
-        if (firebaseNews && firebaseNews.type === 'news') {
-          setNews(firebaseNews);
+        if (!querySnapshot.empty) {
+          // Use the first matching document
+          const newsDoc = querySnapshot.docs[0];
+          const newsData = newsDoc.data();
+          setNews({
+            id: newsDoc.id,
+            ...newsData,
+            type: "news"
+          });
         } else {
-          // If not found in Firebase, check static data
-          const staticNewsItem = staticNews.find(n => n.id === id);
+          // If not found, try to fetch using the service
+          const firebaseNews = await fetchNewsEventById(id);
           
-          if (staticNewsItem) {
-            setNews(staticNewsItem);
+          if (firebaseNews && firebaseNews.type === 'news') {
+            setNews(firebaseNews);
           } else {
-            toast.error("News article not found");
+            // If still not found, check static data
+            const staticNewsItem = staticNews.find(n => n.id === id);
+            
+            if (staticNewsItem) {
+              setNews(staticNewsItem);
+            } else {
+              // Try to match by partial ID
+              const partialMatch = staticNews.find(n => id.includes(n.id) || n.id.includes(id));
+              if (partialMatch) {
+                setNews(partialMatch);
+              } else {
+                toast.error("News article not found");
+              }
+            }
           }
         }
       } catch (error) {
@@ -138,7 +213,6 @@ const NewsDetail = () => {
     );
   }
   
-  // If no news is found, show a message and a button to go back
   if (!news) {
     return (
       <div className="min-h-screen">
