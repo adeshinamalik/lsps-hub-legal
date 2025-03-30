@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import {
   Calendar,
@@ -47,6 +48,23 @@ import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase
 import { db } from "@/firebase/Firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/supabase/supabase";
+
+// Define the NewsItem interface
+interface NewsItem {
+  id: string;
+  title: string;
+  type: string;
+  description?: string;
+  content?: string;
+  date: string;
+  author: string;
+  imageSrc?: string;
+  imageUrl?: string;
+  location?: string;
+  eventDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 // Static news items
 const newsItemsStatic = [

@@ -21,7 +21,7 @@ interface Comment {
 
 interface CommentSectionProps {
   itemId: string;
-  itemType: 'publication' | 'news' | 'event';
+  itemType: 'publication' | 'news' | 'event' | 'resource';
   className?: string;
 }
 
