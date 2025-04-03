@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { User, MessageSquare } from "lucide-react";
+import { User, MessageSquare, Lock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { collection, addDoc, query, where, orderBy, getDocs, serverTimestamp, Timestamp } from "firebase/firestore";
-import { db } from "@/firebase/Firebase";
+import { db, auth } from "@/firebase/Firebase";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Comment {
   id: string;
@@ -16,6 +17,7 @@ interface Comment {
   content: string;
   timestamp: Date;
   avatarUrl?: string;
+  userId?: string;
 }
 
 interface CommentSectionProps {
