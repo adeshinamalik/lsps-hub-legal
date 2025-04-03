@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -23,78 +22,11 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { cn } from "@/lib/utils";
-
-// Mock data for gallery
-const galleryItems = [
-  {
-    id: "1",
-    title: "Annual Law Conference 2023",
-    type: "image",
-    url: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    date: "May 15, 2023",
-    category: "Events",
-  },
-  {
-    id: "2",
-    title: "Moot Court Competition",
-    type: "image",
-    url: "https://images.unsplash.com/photo-1593115057322-e94b77572f20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
-    date: "April 22, 2023",
-    category: "Competitions",
-  },
-  {
-    id: "3",
-    title: "Law Review Editorial Meeting",
-    type: "image",
-    url: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    date: "March 10, 2023",
-    category: "Meetings",
-  },
-  {
-    id: "4",
-    title: "Legal Aid Clinic Outreach",
-    type: "image",
-    url: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    date: "February 28, 2023",
-    category: "Community",
-  },
-  {
-    id: "5",
-    title: "Guest Lecture: Supreme Court Justice",
-    type: "video",
-    url: "https://images.unsplash.com/photo-1557425493-6f90ae4659fc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    date: "January 17, 2023",
-    category: "Lectures",
-  },
-  {
-    id: "6",
-    title: "Law Students' Association Dinner",
-    type: "image",
-    url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    date: "December 5, 2022",
-    category: "Social",
-  },
-  {
-    id: "7",
-    title: "Law Students' Publication Workshop",
-    type: "document",
-    url: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    date: "November 12, 2022",
-    category: "Workshops",
-  },
-  {
-    id: "8",
-    title: "Mock Trial Preparation",
-    type: "image",
-    url: "https://images.unsplash.com/photo-1589391886645-d51941baf7fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    date: "October 8, 2022",
-    category: "Training",
-  },
-];
+import { fetchGalleryItems, GalleryItem as FirebaseGalleryItem } from "@/firebase/firebaseService";
+import { useToast } from "@/components/ui/use-toast";
 
 // Categories for filtering
 const categories = [
@@ -109,23 +41,72 @@ const categories = [
   "Training"
 ];
 
+// Interface for our gallery items with type
+interface GalleryItem extends FirebaseGalleryItem {
+  type: 'image' | 'video' | 'document';
+}
+
 const Gallery = () => {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  const [selectedItem, setSelectedItem] = useState<typeof galleryItems[0] | null>(null);
+  const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadGalleryItems = async () => {
+      try {
+        const fetchedItems = await fetchGalleryItems();
+        // Convert to GalleryItem with type property
+        const items: GalleryItem[] = fetchedItems.map(item => ({
+          ...item,
+          type: determineFileType(item.imageSrc)
+        }));
+        
+        setGalleryItems(items);
+      } catch (error) {
+        console.error("Error loading gallery items:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load gallery items. Using fallback data.",
+          variant: "destructive",
+        });
+        // If there's an error, we'll use the mock data
+        setGalleryItems(fallbackGalleryItems);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadGalleryItems();
+  }, [toast]);
+
+  // Function to determine file type based on URL
+  const determineFileType = (url: string): 'image' | 'video' | 'document' => {
+    const lowercaseUrl = url.toLowerCase();
+    if (lowercaseUrl.match(/\.(mp4|mov|wmv|avi|flv)$/)) {
+      return 'video';
+    } else if (lowercaseUrl.match(/\.(pdf|doc|docx|xls|xlsx|ppt|pptx)$/)) {
+      return 'document';
+    } else {
+      return 'image';
+    }
+  };
 
   // Filter items based on search query, tab, and category
   const filteredItems = galleryItems.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         (item.description?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
     const matchesTab = selectedTab === "all" || item.type === selectedTab;
     const matchesCategory = selectedCategory === "All Categories" || item.category === selectedCategory;
     
     return matchesSearch && matchesTab && matchesCategory;
   });
 
-  const handleItemClick = (item: typeof galleryItems[0]) => {
+  const handleItemClick = (item: GalleryItem) => {
     setSelectedItem(item);
     setDialogOpen(true);
   };
@@ -142,6 +123,74 @@ const Gallery = () => {
         return <Grid2X2 className="h-5 w-5" />;
     }
   };
+
+  // Fallback gallery items to use if Firebase fetch fails
+  const fallbackGalleryItems: GalleryItem[] = [
+    {
+      id: "1",
+      title: "Annual Law Conference 2023",
+      type: "image",
+      imageSrc: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      date: "May 15, 2023",
+      category: "Events",
+    },
+    {
+      id: "2",
+      title: "Moot Court Competition",
+      type: "image",
+      imageSrc: "https://images.unsplash.com/photo-1593115057322-e94b77572f20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
+      date: "April 22, 2023",
+      category: "Competitions",
+    },
+    {
+      id: "3",
+      title: "Law Review Editorial Meeting",
+      type: "image",
+      imageSrc: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      date: "March 10, 2023",
+      category: "Meetings",
+    },
+    {
+      id: "4",
+      title: "Legal Aid Clinic Outreach",
+      type: "image",
+      imageSrc: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      date: "February 28, 2023",
+      category: "Community",
+    },
+    {
+      id: "5",
+      title: "Guest Lecture: Supreme Court Justice",
+      type: "video",
+      imageSrc: "https://images.unsplash.com/photo-1557425493-6f90ae4659fc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      date: "January 17, 2023",
+      category: "Lectures",
+    },
+    {
+      id: "6",
+      title: "Law Students' Association Dinner",
+      type: "image",
+      imageSrc: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      date: "December 5, 2022",
+      category: "Social",
+    },
+    {
+      id: "7",
+      title: "Law Students' Publication Workshop",
+      type: "document",
+      imageSrc: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      date: "November 12, 2022",
+      category: "Workshops",
+    },
+    {
+      id: "8",
+      title: "Mock Trial Preparation",
+      type: "image",
+      imageSrc: "https://images.unsplash.com/photo-1589391886645-d51941baf7fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      date: "October 8, 2022",
+      category: "Training",
+    },
+  ];
 
   return (
     <div className="min-h-screen">
@@ -217,7 +266,12 @@ const Gallery = () => {
             </div>
           </div>
           
-          {filteredItems.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-law-DEFAULT mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading gallery items...</p>
+            </div>
+          ) : filteredItems.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredItems.map((item, index) => (
                 <div 
@@ -234,7 +288,7 @@ const Gallery = () => {
                       {getTypeIcon(item.type)}
                     </div>
                     <img
-                      src={item.url}
+                      src={item.imageSrc}
                       alt={item.title}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
@@ -285,10 +339,13 @@ const Gallery = () => {
             <span>{selectedItem?.date}</span>
             <span>{selectedItem?.category}</span>
           </DialogDescription>
+          {selectedItem?.description && (
+            <p className="text-gray-600 mt-2">{selectedItem.description}</p>
+          )}
           <div className="mt-4">
             {selectedItem?.type === 'image' && (
               <img 
-                src={selectedItem.url} 
+                src={selectedItem.imageSrc} 
                 alt={selectedItem.title} 
                 className="w-full rounded-lg object-cover max-h-[70vh]" 
               />

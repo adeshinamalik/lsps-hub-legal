@@ -16,6 +16,7 @@ import AdminPublications from './pages/admin/Publications';
 import AdminNews from './pages/admin/News';
 import AdminUsers from './pages/admin/Users';
 import AdminMedia from './pages/admin/Media';
+import AdminGallery from './pages/admin/Gallery';
 import NotFound from './pages/NotFound';
 import { Toaster } from "@/components/ui/toaster";
 import JoinUs from './pages/JoinUs';
@@ -55,6 +56,7 @@ const App = () => {
               <Route index element={<Dashboard />} />
               <Route path="publications" element={<AdminPublications />} />
               <Route path="news" element={<AdminNews />} />
+              <Route path="gallery" element={<AdminGallery />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="media" element={<AdminMedia />} />
             </Route>
