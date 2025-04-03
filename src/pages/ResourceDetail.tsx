@@ -57,22 +57,22 @@ const ResourceDetail = () => {
   const navigate = useNavigate();
   const [resource, setResource] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchResourceData = async () => {
       if (!id) return;
-      
+
       setIsLoading(true);
       try {
         // Try to fetch from Firebase
         const firebaseResource = await fetchResourceById(id);
-        
+
         if (firebaseResource) {
           setResource(firebaseResource);
         } else {
           // If not found in Firebase, check static data
           const staticResource = staticResources.find(r => r.id === id);
-          
+
           if (staticResource) {
             setResource(staticResource);
           } else {
@@ -82,7 +82,7 @@ const ResourceDetail = () => {
       } catch (error) {
         console.error("Error fetching resource:", error);
         toast.error("Failed to load resource details");
-        
+
         // Fallback to static data
         const staticResource = staticResources.find(r => r.id === id);
         if (staticResource) {
@@ -92,25 +92,25 @@ const ResourceDetail = () => {
         setIsLoading(false);
       }
     };
-    
+
     fetchResourceData();
   }, [id]);
-  
+
   if (isLoading) {
     return (
       <div className="min-h-screen">
         <Navbar />
         <div className="pt-28 pb-16 md:pt-32 md:pb-20 px-6 md:px-10 lg:px-20 bg-law-muted">
           <div className="container mx-auto">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="mb-6 text-law-DEFAULT hover:text-law-accent pl-0"
               onClick={() => navigate('/resources')}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Resources
             </Button>
-            
+
             <div className="max-w-4xl mx-auto">
               <Skeleton className="h-8 w-1/3 mb-4" />
               <Skeleton className="h-12 w-full mb-6" />
@@ -121,7 +121,7 @@ const ResourceDetail = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="py-12 px-6 md:px-10 lg:px-20">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto">
@@ -136,12 +136,12 @@ const ResourceDetail = () => {
             </div>
           </div>
         </div>
-        
+
         <Footer />
       </div>
     );
   }
-  
+
   // If no resource is found, show a message and a button to go back
   if (!resource) {
     return (
@@ -150,8 +150,8 @@ const ResourceDetail = () => {
         <div className="container mx-auto px-6 md:px-10 lg:px-20 py-32 text-center">
           <h1 className="text-3xl font-bold text-law-DEFAULT mb-6">Resource Not Found</h1>
           <p className="text-law-text-light mb-8">The resource you are looking for does not exist or has been removed.</p>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="border-law-DEFAULT text-law-DEFAULT hover:bg-law-DEFAULT hover:text-white"
             onClick={() => navigate('/resources')}
           >
@@ -163,22 +163,22 @@ const ResourceDetail = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <div className="pt-28 pb-16 md:pt-32 md:pb-20 px-6 md:px-10 lg:px-20 bg-law-muted">
         <div className="container mx-auto">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="mb-6 text-law-DEFAULT hover:text-law-accent pl-0"
             onClick={() => navigate('/resources')}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Resources
           </Button>
-          
+
           <div className="max-w-4xl mx-auto">
             <div className="flex flex-wrap gap-3 mb-4">
               <span className="inline-block bg-law-DEFAULT/10 text-law-DEFAULT px-3 py-1 rounded-full text-sm font-medium">
@@ -188,15 +188,15 @@ const ResourceDetail = () => {
                 {resource.type}
               </span>
             </div>
-            
+
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-law-DEFAULT mb-6">{resource.title}</h1>
-            
+
             <div className="flex flex-wrap gap-4 text-law-text-light mb-8">
               <div className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2" />
                 <span>{resource.date}</span>
               </div>
-              
+
               {resource.fileSize && (
                 <div className="flex items-center">
                   <FileText className="h-4 w-4 mr-2" />
@@ -207,14 +207,14 @@ const ResourceDetail = () => {
           </div>
         </div>
       </div>
-      
+
       <article className="py-12 px-6 md:px-10 lg:px-20">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
             <div className="mb-10">
-              <img 
-                src={resource.imageSrc || resource.imageUrl} 
-                alt={resource.title} 
+              <img
+                src={resource.imageSrc || resource.imageUrl}
+                alt={resource.title}
                 className="w-full h-[400px] object-cover rounded-lg shadow-md"
                 loading="lazy"
                 onError={(e) => {
@@ -222,19 +222,19 @@ const ResourceDetail = () => {
                 }}
               />
             </div>
-            
+
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-law-DEFAULT mb-4">Description</h2>
               <p className="text-law-text-light leading-relaxed mb-6">{resource.description}</p>
-              
+
               {resource.content && (
                 <div className="prose prose-lg max-w-none mb-12" dangerouslySetInnerHTML={{ __html: resource.content }} />
               )}
             </div>
-            
+
             <div className="mb-12 flex flex-wrap gap-4">
               {resource.url && (
-                <Button 
+                <Button
                   size="lg"
                   className="bg-law-DEFAULT hover:bg-law-light text-white"
                   onClick={() => window.open(resource.url, '_blank')}
@@ -253,13 +253,13 @@ const ResourceDetail = () => {
                 </Button>
               )}
             </div>
-            
+
             {/* Comment Section */}
             <CommentSection itemId={id || ""} itemType="resource" />
           </div>
         </div>
       </article>
-      
+
       <Footer />
     </div>
   );

@@ -9,7 +9,7 @@ import PublicationDetail from './pages/PublicationDetail';
 import News from './pages/News';
 import NewsPage from './pages/NewsPage';
 import Events from './pages/Events';
-import NewsEventDetail from './pages/NewsEventDetail';
+import NewsDetail from './pages/NewsDetail';
 import AdminLayout from './components/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
 import AdminPublications from './pages/admin/Publications';
@@ -24,6 +24,7 @@ import Resources from './pages/Resources';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import EventDetail from './pages/EventDetail';
 
 const App = () => {
   return (
@@ -38,7 +39,8 @@ const App = () => {
             <Route path="/publications/:id" element={<PublicationDetail />} />
             <Route path="/news" element={<NewsPage />} />
             <Route path="/events" element={<Events />} />
-            <Route path="/news/:id" element={<NewsEventDetail />} />
+            <Route path="/events/:id" element={<EventDetail />} />
+            <Route path="/news/:id" element={<NewsDetail />} />
             <Route path="/join-us" element={<JoinUs />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/resources" element={<Resources />} />

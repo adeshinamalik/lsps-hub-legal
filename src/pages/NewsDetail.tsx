@@ -6,9 +6,10 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
 import { ArrowLeft, Calendar, User } from "lucide-react";
-import { fetchNewsEventById } from "@/firebase/firebaseService";
+import { fetchNewsById } from "@/firebase/firebaseService";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { log } from "node:console";
 
 // Mock news data as fallback
 const staticNews = [
@@ -53,22 +54,25 @@ const NewsDetail = () => {
   const navigate = useNavigate();
   const [news, setNews] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
+
   useEffect(() => {
     const fetchNewsData = async () => {
+
       if (!id) return;
-      
+
       setIsLoading(true);
       try {
         // Try to fetch from Firebase
-        const firebaseNews = await fetchNewsEventById(id);
-        
-        if (firebaseNews && firebaseNews.type === 'news') {
+
+        const firebaseNews = await fetchNewsById(id);
+
+        if (firebaseNews && firebaseNews.type === 'News') {
           setNews(firebaseNews);
         } else {
           // If not found in Firebase, check static data
           const staticNewsItem = staticNews.find(n => n.id === id);
-          
+
           if (staticNewsItem) {
             setNews(staticNewsItem);
           } else {
@@ -78,7 +82,7 @@ const NewsDetail = () => {
       } catch (error) {
         console.error("Error fetching news:", error);
         toast.error("Failed to load news details");
-        
+
         // Fallback to static data
         const staticNewsItem = staticNews.find(n => n.id === id);
         if (staticNewsItem) {
@@ -88,25 +92,26 @@ const NewsDetail = () => {
         setIsLoading(false);
       }
     };
-    
+
     fetchNewsData();
   }, [id]);
-  
+console.log(news);
+
   if (isLoading) {
     return (
       <div className="min-h-screen">
         <Navbar />
         <div className="pt-28 pb-16 md:pt-32 md:pb-20 px-6 md:px-10 lg:px-20 bg-law-muted">
           <div className="container mx-auto">
-            <Button 
-              variant="ghost" 
-              className="mb-6 text-law-DEFAULT hover:text-law-accent pl-0"
+            <Button
+              variant="ghost"
+              className="mb-6 text-law-DEFAULT hover:text-law-accent hover:text-white pl-0"
               onClick={() => navigate('/news')}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to News
             </Button>
-            
+
             <div className="max-w-4xl mx-auto">
               <Skeleton className="h-8 w-1/3 mb-4" />
               <Skeleton className="h-12 w-full mb-6" />
@@ -117,7 +122,7 @@ const NewsDetail = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="py-12 px-6 md:px-10 lg:px-20">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto">
@@ -132,12 +137,12 @@ const NewsDetail = () => {
             </div>
           </div>
         </div>
-        
+
         <Footer />
       </div>
     );
   }
-  
+
   // If no news is found, show a message and a button to go back
   if (!news) {
     return (
@@ -146,8 +151,8 @@ const NewsDetail = () => {
         <div className="container mx-auto px-6 md:px-10 lg:px-20 py-32 text-center">
           <h1 className="text-3xl font-bold text-law-DEFAULT mb-6">News Article Not Found</h1>
           <p className="text-law-text-light mb-8">The news article you are looking for does not exist or has been removed.</p>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="border-law-DEFAULT text-law-DEFAULT hover:bg-law-DEFAULT hover:text-white"
             onClick={() => navigate('/news')}
           >
@@ -159,37 +164,37 @@ const NewsDetail = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <div className="pt-28 pb-16 md:pt-32 md:pb-20 px-6 md:px-10 lg:px-20 bg-law-muted">
         <div className="container mx-auto">
-          <Button 
-            variant="ghost" 
-            className="mb-6 text-law-DEFAULT hover:text-law-accent pl-0"
+          <Button
+            variant="ghost"
+            className="mb-6 text-law-DEFAULT hover:text-white pl-3"
             onClick={() => navigate('/news')}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to News
           </Button>
-          
+
           <div className="max-w-4xl mx-auto">
             <div className="flex flex-wrap gap-3 mb-4">
               <span className="inline-block bg-law-DEFAULT/10 text-law-DEFAULT px-3 py-1 rounded-full text-sm font-medium">
                 News
               </span>
             </div>
-            
+
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-law-DEFAULT mb-6">{news.title}</h1>
-            
+
             <div className="flex flex-wrap gap-4 text-law-text-light mb-8">
               <div className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2" />
                 <span>{news.date}</span>
               </div>
-              
+
               {news.author && (
                 <div className="flex items-center">
                   <User className="h-4 w-4 mr-2" />
@@ -200,14 +205,14 @@ const NewsDetail = () => {
           </div>
         </div>
       </div>
-      
+
       <article className="py-12 px-6 md:px-10 lg:px-20">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
             <div className="mb-10">
-              <img 
-                src={news.imageSrc || news.imageUrl} 
-                alt={news.title} 
+              <img
+                src={news.imageSrc || news.imageUrl}
+                alt={news.title}
                 className="w-full h-[400px] object-cover rounded-lg shadow-md"
                 loading="lazy"
                 onError={(e) => {
@@ -215,18 +220,18 @@ const NewsDetail = () => {
                 }}
               />
             </div>
-            
-            <div 
-              className="prose prose-lg max-w-none mb-12" 
+
+            <div
+              className="prose prose-lg max-w-none mb-12"
               dangerouslySetInnerHTML={{ __html: news.content }}
             />
-            
+
             {/* Comment Section */}
             <CommentSection itemId={id || ""} itemType="news" />
           </div>
         </div>
       </article>
-      
+
       <Footer />
     </div>
   );

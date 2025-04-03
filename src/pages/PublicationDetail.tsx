@@ -172,7 +172,7 @@ const PublicationDetail = () => {
           <div className="container mx-auto">
             <Button 
               variant="ghost" 
-              className="mb-6 text-law-DEFAULT hover:text-law-accent pl-0"
+              className="mb-6 text-law-DEFAULT hover:text-white pl-0"
               onClick={() => navigate('/publications')}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -240,7 +240,7 @@ const PublicationDetail = () => {
         <div className="container mx-auto">
           <Button 
             variant="ghost" 
-            className="mb-6 text-law-DEFAULT hover:text-law-accent pl-0"
+            className="mb-6 text-law-DEFAULT hover:text-white pl-3"
             onClick={() => navigate('/publications')}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

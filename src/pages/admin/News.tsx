@@ -48,6 +48,7 @@ import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase
 import { db } from "@/firebase/Firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/supabase/supabase";
+import { log } from "node:console";
 
 // Define the NewsItem interface
 interface NewsItem {
@@ -207,6 +208,8 @@ const AdminNews = () => {
     try {
       setIsUploading(true);
       const imageUrl = await uploadImage();
+      console.log(imageUrl);
+
       const itemToAdd = {
         title: newItem.title,
         type: newItem.type,
@@ -237,7 +240,7 @@ const AdminNews = () => {
         createdAt: doc.data().createdAt || "",
         updatedAt: doc.data().updatedAt || "",
       } as NewsItem));
-      
+
       const eventsSnapshot = await getDocs(collection(db, "events"));
       const eventsItemsFirestore = eventsSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -252,7 +255,7 @@ const AdminNews = () => {
         createdAt: doc.data().createdAt || "",
         updatedAt: doc.data().updatedAt || "",
       } as NewsItem));
-      
+
       setNewsItems([...newsItemsStatic, ...newsItemsFirestore, ...eventsItemsFirestore]);
 
       toast.success(`${newItem.type} added successfully!`);
@@ -330,7 +333,7 @@ const AdminNews = () => {
         createdAt: doc.data().createdAt || "",
         updatedAt: doc.data().updatedAt || "",
       } as NewsItem));
-      
+
       const eventsSnapshot = await getDocs(collection(db, "events"));
       const eventsItemsFirestore = eventsSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -345,7 +348,7 @@ const AdminNews = () => {
         createdAt: doc.data().createdAt || "",
         updatedAt: doc.data().updatedAt || "",
       } as NewsItem));
-      
+
       setNewsItems([...newsItemsStatic, ...newsItemsFirestore, ...eventsItemsFirestore]);
 
       toast.success(`${editItem?.type} updated successfully!`);
@@ -436,9 +439,8 @@ const AdminNews = () => {
                       <TableCell className="font-medium">{item.title}</TableCell>
                       <TableCell>
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            item.type === "News" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
-                          }`}
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${item.type === "News" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
+                            }`}
                         >
                           {item.type}
                         </span>
