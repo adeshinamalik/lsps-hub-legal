@@ -10,7 +10,8 @@ import {
   Calendar, 
   Users, 
   Image,
-  LogOut 
+  LogOut,
+  ImageIcon
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ const AdminLayout = () => {
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Publications", href: "/admin/publications", icon: FileText },
     { name: "News & Events", href: "/admin/news", icon: Calendar },
+    { name: "Gallery", href: "/admin/gallery", icon: ImageIcon },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Media Library", href: "/admin/media", icon: Image },
   ];
