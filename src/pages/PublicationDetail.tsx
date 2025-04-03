@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
@@ -9,6 +8,8 @@ import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
 import { fetchArticleById } from "@/firebase/firebaseService";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/firebase/Firebase";
 
 // Mock data - as fallback if Firebase fetch fails
 const allArticles = [
@@ -132,19 +133,40 @@ const PublicationDetail = () => {
       
       setIsLoading(true);
       try {
-        // Try to fetch from Firebase
-        const firebaseArticle = await fetchArticleById(id);
+        // First try to fetch directly from Firestore
+        const articlesRef = collection(db, "articles");
+        const q = query(articlesRef, where("id", "==", id));
+        const querySnapshot = await getDocs(q);
         
-        if (firebaseArticle) {
-          setArticle(firebaseArticle);
+        if (!querySnapshot.empty) {
+          // Use the first matching document
+          const articleDoc = querySnapshot.docs[0];
+          const articleData = articleDoc.data();
+          setArticle({
+            id: articleDoc.id,
+            ...articleData
+          });
         } else {
-          // If not found in Firebase, check static data
-          const staticArticle = allArticles.find(a => a.id === id);
+          // If not found, try to fetch using the service
+          const firebaseArticle = await fetchArticleById(id);
           
-          if (staticArticle) {
-            setArticle(staticArticle);
+          if (firebaseArticle) {
+            setArticle(firebaseArticle);
           } else {
-            toast.error("Publication not found");
+            // If still not found, check static data
+            const staticArticle = allArticles.find(a => a.id === id);
+            
+            if (staticArticle) {
+              setArticle(staticArticle);
+            } else {
+              // Try to match by partial ID
+              const partialMatch = allArticles.find(a => id.includes(a.id) || a.id.includes(id));
+              if (partialMatch) {
+                setArticle(partialMatch);
+              } else {
+                toast.error("Publication not found");
+              }
+            }
           }
         }
       } catch (error) {
@@ -210,7 +232,6 @@ const PublicationDetail = () => {
     );
   }
   
-  // If no article is found, show a message and a button to go back
   if (!article) {
     return (
       <div className="min-h-screen">
@@ -250,7 +271,7 @@ const PublicationDetail = () => {
           <div className="max-w-4xl mx-auto">
             <div className="flex flex-wrap gap-3 mb-4">
               <span className="inline-block bg-law-DEFAULT/10 text-law-DEFAULT px-3 py-1 rounded-full text-sm font-medium">
-                {article.category}
+                {article.category || "Publication"}
               </span>
             </div>
             
