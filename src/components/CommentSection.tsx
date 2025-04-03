@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,7 +20,7 @@ interface Comment {
 
 interface CommentSectionProps {
   itemId: string;
-  itemType: 'publication' | 'news' | 'event' | 'resource';
+  itemType: "publication" | "news" | "event" | "resource";
   className?: string;
 }
 
@@ -30,40 +29,45 @@ const CommentSection = ({ itemId, itemType, className }: CommentSectionProps) =>
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [authorName, setAuthorName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // New state for submission
+
+  console.log("Item ID:", itemId);
+
+  const fetchComments = async () => {
+    setIsLoading(true);
+    try {
+      const commentsRef = collection(db, "comments");
+      const q = query(
+        commentsRef,
+        where("itemId", "==", itemId),
+        where("itemType", "==", itemType),
+        orderBy("timestamp", "asc")
+      );
+
+      const querySnapshot = await getDocs(q);
+      console.log("Fetching comments");
+
+      const fetchedComments = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          author: data.author,
+          content: data.content,
+          timestamp: data.timestamp instanceof Timestamp ? data.timestamp.toDate() : new Date(),
+          avatarUrl: data.avatarUrl,
+        };
+      });
+
+      setComments(fetchedComments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      toast.error("Failed to load comments");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchComments = async () => {
-      setIsLoading(true);
-      try {
-        const commentsRef = collection(db, "comments");
-        const q = query(
-          commentsRef,
-          where("itemId", "==", itemId),
-          where("itemType", "==", itemType),
-          orderBy("timestamp", "desc")
-        );
-        
-        const querySnapshot = await getDocs(q);
-        const fetchedComments = querySnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            author: data.author,
-            content: data.content,
-            timestamp: data.timestamp?.toDate() || new Date(),
-            avatarUrl: data.avatarUrl
-          };
-        });
-        
-        setComments(fetchedComments);
-      } catch (error) {
-        console.error("Error fetching comments:", error);
-        toast.error("Failed to load comments");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchComments();
   }, [itemId, itemType]);
 
@@ -78,30 +82,25 @@ const CommentSection = ({ itemId, itemType, className }: CommentSectionProps) =>
       return;
     }
 
+    setIsSubmitting(true); // Disable button
     try {
-      // Add comment to Firestore
-      const commentRef = await addDoc(collection(db, "comments"), {
+      await addDoc(collection(db, "comments"), {
         itemId,
         itemType,
         author: authorName,
         content: commentText,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
       });
 
-      // Create a new comment object for the UI
-      const newComment: Comment = {
-        id: commentRef.id,
-        author: authorName,
-        content: commentText,
-        timestamp: new Date()
-      };
-
-      setComments([newComment, ...comments]);
-      setCommentText("");
+      console.log("Comment posted:", commentText);
+      setCommentText(""); // Reset after success
       toast.success("Comment added successfully");
+      await fetchComments(); // Refetch comments
     } catch (error) {
       console.error("Error adding comment:", error);
       toast.error("Failed to add comment");
+    } finally {
+      setIsSubmitting(false); // Re-enable button
     }
   };
 
@@ -118,18 +117,21 @@ const CommentSection = ({ itemId, itemType, className }: CommentSectionProps) =>
           className="mb-3"
           value={authorName}
           onChange={(e) => setAuthorName(e.target.value)}
+          disabled={isLoading || isSubmitting} // Disable during loading or submitting
         />
         <Textarea
           placeholder="Share your thoughts..."
           className="mb-3 min-h-[100px]"
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
+          disabled={isLoading || isSubmitting} // Disable during loading or submitting
         />
         <Button
           onClick={handleSubmitComment}
           className="hover:bg-law-light"
+          disabled={isLoading || isSubmitting} // Disable during loading or submitting
         >
-          Post Comment
+          {isSubmitting ? "Posting..." : "Post Comment"}
         </Button>
       </div>
 

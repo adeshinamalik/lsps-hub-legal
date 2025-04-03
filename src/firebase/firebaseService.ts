@@ -1,15 +1,15 @@
 
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
   limit,
   serverTimestamp,
   DocumentData,
@@ -18,6 +18,7 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from './Firebase';
+import { log } from 'console';
 
 // Types
 export interface Article {
@@ -113,13 +114,46 @@ export const fetchPublishedArticles = async (): Promise<Article[]> => {
 
 // Get article by ID
 export const fetchArticleById = async (id: string): Promise<Article | null> => {
-  const docRef = doc(db, 'articles', id);
+  const docRef = doc(db, 'publications', id);
   const docSnap = await getDoc(docRef);
-  
+
   if (docSnap.exists()) {
     return { id: docSnap.id, ...docSnap.data() } as Article;
   } else {
     return null;
+  }
+};
+
+// Get news by ID
+export const fetchNewsById = async (id: string) => {
+
+  try {
+    // Use 'newsEvents' to match other functions, adjust if 'news' is correct
+    const docRef = doc(db, 'news', id);
+    const docSnap = await getDoc(docRef); if (docSnap.exists()) {
+    const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        title: data.title,
+        summary: data.summary || '',
+        content: data.content,
+        date: data.date,
+        author: data.author,
+        type: data.type,
+        imageSrc: data.imageSrc,
+        status: data.status,
+        ...(data.location && { location: data.location }),
+        ...(data.eventDate && { eventDate: data.eventDate }),
+        ...(data.createdAt && { createdAt: data.createdAt }),
+        ...(data.updatedAt && { updatedAt: data.updatedAt }),
+      }
+    } else {
+      console.log("No news document found for ID:", id);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching news by ID:", error);
+    return null; // Return null on error to match NewsDetail expectation
   }
 };
 
@@ -153,9 +187,9 @@ export const searchArticles = async (searchTerm: string, category?: string): Pro
   // Note: Firestore doesn't support full-text search natively
   // For a complete solution, you would need to use a service like Algolia
   // This is a basic implementation that will only work for exact matches
-  
+
   let articlesQuery;
-  
+
   if (category && category !== 'All Categories') {
     articlesQuery = query(
       collection(db, 'articles'),
@@ -168,12 +202,12 @@ export const searchArticles = async (searchTerm: string, category?: string): Pro
       where('status', '==', 'Published')
     );
   }
-  
+
   const querySnapshot = await getDocs(articlesQuery);
   const articles = querySnapshot.docs.map(doc => convertDoc<Article>(doc));
-  
+
   // Client-side filtering for the search term
-  return articles.filter(article => 
+  return articles.filter(article =>
     article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     article.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
     article.author.toLowerCase().includes(searchTerm.toLowerCase())
@@ -218,10 +252,11 @@ export const fetchEvents = async (): Promise<NewsEvent[]> => {
 };
 
 // Get news/event by ID
-export const fetchNewsEventById = async (id: string): Promise<NewsEvent | null> => {
-  const docRef = doc(db, 'newsEvents', id);
+export const fetchEventById = async (id: string): Promise<NewsEvent | null> => {
+  const docRef = doc(db, 'events', id);
   const docSnap = await getDoc(docRef);
-  
+  console.log(id);
+
   if (docSnap.exists()) {
     return { id: docSnap.id, ...docSnap.data() } as NewsEvent;
   } else {
@@ -268,7 +303,7 @@ export const fetchUsers = async (): Promise<User[]> => {
 export const fetchUserById = async (id: string): Promise<User | null> => {
   const docRef = doc(db, 'users', id);
   const docSnap = await getDoc(docRef);
-  
+
   if (docSnap.exists()) {
     return { id: docSnap.id, ...docSnap.data() } as User;
   } else {
@@ -314,7 +349,7 @@ export const fetchGalleryItems = async (): Promise<GalleryItem[]> => {
 export const fetchGalleryItemById = async (id: string): Promise<GalleryItem | null> => {
   const docRef = doc(db, 'gallery', id);
   const docSnap = await getDoc(docRef);
-  
+
   if (docSnap.exists()) {
     return { id: docSnap.id, ...docSnap.data() } as GalleryItem;
   } else {
@@ -361,7 +396,7 @@ export const fetchResources = async (): Promise<Resource[]> => {
 export const fetchResourceById = async (id: string): Promise<Resource | null> => {
   const docRef = doc(db, 'resources', id);
   const docSnap = await getDoc(docRef);
-  
+
   if (docSnap.exists()) {
     return { id: docSnap.id, ...docSnap.data() } as Resource;
   } else {
@@ -406,16 +441,16 @@ export const deleteImage = async (imageUrl: string): Promise<void> => {
   const url = new URL(imageUrl);
   const pathWithToken = url.pathname;
   const path = pathWithToken.split('?')[0]; // Remove token if present
-  
+
   // Storage references have a format like /b/bucket-name/o/path
   const parts = path.split('/o/');
   if (parts.length < 2) {
     throw new Error('Invalid image URL');
   }
-  
+
   const decodedPath = decodeURIComponent(parts[1]);
   const imageRef = ref(storage, decodedPath);
-  
+
   await deleteObject(imageRef);
 };
 
@@ -424,13 +459,13 @@ export const deleteImage = async (imageUrl: string): Promise<void> => {
 
 // Get paginated articles
 export const fetchPaginatedArticles = async (
-  page: number = 1, 
+  page: number = 1,
   itemsPerPage: number = 6,
   category?: string,
   searchQuery?: string
-): Promise<{items: Article[], totalItems: number}> => {
+): Promise<{ items: Article[], totalItems: number }> => {
   let baseQuery;
-  
+
   if (category && category !== 'All Categories') {
     baseQuery = query(
       collection(db, 'articles'),
@@ -443,29 +478,29 @@ export const fetchPaginatedArticles = async (
       where('status', '==', 'Published')
     );
   }
-  
+
   const querySnapshot = await getDocs(baseQuery);
   let items = querySnapshot.docs.map(doc => convertDoc<Article>(doc));
-  
+
   // Apply search filter if provided
   if (searchQuery) {
     const lowercaseQuery = searchQuery.toLowerCase();
-    items = items.filter(item => 
+    items = items.filter(item =>
       item.title.toLowerCase().includes(lowercaseQuery) ||
       item.excerpt.toLowerCase().includes(lowercaseQuery) ||
       item.author.toLowerCase().includes(lowercaseQuery)
     );
   }
-  
+
   const totalItems = items.length;
-  
+
   // Sort by date (newest first)
   items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  
+
   // Apply pagination
   const startIndex = (page - 1) * itemsPerPage;
   const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
-  
+
   return {
     items: paginatedItems,
     totalItems
@@ -474,38 +509,38 @@ export const fetchPaginatedArticles = async (
 
 // Get paginated news
 export const fetchPaginatedNews = async (
-  page: number = 1, 
+  page: number = 1,
   itemsPerPage: number = 6,
   searchQuery?: string
-): Promise<{items: NewsEvent[], totalItems: number}> => {
+): Promise<{ items: NewsEvent[], totalItems: number }> => {
   const newsQuery = query(
     collection(db, 'newsEvents'),
     where('type', '==', 'news'),
     where('status', '==', 'Published')
   );
-  
+
   const querySnapshot = await getDocs(newsQuery);
   let items = querySnapshot.docs.map(doc => convertDoc<NewsEvent>(doc));
-  
+
   // Apply search filter if provided
   if (searchQuery) {
     const lowercaseQuery = searchQuery.toLowerCase();
-    items = items.filter(item => 
+    items = items.filter(item =>
       item.title.toLowerCase().includes(lowercaseQuery) ||
       item.summary.toLowerCase().includes(lowercaseQuery) ||
       item.author.toLowerCase().includes(lowercaseQuery)
     );
   }
-  
+
   const totalItems = items.length;
-  
+
   // Sort by date (newest first)
   items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  
+
   // Apply pagination
   const startIndex = (page - 1) * itemsPerPage;
   const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
-  
+
   return {
     items: paginatedItems,
     totalItems
@@ -514,31 +549,31 @@ export const fetchPaginatedNews = async (
 
 // Get paginated events
 export const fetchPaginatedEvents = async (
-  page: number = 1, 
+  page: number = 1,
   itemsPerPage: number = 6,
   searchQuery?: string
-): Promise<{items: NewsEvent[], totalItems: number}> => {
+): Promise<{ items: NewsEvent[], totalItems: number }> => {
   const eventsQuery = query(
     collection(db, 'newsEvents'),
     where('type', '==', 'event'),
     where('status', '==', 'Published')
   );
-  
+
   const querySnapshot = await getDocs(eventsQuery);
   let items = querySnapshot.docs.map(doc => convertDoc<NewsEvent>(doc));
-  
+
   // Apply search filter if provided
   if (searchQuery) {
     const lowercaseQuery = searchQuery.toLowerCase();
-    items = items.filter(item => 
+    items = items.filter(item =>
       item.title.toLowerCase().includes(lowercaseQuery) ||
       item.summary.toLowerCase().includes(lowercaseQuery) ||
       (item.location && item.location.toLowerCase().includes(lowercaseQuery))
     );
   }
-  
+
   const totalItems = items.length;
-  
+
   // Sort by event date (upcoming first)
   items.sort((a, b) => {
     if (a.eventDate && b.eventDate) {
@@ -546,11 +581,11 @@ export const fetchPaginatedEvents = async (
     }
     return 0;
   });
-  
+
   // Apply pagination
   const startIndex = (page - 1) * itemsPerPage;
   const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
-  
+
   return {
     items: paginatedItems,
     totalItems
@@ -559,13 +594,13 @@ export const fetchPaginatedEvents = async (
 
 // Get paginated resources
 export const fetchPaginatedResources = async (
-  page: number = 1, 
+  page: number = 1,
   itemsPerPage: number = 6,
   category?: string,
   searchQuery?: string
-): Promise<{items: Resource[], totalItems: number}> => {
+): Promise<{ items: Resource[], totalItems: number }> => {
   let baseQuery;
-  
+
   if (category) {
     baseQuery = query(
       collection(db, 'resources'),
@@ -578,28 +613,28 @@ export const fetchPaginatedResources = async (
       where('status', '==', 'Published')
     );
   }
-  
+
   const querySnapshot = await getDocs(baseQuery);
   let items = querySnapshot.docs.map(doc => convertDoc<Resource>(doc));
-  
+
   // Apply search filter if provided
   if (searchQuery) {
     const lowercaseQuery = searchQuery.toLowerCase();
-    items = items.filter(item => 
+    items = items.filter(item =>
       item.title.toLowerCase().includes(lowercaseQuery) ||
       item.description.toLowerCase().includes(lowercaseQuery)
     );
   }
-  
+
   const totalItems = items.length;
-  
+
   // Sort by date (newest first)
   items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  
+
   // Apply pagination
   const startIndex = (page - 1) * itemsPerPage;
   const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
-  
+
   return {
     items: paginatedItems,
     totalItems

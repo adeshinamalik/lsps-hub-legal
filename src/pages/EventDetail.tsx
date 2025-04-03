@@ -6,9 +6,10 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
 import { ArrowLeft, Calendar, User, Tag, MapPin } from "lucide-react";
-import { fetchNewsEventById } from "@/firebase/firebaseService";
+import { fetchEventById } from "@/firebase/firebaseService";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { log } from "console";
 
 // Mock events data as fallback
 const staticEvents = [
@@ -64,6 +65,8 @@ const EventDetail = () => {
   const navigate = useNavigate();
   const [event, setEvent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+
   
   useEffect(() => {
     const fetchEventData = async () => {
@@ -72,7 +75,9 @@ const EventDetail = () => {
       setIsLoading(true);
       try {
         // Try to fetch from Firebase
-        const firebaseEvent = await fetchNewsEventById(id);
+        const firebaseEvent = await fetchEventById(id);
+        console.log(firebaseEvent);
+        
         
         if (firebaseEvent) {
           setEvent(firebaseEvent);
@@ -103,6 +108,7 @@ const EventDetail = () => {
     fetchEventData();
   }, [id]);
   
+  
   if (isLoading) {
     return (
       <div className="min-h-screen">
@@ -111,7 +117,7 @@ const EventDetail = () => {
           <div className="container mx-auto">
             <Button 
               variant="ghost" 
-              className="mb-6 text-law-DEFAULT hover:text-law-accent pl-0"
+              className="mb-6 text-law-DEFAULT hover:text-white pl-0"
               onClick={() => navigate('/events')}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -179,7 +185,7 @@ const EventDetail = () => {
         <div className="container mx-auto">
           <Button 
             variant="ghost" 
-            className="mb-6 text-law-DEFAULT hover:text-law-accent pl-0"
+            className="mb-6 text-law-DEFAULT hover:text-white pl-3"
             onClick={() => navigate('/events')}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
