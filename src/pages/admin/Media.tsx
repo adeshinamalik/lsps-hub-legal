@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Image,
   Plus,
@@ -11,7 +11,11 @@ import {
   FolderOpen,
   Download,
   FolderPlus,
-  FileUp
+  FileUp,
+  FileImage,
+  FileText,
+  FileVideo,
+  FileAudio
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,8 +41,8 @@ import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Dummy data for media items
-const mediaItems = [
+// Expanded dummy data for media items with more diverse file types
+const dummyMediaItems = [
   {
     id: "1",
     name: "conference-2023.jpg",
@@ -93,6 +97,60 @@ const mediaItems = [
     uploadDate: "2023-05-25",
     url: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2074&q=80",
   },
+  {
+    id: "7",
+    name: "legal-symposium-opening.mp4",
+    type: "video",
+    size: "28.5 MB",
+    uploadedBy: "Admin",
+    uploadDate: "2023-07-12",
+    url: "",
+  },
+  {
+    id: "8",
+    name: "keynote-speech.mp3",
+    type: "audio",
+    size: "12.8 MB",
+    uploadedBy: "Editor",
+    uploadDate: "2023-06-30",
+    url: "",
+  },
+  {
+    id: "9",
+    name: "legal-research-handbook.pdf",
+    type: "document",
+    size: "5.4 MB",
+    uploadedBy: "Researcher",
+    uploadDate: "2023-08-05",
+    url: "",
+  },
+  {
+    id: "10",
+    name: "seminar-registration.jpg",
+    type: "image",
+    size: "1.1 MB",
+    uploadedBy: "Admin",
+    uploadDate: "2023-09-15",
+    url: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+  },
+  {
+    id: "11",
+    name: "mock-trial-guidelines.docx",
+    type: "document",
+    size: "1.8 MB",
+    uploadedBy: "Professor",
+    uploadDate: "2023-10-01",
+    url: "",
+  },
+  {
+    id: "12",
+    name: "faculty-meeting.jpg",
+    type: "image",
+    size: "1.3 MB",
+    uploadedBy: "Dean",
+    uploadDate: "2023-09-28",
+    url: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+  },
 ];
 
 const AdminMedia = () => {
@@ -105,6 +163,30 @@ const AdminMedia = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [newFolder, setNewFolder] = useState({ name: "" });
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [mediaItems, setMediaItems] = useState(dummyMediaItems);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate loading real data
+  useEffect(() => {
+    // In a real app, this would fetch media items from your database
+    const fetchMedia = async () => {
+      try {
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // For demo purposes, we'll just use the dummy data
+        // In a real app, you would set the data from your API here
+        setMediaItems(dummyMediaItems);
+      } catch (error) {
+        console.error("Error fetching media items:", error);
+        toast.error("Failed to load media items");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMedia();
+  }, []);
 
   const filteredItems = mediaItems.filter(
     (item) =>
@@ -121,6 +203,35 @@ const AdminMedia = () => {
       return;
     }
     
+    // Generate a random ID for the new file
+    const newId = Math.floor(Math.random() * 10000).toString();
+    
+    // Determine file type based on extension
+    const fileExtension = uploadFile.name.split('.').pop()?.toLowerCase() || '';
+    let fileType = 'document';
+    
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension)) {
+      fileType = 'image';
+    } else if (['mp4', 'mov', 'avi', 'webm'].includes(fileExtension)) {
+      fileType = 'video';
+    } else if (['mp3', 'wav', 'ogg', 'aac'].includes(fileExtension)) {
+      fileType = 'audio';
+    }
+    
+    // Create a new media item
+    const newMediaItem = {
+      id: newId,
+      name: uploadFile.name,
+      type: fileType,
+      size: `${(uploadFile.size / (1024 * 1024)).toFixed(2)} MB`,
+      uploadedBy: 'Current User', // In a real app, this would be the current user
+      uploadDate: new Date().toISOString().split('T')[0],
+      url: fileType === 'image' ? URL.createObjectURL(uploadFile) : '',
+    };
+    
+    // Add the new item to the media items
+    setMediaItems(prevItems => [newMediaItem, ...prevItems]);
+    
     toast.success("File uploaded successfully!");
     setIsUploadDialogOpen(false);
     setUploadFile(null);
@@ -133,13 +244,32 @@ const AdminMedia = () => {
       return;
     }
     
+    // Generate a random ID for the new folder
+    const newId = Math.floor(Math.random() * 10000).toString();
+    
+    // Add the new folder to the beginning of the media items
+    setMediaItems(prevItems => [{
+      id: newId,
+      name: newFolder.name,
+      type: 'folder',
+      size: '-',
+      uploadedBy: 'Current User', // In a real app, this would be the current user
+      uploadDate: new Date().toISOString().split('T')[0],
+      url: '',
+    }, ...prevItems]);
+    
     toast.success("Folder created successfully!");
     setIsNewFolderDialogOpen(false);
     setNewFolder({ name: "" });
   };
 
   const handleDeleteItem = () => {
-    // In a real app, this would delete the media item
+    // In a real app, this would delete the media item from your storage
+    if (!selectedItem) return;
+    
+    // Filter out the item with the selected ID
+    setMediaItems(prevItems => prevItems.filter(item => item.id !== selectedItem));
+    
     toast.success("Item deleted successfully!");
     setIsDeleteDialogOpen(false);
     setSelectedItem(null);
@@ -147,6 +277,22 @@ const AdminMedia = () => {
 
   const formatFileSize = (size: string) => {
     return size;
+  };
+
+  // Function to render the appropriate icon based on file type
+  const renderFileIcon = (type: string) => {
+    switch (type) {
+      case 'image':
+        return <FileImage className="h-5 w-5 text-blue-500" />;
+      case 'video':
+        return <FileVideo className="h-5 w-5 text-purple-500" />;
+      case 'audio':
+        return <FileAudio className="h-5 w-5 text-green-500" />;
+      case 'folder':
+        return <FolderOpen className="h-5 w-5 text-yellow-500" />;
+      default:
+        return <FileText className="h-5 w-5 text-blue-500" />;
+    }
   };
 
   return (
@@ -186,10 +332,12 @@ const AdminMedia = () => {
         className="w-full"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-center">
-          <TabsList className="grid w-full grid-cols-3 md:w-auto">
+          <TabsList className="grid w-full grid-cols-5 md:w-auto">
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="image">Images</TabsTrigger>
             <TabsTrigger value="document">Documents</TabsTrigger>
+            <TabsTrigger value="video">Videos</TabsTrigger>
+            <TabsTrigger value="audio">Audio</TabsTrigger>
           </TabsList>
 
           <div className="relative flex-1">
@@ -246,7 +394,11 @@ const AdminMedia = () => {
         </div>
 
         <TabsContent value="all" className="mt-6">
-          {filteredItems.length === 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            </div>
+          ) : filteredItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
               <Image className="h-12 w-12 mb-2 text-gray-400" />
               <h3 className="mt-2 text-lg font-semibold">No media found</h3>
@@ -273,13 +425,6 @@ const AdminMedia = () => {
             </div>
           ) : viewMode === "grid" ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              <div className="group relative cursor-pointer rounded-lg border bg-card p-2 transition-all hover:border-primary">
-                <div className="flex h-full w-full flex-col items-center justify-center gap-1 p-4">
-                  <FolderOpen className="h-16 w-16 text-yellow-500" />
-                  <span className="mt-2 text-sm font-medium">New Folder</span>
-                </div>
-              </div>
-              
               {filteredItems.map((item) => (
                 <div
                   key={item.id}
@@ -293,23 +438,21 @@ const AdminMedia = () => {
                         className="h-full w-full object-cover transition-all group-hover:scale-105"
                       />
                     </div>
+                  ) : item.type === "video" ? (
+                    <div className="flex aspect-square items-center justify-center bg-purple-100 rounded-md">
+                      <FileVideo className="h-16 w-16 text-purple-500" />
+                    </div>
+                  ) : item.type === "audio" ? (
+                    <div className="flex aspect-square items-center justify-center bg-green-100 rounded-md">
+                      <FileAudio className="h-16 w-16 text-green-500" />
+                    </div>
+                  ) : item.type === "folder" ? (
+                    <div className="flex aspect-square items-center justify-center bg-yellow-100 rounded-md">
+                      <FolderOpen className="h-16 w-16 text-yellow-500" />
+                    </div>
                   ) : (
-                    <div className="flex aspect-square items-center justify-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="48"
-                        height="48"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-blue-500"
-                      >
-                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                        <polyline points="14 2 14 8 20 8" />
-                      </svg>
+                    <div className="flex aspect-square items-center justify-center bg-blue-100 rounded-md">
+                      <FileText className="h-16 w-16 text-blue-500" />
                     </div>
                   )}
                   <div className="p-2">
@@ -321,14 +464,16 @@ const AdminMedia = () => {
                     </p>
                   </div>
                   <div className="invisible absolute right-2 top-2 flex gap-1 rounded-md bg-background/80 p-1 backdrop-blur transition-all group-hover:visible">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span className="sr-only">Download</span>
-                    </Button>
+                    {item.type !== "folder" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                      >
+                        <Download className="h-4 w-4" />
+                        <span className="sr-only">Download</span>
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -367,53 +512,11 @@ const AdminMedia = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b">
-                    <td className="px-4 py-3 font-medium">
-                      <div className="flex items-center gap-2">
-                        <FolderOpen className="h-5 w-5 text-yellow-500" />
-                        New Folder
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">Folder</td>
-                    <td className="px-4 py-3">-</td>
-                    <td className="px-4 py-3">Admin</td>
-                    <td className="px-4 py-3">-</td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-blue-500"
-                        >
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Rename</span>
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
                   {filteredItems.map((item) => (
                     <tr key={item.id} className="border-b">
                       <td className="px-4 py-3 font-medium">
                         <div className="flex items-center gap-2">
-                          {item.type === "image" ? (
-                            <Image className="h-5 w-5 text-blue-500" />
-                          ) : (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="text-blue-500"
-                            >
-                              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                              <polyline points="14 2 14 8 20 8" />
-                            </svg>
-                          )}
+                          {renderFileIcon(item.type)}
                           {item.name}
                         </div>
                       </td>
@@ -423,152 +526,16 @@ const AdminMedia = () => {
                       <td className="px-4 py-3">{item.uploadDate}</td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <Download className="h-4 w-4" />
-                            <span className="sr-only">Download</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-blue-500"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Rename</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-500"
-                            onClick={() => {
-                              setSelectedItem(item.id);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="image" className="mt-6">
-          {/* Similar display for images, filtered by type */}
-          {filteredItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-              <Image className="h-12 w-12 mb-2 text-gray-400" />
-              <h3 className="mt-2 text-lg font-semibold">No images found</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Upload image files to see them here.
-              </p>
-              <div className="mt-6">
-                <Button
-                  onClick={() => setIsUploadDialogOpen(true)}
-                  className="gap-2"
-                >
-                  <FileUp className="h-4 w-4" />
-                  Upload Image
-                </Button>
-              </div>
-            </div>
-          ) : viewMode === "grid" ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {filteredItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="group relative cursor-pointer rounded-lg border bg-card p-2 transition-all hover:border-primary"
-                >
-                  <div className="aspect-square overflow-hidden rounded-md">
-                    <img
-                      src={item.url}
-                      alt={item.name}
-                      className="h-full w-full object-cover transition-all group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="p-2">
-                    <p className="truncate text-sm font-medium">
-                      {item.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatFileSize(item.size)}
-                    </p>
-                  </div>
-                  <div className="invisible absolute right-2 top-2 flex gap-1 rounded-md bg-background/80 p-1 backdrop-blur transition-all group-hover:visible">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span className="sr-only">Download</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                    >
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Rename</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-red-500"
-                      onClick={() => {
-                        setSelectedItem(item.id);
-                        setIsDeleteDialogOpen(true);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="px-4 py-3 text-left font-medium">Name</th>
-                    <th className="px-4 py-3 text-left font-medium">Size</th>
-                    <th className="px-4 py-3 text-left font-medium">Uploaded By</th>
-                    <th className="px-4 py-3 text-left font-medium">Date</th>
-                    <th className="px-4 py-3 text-right font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItems.map((item) => (
-                    <tr key={item.id} className="border-b">
-                      <td className="px-4 py-3 font-medium">
-                        <div className="flex items-center gap-2">
-                          <Image className="h-5 w-5 text-blue-500" />
-                          {item.name}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">{item.size}</td>
-                      <td className="px-4 py-3">{item.uploadedBy}</td>
-                      <td className="px-4 py-3">{item.uploadDate}</td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <Download className="h-4 w-4" />
-                            <span className="sr-only">Download</span>
-                          </Button>
+                          {item.type !== "folder" && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <Download className="h-4 w-4" />
+                              <span className="sr-only">Download</span>
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -599,181 +566,171 @@ const AdminMedia = () => {
           )}
         </TabsContent>
 
-        <TabsContent value="document" className="mt-6">
-          {/* Similar display for documents, filtered by type */}
-          {filteredItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-gray-400"
-              >
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-              <h3 className="mt-2 text-lg font-semibold">No documents found</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Upload document files to see them here.
-              </p>
-              <div className="mt-6">
-                <Button
-                  onClick={() => setIsUploadDialogOpen(true)}
-                  className="gap-2"
-                >
-                  <FileUp className="h-4 w-4" />
-                  Upload Document
-                </Button>
+        {/* Content for other tabs - Image, Document, Video, Audio */}
+        {["image", "document", "video", "audio"].map((tabValue) => (
+          <TabsContent key={tabValue} value={tabValue} className="mt-6">
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
               </div>
-            </div>
-          ) : viewMode === "grid" ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {filteredItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="group relative cursor-pointer rounded-lg border bg-card p-2 transition-all hover:border-primary"
-                >
-                  <div className="flex aspect-square items-center justify-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="48"
-                      height="48"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-blue-500"
-                    >
-                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                      <polyline points="14 2 14 8 20 8" />
-                    </svg>
-                  </div>
-                  <div className="p-2">
-                    <p className="truncate text-sm font-medium">
-                      {item.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatFileSize(item.size)}
-                    </p>
-                  </div>
-                  <div className="invisible absolute right-2 top-2 flex gap-1 rounded-md bg-background/80 p-1 backdrop-blur transition-all group-hover:visible">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span className="sr-only">Download</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                    >
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Rename</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-red-500"
-                      onClick={() => {
-                        setSelectedItem(item.id);
-                        setIsDeleteDialogOpen(true);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
+            ) : filteredItems.length === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
+                {tabValue === "image" ? (
+                  <FileImage className="h-12 w-12 mb-2 text-gray-400" />
+                ) : tabValue === "video" ? (
+                  <FileVideo className="h-12 w-12 mb-2 text-gray-400" />
+                ) : tabValue === "audio" ? (
+                  <FileAudio className="h-12 w-12 mb-2 text-gray-400" />
+                ) : (
+                  <FileText className="h-12 w-12 mb-2 text-gray-400" />
+                )}
+                <h3 className="mt-2 text-lg font-semibold">No {tabValue}s found</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Upload {tabValue} files to see them here.
+                </p>
+                <div className="mt-6">
+                  <Button
+                    onClick={() => setIsUploadDialogOpen(true)}
+                    className="gap-2"
+                  >
+                    <FileUp className="h-4 w-4" />
+                    Upload {tabValue.charAt(0).toUpperCase() + tabValue.slice(1)}
+                  </Button>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="px-4 py-3 text-left font-medium">Name</th>
-                    <th className="px-4 py-3 text-left font-medium">Size</th>
-                    <th className="px-4 py-3 text-left font-medium">Uploaded By</th>
-                    <th className="px-4 py-3 text-left font-medium">Date</th>
-                    <th className="px-4 py-3 text-right font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItems.map((item) => (
-                    <tr key={item.id} className="border-b">
-                      <td className="px-4 py-3 font-medium">
-                        <div className="flex items-center gap-2">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-blue-500"
-                          >
-                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                            <polyline points="14 2 14 8 20 8" />
-                          </svg>
-                          {item.name}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">{item.size}</td>
-                      <td className="px-4 py-3">{item.uploadedBy}</td>
-                      <td className="px-4 py-3">{item.uploadDate}</td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <Download className="h-4 w-4" />
-                            <span className="sr-only">Download</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-blue-500"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Rename</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-500"
-                            onClick={() => {
-                              setSelectedItem(item.id);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
-                        </div>
-                      </td>
+              </div>
+            ) : viewMode === "grid" ? (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                {filteredItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="group relative cursor-pointer rounded-lg border bg-card p-2 transition-all hover:border-primary"
+                  >
+                    {tabValue === "image" ? (
+                      <div className="aspect-square overflow-hidden rounded-md">
+                        <img
+                          src={item.url}
+                          alt={item.name}
+                          className="h-full w-full object-cover transition-all group-hover:scale-105"
+                        />
+                      </div>
+                    ) : tabValue === "video" ? (
+                      <div className="flex aspect-square items-center justify-center bg-purple-100 rounded-md">
+                        <FileVideo className="h-16 w-16 text-purple-500" />
+                      </div>
+                    ) : tabValue === "audio" ? (
+                      <div className="flex aspect-square items-center justify-center bg-green-100 rounded-md">
+                        <FileAudio className="h-16 w-16 text-green-500" />
+                      </div>
+                    ) : (
+                      <div className="flex aspect-square items-center justify-center bg-blue-100 rounded-md">
+                        <FileText className="h-16 w-16 text-blue-500" />
+                      </div>
+                    )}
+                    <div className="p-2">
+                      <p className="truncate text-sm font-medium">
+                        {item.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatFileSize(item.size)}
+                      </p>
+                    </div>
+                    <div className="invisible absolute right-2 top-2 flex gap-1 rounded-md bg-background/80 p-1 backdrop-blur transition-all group-hover:visible">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                      >
+                        <Download className="h-4 w-4" />
+                        <span className="sr-only">Download</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Rename</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-red-500"
+                        onClick={() => {
+                          setSelectedItem(item.id);
+                          setIsDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-md border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="px-4 py-3 text-left font-medium">Name</th>
+                      <th className="px-4 py-3 text-left font-medium">Size</th>
+                      <th className="px-4 py-3 text-left font-medium">Uploaded By</th>
+                      <th className="px-4 py-3 text-left font-medium">Date</th>
+                      <th className="px-4 py-3 text-right font-medium">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </TabsContent>
+                  </thead>
+                  <tbody>
+                    {filteredItems.map((item) => (
+                      <tr key={item.id} className="border-b">
+                        <td className="px-4 py-3 font-medium">
+                          <div className="flex items-center gap-2">
+                            {renderFileIcon(item.type)}
+                            {item.name}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">{item.size}</td>
+                        <td className="px-4 py-3">{item.uploadedBy}</td>
+                        <td className="px-4 py-3">{item.uploadDate}</td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <Download className="h-4 w-4" />
+                              <span className="sr-only">Download</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-blue-500"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              <span className="sr-only">Rename</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-red-500"
+                              onClick={() => {
+                                setSelectedItem(item.id);
+                                setIsDeleteDialogOpen(true);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </TabsContent>
+        ))}
       </Tabs>
 
       {/* Upload File Dialog */}
@@ -816,22 +773,13 @@ const AdminMedia = () => {
             {uploadFile && (
               <div className="mt-2 flex items-center gap-2 rounded-md bg-blue-50 p-2 text-blue-700">
                 {uploadFile.name.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                  <Image className="h-4 w-4" />
+                  <FileImage className="h-4 w-4" />
+                ) : uploadFile.name.match(/\.(mp4|mov|avi|webm)$/i) ? (
+                  <FileVideo className="h-4 w-4" />
+                ) : uploadFile.name.match(/\.(mp3|wav|ogg)$/i) ? (
+                  <FileAudio className="h-4 w-4" />
                 ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                    <polyline points="14 2 14 8 20 8" />
-                  </svg>
+                  <FileText className="h-4 w-4" />
                 )}
                 <span className="text-sm">{uploadFile.name}</span>
               </div>
