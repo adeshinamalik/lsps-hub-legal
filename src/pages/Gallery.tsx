@@ -46,6 +46,82 @@ interface GalleryItem extends FirebaseGalleryItem {
   type: 'image' | 'video' | 'document';
 }
 
+// Dummy gallery items to use when the gallery is empty
+const dummyGalleryItems: GalleryItem[] = [
+  {
+    id: "dummy1",
+    title: "Annual Law Conference 2023",
+    type: "image",
+    imageSrc: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    date: "May 15, 2023",
+    category: "Events",
+    description: "Legal professionals gathering to discuss the latest developments in law practice and legislation."
+  },
+  {
+    id: "dummy2",
+    title: "Moot Court Competition",
+    type: "image",
+    imageSrc: "https://images.unsplash.com/photo-1593115057322-e94b77572f20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
+    date: "April 22, 2023",
+    category: "Competitions",
+    description: "Students demonstrating their advocacy skills in our annual moot court competition."
+  },
+  {
+    id: "dummy3",
+    title: "Law Review Editorial Meeting",
+    type: "image",
+    imageSrc: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    date: "March 10, 2023",
+    category: "Meetings",
+    description: "Our editorial team discussing submissions for the upcoming law review publication."
+  },
+  {
+    id: "dummy4",
+    title: "Legal Aid Clinic Outreach",
+    type: "image",
+    imageSrc: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    date: "February 28, 2023",
+    category: "Community",
+    description: "Student volunteers providing legal assistance to underserved communities."
+  },
+  {
+    id: "dummy5",
+    title: "Guest Lecture: Supreme Court Justice",
+    type: "video",
+    imageSrc: "https://images.unsplash.com/photo-1557425493-6f90ae4659fc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    date: "January 17, 2023",
+    category: "Lectures",
+    description: "A special lecture given by a sitting Justice of the Supreme Court about constitutional law."
+  },
+  {
+    id: "dummy6",
+    title: "Law Students' Association Dinner",
+    type: "image",
+    imageSrc: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    date: "December 5, 2022",
+    category: "Social",
+    description: "Annual gala dinner celebrating our students' achievements throughout the academic year."
+  },
+  {
+    id: "dummy7",
+    title: "Law Students' Publication Workshop",
+    type: "document",
+    imageSrc: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    date: "November 12, 2022",
+    category: "Workshops",
+    description: "Workshop helping students learn how to publish their legal research and articles."
+  },
+  {
+    id: "dummy8",
+    title: "Mock Trial Preparation",
+    type: "image",
+    imageSrc: "https://images.unsplash.com/photo-1589391886645-d51941baf7fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    date: "October 8, 2022",
+    category: "Training",
+    description: "Students rehearsing for the upcoming mock trial competition, perfecting their arguments and evidence presentations."
+  },
+];
+
 const Gallery = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -66,7 +142,14 @@ const Gallery = () => {
           type: determineFileType(item.imageSrc)
         }));
         
-        setGalleryItems(items);
+        // If we got items from Firebase, use those
+        if (items.length > 0) {
+          setGalleryItems(items);
+        } else {
+          // Otherwise use our dummy items
+          setGalleryItems(dummyGalleryItems);
+          console.log("No gallery items found in database, using dummy items");
+        }
       } catch (error) {
         console.error("Error loading gallery items:", error);
         toast({
@@ -74,8 +157,8 @@ const Gallery = () => {
           description: "Failed to load gallery items. Using fallback data.",
           variant: "destructive",
         });
-        // If there's an error, we'll use the mock data
-        setGalleryItems(fallbackGalleryItems);
+        // If there's an error, we'll use the dummy data
+        setGalleryItems(dummyGalleryItems);
       } finally {
         setLoading(false);
       }
@@ -99,7 +182,7 @@ const Gallery = () => {
   // Filter items based on search query, tab, and category
   const filteredItems = galleryItems.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         (item.description?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
+                         ((item.description?.toLowerCase().includes(searchQuery.toLowerCase())) || false);
     const matchesTab = selectedTab === "all" || item.type === selectedTab;
     const matchesCategory = selectedCategory === "All Categories" || item.category === selectedCategory;
     
@@ -123,74 +206,6 @@ const Gallery = () => {
         return <Grid2X2 className="h-5 w-5" />;
     }
   };
-
-  // Fallback gallery items to use if Firebase fetch fails
-  const fallbackGalleryItems: GalleryItem[] = [
-    {
-      id: "1",
-      title: "Annual Law Conference 2023",
-      type: "image",
-      imageSrc: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-      date: "May 15, 2023",
-      category: "Events",
-    },
-    {
-      id: "2",
-      title: "Moot Court Competition",
-      type: "image",
-      imageSrc: "https://images.unsplash.com/photo-1593115057322-e94b77572f20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
-      date: "April 22, 2023",
-      category: "Competitions",
-    },
-    {
-      id: "3",
-      title: "Law Review Editorial Meeting",
-      type: "image",
-      imageSrc: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-      date: "March 10, 2023",
-      category: "Meetings",
-    },
-    {
-      id: "4",
-      title: "Legal Aid Clinic Outreach",
-      type: "image",
-      imageSrc: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-      date: "February 28, 2023",
-      category: "Community",
-    },
-    {
-      id: "5",
-      title: "Guest Lecture: Supreme Court Justice",
-      type: "video",
-      imageSrc: "https://images.unsplash.com/photo-1557425493-6f90ae4659fc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-      date: "January 17, 2023",
-      category: "Lectures",
-    },
-    {
-      id: "6",
-      title: "Law Students' Association Dinner",
-      type: "image",
-      imageSrc: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-      date: "December 5, 2022",
-      category: "Social",
-    },
-    {
-      id: "7",
-      title: "Law Students' Publication Workshop",
-      type: "document",
-      imageSrc: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-      date: "November 12, 2022",
-      category: "Workshops",
-    },
-    {
-      id: "8",
-      title: "Mock Trial Preparation",
-      type: "image",
-      imageSrc: "https://images.unsplash.com/photo-1589391886645-d51941baf7fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-      date: "October 8, 2022",
-      category: "Training",
-    },
-  ];
 
   return (
     <div className="min-h-screen">
