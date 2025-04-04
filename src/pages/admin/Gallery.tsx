@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -47,7 +46,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus, Pencil, Trash2 } from "lucide-react";
+import { ImagePlus, Pencil, Trash2, Calendar } from "lucide-react";
 import { 
   createGalleryItem, 
   deleteGalleryItem, 
@@ -57,6 +56,14 @@ import {
   uploadImage 
 } from "@/firebase/firebaseService";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { format } from "date-fns";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const AdminGallery = () => {
   const { toast } = useToast();
@@ -71,12 +78,14 @@ const AdminGallery = () => {
     category: string;
     imageFile: File | null;
     imageSrc: string;
+    date: Date;
   }>({
     title: "",
     description: "",
     category: "",
     imageFile: null,
     imageSrc: "",
+    date: new Date(),
   });
 
   // Categories for filtering
@@ -118,6 +127,7 @@ const AdminGallery = () => {
       category: "",
       imageFile: null,
       imageSrc: "",
+      date: new Date(),
     });
     setSelectedItem(null);
   };
@@ -149,6 +159,12 @@ const AdminGallery = () => {
     setFormData((prev) => ({ ...prev, category: value }));
   };
 
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setFormData((prev) => ({ ...prev, date }));
+    }
+  };
+
   const handleAddItem = async () => {
     if (!formData.title || !formData.category || (!formData.imageFile && !formData.imageSrc)) {
       toast({
@@ -174,7 +190,7 @@ const AdminGallery = () => {
         description: formData.description,
         imageSrc: imageUrl,
         category: formData.category,
-        date: new Date().toISOString().split('T')[0],
+        date: format(formData.date, "MMMM d, yyyy"),
       };
       
       const id = await createGalleryItem(newItem);
@@ -228,6 +244,7 @@ const AdminGallery = () => {
         title: formData.title,
         description: formData.description,
         category: formData.category,
+        date: format(formData.date, "MMMM d, yyyy"),
         ...(formData.imageFile ? { imageSrc: imageUrl } : {}),
       };
       
@@ -295,12 +312,34 @@ const AdminGallery = () => {
 
   const handleEdit = (item: GalleryItem) => {
     setSelectedItem(item);
+    let itemDate = new Date();
+    
+    // Try to parse the date from the item
+    if (item.date) {
+      try {
+        // Parse date if it's in "Month day, year" format like "May 15, 2023"
+        const dateParts = item.date.match(/([a-zA-Z]+)\s+(\d+),\s+(\d+)/);
+        if (dateParts) {
+          const [_, month, day, year] = dateParts;
+          const monthIndex = new Date(Date.parse(`${month} 1, 2000`)).getMonth();
+          itemDate = new Date(parseInt(year), monthIndex, parseInt(day));
+        } else {
+          // Fallback to simple date parsing
+          itemDate = new Date(item.date);
+        }
+      } catch (e) {
+        console.error("Error parsing date:", e);
+        // Keep default date if parsing fails
+      }
+    }
+    
     setFormData({
       title: item.title,
       description: item.description || "",
       category: item.category || "",
       imageFile: null,
       imageSrc: item.imageSrc,
+      date: itemDate,
     });
     setDialogOpen(true);
   };
@@ -376,6 +415,35 @@ const AdminGallery = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="date">Date *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="date"
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal flex gap-2"
+                    >
+                      <Calendar className="h-4 w-4" />
+                      {formData.date ? (
+                        format(formData.date, "MMMM d, yyyy")
+                      ) : (
+                        <span>Select a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={formData.date}
+                      onSelect={handleDateChange}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               
               <div className="space-y-2">
