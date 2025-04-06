@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import Hero from "@/components/Hero";
 import FeaturedArticles from "@/components/FeaturedArticles";
-import NewsHighlights from "@/components/NewsHighlights";
+import NewsSection from "@/components/NewsSection";
+import EventsSection from "@/components/EventsSection";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { myImages } from "@/images";
 import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/firebase/Firebase';
 import { supabase } from "@/supabase/supabase";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Article {
   id: string;
@@ -38,8 +40,9 @@ const Index = () => {
   const navigate = useNavigate();
   const [featuredFirebaseArticles, setFeaturedFirebaseArticles] = useState<Article[]>([]);
   const [featuredSupabaseArticles, setFeaturedSupabaseArticles] = useState<Article[]>([]);
-  const [firebaseNewsEvents, setFirebaseNewsEvents] = useState<NewsEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [firebaseNewsItems, setFirebaseNewsItems] = useState<NewsEvent[]>([]);
+  const [firebaseEventItems, setFirebaseEventItems] = useState<NewsEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const staticFeaturedArticles = [
     {
@@ -71,7 +74,26 @@ const Index = () => {
     },
   ];
 
-  const staticNewsEvents = [
+  const staticNewsItems = [
+    {
+      id: "1",
+      title: "LSPS Welcomes New Editorial Board",
+      date: "May 28, 2023",
+      description: "The Law Students' Press Society is pleased to announce the appointment of a new editorial board for the 2023/2024 academic session.",
+      type: "news" as const,
+      imageSrc: "https://images.unsplash.com/photo-1528901166007-3784c7dd3653?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+    },
+    {
+      id: "2",
+      title: "Mock Trial Competition Results",
+      date: "June 10, 2023",
+      description: "Congratulations to Team Equity for winning this year's mock trial competition. Their exceptional advocacy skills impressed the panel of judges.",
+      type: "news" as const,
+      imageSrc: myImages.image1
+    },
+  ];
+
+  const staticEventItems = [
     {
       id: "1",
       title: "LSPS Annual Legal Writing Workshop",
@@ -81,14 +103,6 @@ const Index = () => {
       eventDate: "July 20, 2023",
       location: "Faculty of Law Auditorium",
       imageSrc: myImages.image3
-    },
-    {
-      id: "2",
-      title: "LSPS Welcomes New Editorial Board",
-      date: "May 28, 2023",
-      description: "The Law Students' Press Society is pleased to announce the appointment of a new editorial board for the 2023/2024 academic session.",
-      type: "news" as const,
-      imageSrc: "https://images.unsplash.com/photo-1528901166007-3784c7dd3653?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
     },
     {
       id: "3",
@@ -103,7 +117,7 @@ const Index = () => {
   ];
 
   useEffect(() => {
-    const fetchFeaturedArticles = async () => {
+    const fetchContent = async () => {
       setIsLoading(true);
       try {
         const articlesQuery = query(
@@ -154,42 +168,76 @@ const Index = () => {
           console.log("Supabase featured articles loaded:", supabaseArticles.length);
         }
 
-        const newsEventsQuery = query(
+        const newsQuery = query(
           collection(db, 'newsEvents'),
           where('status', '==', 'Published'),
+          where('type', '==', 'news'),
           orderBy('createdAt', 'desc'),
           limit(3)
         );
         
-        const newsEventsSnapshot = await getDocs(newsEventsQuery);
-        const firestoreNewsEvents = newsEventsSnapshot.docs.map(doc => {
+        const newsSnapshot = await getDocs(newsQuery);
+        const firestoreNewsItems = newsSnapshot.docs.map(doc => {
           const data = doc.data();
           return {
             id: doc.id,
             title: data.title || "Untitled",
             description: data.summary || "No description available",
             date: `Posted on ${data.date || new Date().toISOString().split('T')[0]}`,
-            type: data.type || "news",
+            type: "news",
+            imageSrc: data.imageSrc || "https://via.placeholder.com/640x360"
+          } as NewsEvent;
+        });
+        
+        setFirebaseNewsItems(firestoreNewsItems);
+        console.log("Firebase news items loaded:", firestoreNewsItems.length);
+
+        const eventsQuery = query(
+          collection(db, 'newsEvents'),
+          where('status', '==', 'Published'),
+          where('type', '==', 'event'),
+          orderBy('eventDate', 'asc'),
+          limit(3)
+        );
+        
+        const eventsSnapshot = await getDocs(eventsQuery);
+        const firestoreEventItems = eventsSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title || "Untitled",
+            description: data.summary || "No description available",
+            date: `Posted on ${data.date || new Date().toISOString().split('T')[0]}`,
+            type: "event",
             eventDate: data.eventDate,
             location: data.location,
             imageSrc: data.imageSrc || "https://via.placeholder.com/640x360"
           } as NewsEvent;
         });
         
-        setFirebaseNewsEvents(firestoreNewsEvents);
-        console.log("Firebase news events loaded:", firestoreNewsEvents.length);
+        setFirebaseEventItems(firestoreEventItems);
+        console.log("Firebase event items loaded:", firestoreEventItems.length);
       } catch (error) {
-        console.error("Error fetching featured content:", error);
+        console.error("Error fetching content:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchFeaturedArticles();
+    fetchContent();
   }, []);
 
-  const combinedFeaturedArticles = [...staticFeaturedArticles, ...featuredFirebaseArticles, ...featuredSupabaseArticles].slice(0, 6);
-  const combinedNewsEvents = [...staticNewsEvents, ...firebaseNewsEvents].slice(0, 6);
+  const combinedFeaturedArticles = featuredFirebaseArticles.length > 0 || featuredSupabaseArticles.length > 0 
+    ? [...featuredFirebaseArticles, ...featuredSupabaseArticles].slice(0, 6) 
+    : staticFeaturedArticles;
+
+  const displayedNewsItems = firebaseNewsItems.length > 0 
+    ? firebaseNewsItems 
+    : staticNewsItems;
+
+  const displayedEventItems = firebaseEventItems.length > 0 
+    ? firebaseEventItems 
+    : staticEventItems;
 
   return (
     <div className="min-h-screen">
@@ -270,9 +318,37 @@ const Index = () => {
         </div>
       </section>
 
-      <FeaturedArticles articles={combinedFeaturedArticles} />
+      {isLoading ? (
+        <div className="container mx-auto py-10 px-6">
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-64" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <Skeleton className="h-80 w-full" />
+              <Skeleton className="h-80 w-full" />
+              <Skeleton className="h-80 w-full" />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <FeaturedArticles articles={combinedFeaturedArticles} />
+      )}
 
-      <NewsHighlights items={combinedNewsEvents} />
+      {isLoading ? (
+        <div className="container mx-auto py-10 px-6 bg-law-muted">
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-64 bg-white/50" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Skeleton className="h-72 w-full bg-white/50" />
+              <Skeleton className="h-72 w-full bg-white/50" />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          <NewsSection items={displayedNewsItems} />
+          <EventsSection items={displayedEventItems} />
+        </>
+      )}
 
       <Footer />
     </div>
