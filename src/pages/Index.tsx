@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Hero from "@/components/Hero";
 import FeaturedArticles from "@/components/FeaturedArticles";
@@ -36,12 +37,31 @@ interface NewsEvent {
   imageSrc: string;
 }
 
+interface NewsItem {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+  type: 'news';
+  imageSrc?: string;
+}
+
+interface EventItem {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+  type: 'event';
+  imageSrc?: string;
+  eventDate?: string;
+  location?: string;
+}
+
 const Index = () => {
   const navigate = useNavigate();
   const [featuredFirebaseArticles, setFeaturedFirebaseArticles] = useState<Article[]>([]);
   const [featuredSupabaseArticles, setFeaturedSupabaseArticles] = useState<Article[]>([]);
-  const [firebaseNewsItems, setFirebaseNewsItems] = useState<NewsEvent[]>([]);
-  const [firebaseEventItems, setFirebaseEventItems] = useState<NewsEvent[]>([]);
+  const [firebaseNewsEvents, setFirebaseNewsEvents] = useState<NewsEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const staticFeaturedArticles = [
@@ -176,22 +196,6 @@ const Index = () => {
           limit(3)
         );
         
-        const newsSnapshot = await getDocs(newsQuery);
-        const firestoreNewsItems = newsSnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            title: data.title || "Untitled",
-            description: data.summary || "No description available",
-            date: `Posted on ${data.date || new Date().toISOString().split('T')[0]}`,
-            type: "news",
-            imageSrc: data.imageSrc || "https://via.placeholder.com/640x360"
-          } as NewsEvent;
-        });
-        
-        setFirebaseNewsItems(firestoreNewsItems);
-        console.log("Firebase news items loaded:", firestoreNewsItems.length);
-
         const eventsQuery = query(
           collection(db, 'newsEvents'),
           where('status', '==', 'Published'),
@@ -200,23 +204,41 @@ const Index = () => {
           limit(3)
         );
         
-        const eventsSnapshot = await getDocs(eventsQuery);
-        const firestoreEventItems = eventsSnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            title: data.title || "Untitled",
-            description: data.summary || "No description available",
-            date: `Posted on ${data.date || new Date().toISOString().split('T')[0]}`,
-            type: "event",
-            eventDate: data.eventDate,
-            location: data.location,
-            imageSrc: data.imageSrc || "https://via.placeholder.com/640x360"
-          } as NewsEvent;
-        });
+        const [newsSnapshot, eventsSnapshot] = await Promise.all([
+          getDocs(newsQuery),
+          getDocs(eventsQuery)
+        ]);
         
-        setFirebaseEventItems(firestoreEventItems);
-        console.log("Firebase event items loaded:", firestoreEventItems.length);
+        const firestoreNewsEvents = [
+          ...newsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              title: data.title || "Untitled",
+              description: data.summary || "No description available",
+              date: `Posted on ${data.date || new Date().toISOString().split('T')[0]}`,
+              type: "news" as const,
+              imageSrc: data.imageSrc || "https://via.placeholder.com/640x360"
+            };
+          }),
+          ...eventsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              title: data.title || "Untitled",
+              description: data.summary || "No description available",
+              date: `Posted on ${data.date || new Date().toISOString().split('T')[0]}`,
+              type: "event" as const,
+              eventDate: data.eventDate,
+              location: data.location,
+              imageSrc: data.imageSrc || "https://via.placeholder.com/640x360"
+            };
+          })
+        ];
+        
+        setFirebaseNewsEvents(firestoreNewsEvents);
+        console.log("Firebase news and events loaded:", firestoreNewsEvents.length);
+        
       } catch (error) {
         console.error("Error fetching content:", error);
       } finally {
@@ -231,13 +253,15 @@ const Index = () => {
     ? [...featuredFirebaseArticles, ...featuredSupabaseArticles].slice(0, 6) 
     : staticFeaturedArticles;
 
-  const displayedNewsItems = firebaseNewsItems.length > 0 
-    ? firebaseNewsItems 
-    : staticNewsItems;
+  // Properly filter news and events by type to match expected NewsItem[] and EventItem[]
+  const displayedNewsItems: NewsItem[] = firebaseNewsEvents.filter(item => item.type === 'news') as NewsItem[];
+  const displayedEventItems: EventItem[] = firebaseNewsEvents.filter(item => item.type === 'event') as EventItem[];
 
-  const displayedEventItems = firebaseEventItems.length > 0 
-    ? firebaseEventItems 
-    : staticEventItems;
+  // If no news items from Firebase, use static dummy data
+  const newsToDisplay = displayedNewsItems.length > 0 ? displayedNewsItems : staticNewsItems;
+  
+  // If no event items from Firebase, use static dummy data
+  const eventsToDisplay = displayedEventItems.length > 0 ? displayedEventItems : staticEventItems;
 
   return (
     <div className="min-h-screen">
@@ -345,8 +369,8 @@ const Index = () => {
         </div>
       ) : (
         <>
-          <NewsSection items={displayedNewsItems} />
-          <EventsSection items={displayedEventItems} />
+          <NewsSection items={newsToDisplay} />
+          <EventsSection items={eventsToDisplay} />
         </>
       )}
 
