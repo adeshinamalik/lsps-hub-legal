@@ -54,28 +54,28 @@ const Footer = () => {
             <h4 className="text-lg font-medium mb-6">Quick Links</h4>
             <ul className="space-y-3">
               <li>
-                <Link to="/" className="text-gray-300 hover:text-white transition-colors">Home</Link>
+                <Link to="/" className="text-gray-300 hover:text-black transition-colors">Home</Link>
               </li>
               <li>
-                <Link to="/about" className="text-gray-300 hover:text-white transition-colors">About Us</Link>
+                <Link to="/about" className="text-gray-300 hover:text-black transition-colors">About Us</Link>
               </li>
               <li>
-                <Link to="/publications" className="text-gray-300 hover:text-white transition-colors">Publications</Link>
+                <Link to="/publications" className="text-gray-300 hover:text-black transition-colors">Publications</Link>
               </li>
               <li>
-                <Link to="/news" className="text-gray-300 hover:text-white transition-colors">News & Events</Link>
+                <Link to="/news" className="text-gray-300 hover:text-black transition-colors">News & Events</Link>
               </li>
               <li>
-                <Link to="/gallery" className="text-gray-300 hover:text-white transition-colors">Gallery</Link>
+                <Link to="/gallery" className="text-gray-300 hover:text-black transition-colors">Gallery</Link>
               </li>
               <li>
-                <Link to="/resources" className="text-gray-300 hover:text-white transition-colors">Resources</Link>
+                <Link to="/resources" className="text-gray-300 hover:text-black transition-colors">Resources</Link>
               </li>
               <li>
-                <Link to="/join-us" className="text-gray-300 hover:text-white transition-colors">Join Us</Link>
+                <Link to="/join-us" className="text-gray-300 hover:text-black transition-colors">Join Us</Link>
               </li>
               <li>
-                <Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Contact</Link>
+                <Link to="/contact" className="text-gray-300 hover:text-black transition-colors">Contact</Link>
               </li>
             </ul>
           </div>
@@ -89,13 +89,13 @@ const Footer = () => {
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 mr-3 text-law-accent shrink-0" />
-                <a href="mailto:info@lsps.org" className="text-gray-300 hover:text-white transition-colors">
+                <a href="mailto:info@lsps.org" className="text-gray-300 hover:text-black transition-colors">
                   info@lsps.org
                 </a>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 mr-3 text-law-accent shrink-0" />
-                <a href="tel:+2348012345678" className="text-gray-300 hover:text-white transition-colors">
+                <a href="tel:+2348012345678" className="text-gray-300 hover:text-black transition-colors">
                   +234 801 234 5678
                 </a>
               </li>
