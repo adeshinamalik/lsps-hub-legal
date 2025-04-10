@@ -195,7 +195,11 @@ const AdminPublications = () => {
   };
 
   const uploadImage = async (): Promise<string> => {
+    console.log("trying upload image");
+
     if (!imageFile) return "";
+    
+    console.log("uploading image");
     try {
       setIsUploading(true);
       const fileName = `${Date.now()}_${imageFile.name}`;
