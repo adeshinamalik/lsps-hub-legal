@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import {
   FileText,
@@ -473,7 +474,7 @@ const AdminPublications = () => {
           <DialogHeader>
             <DialogTitle>Add New Publication</DialogTitle>
             <DialogDescription>
-              Create a new article, case note, or essay for the LSPS website.
+              Create a new article, case note, or essay for the Law Students' Society Press website.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">

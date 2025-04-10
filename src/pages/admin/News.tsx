@@ -69,7 +69,7 @@ interface NewsItem {
 
 // Static news items
 const newsItemsStatic = [
-  { id: "1", title: "LSPS Announces New Editorial Board", type: "News", author: "Admin", date: "2023-05-15", imageUrl: "" },
+  { id: "1", title: "LSSP Announces New Editorial Board", type: "News", author: "Admin", date: "2023-05-15", imageUrl: "" },
   { id: "2", title: "Annual Law Students Conference", type: "Event", author: "Admin", date: "2023-06-10", imageUrl: "", location: "Faculty of Law Auditorium", eventDate: "June 10, 2023 | 10:00 AM - 4:00 PM" },
   { id: "3", title: "New Journal Publication Released", type: "News", author: "Admin", date: "2023-05-05", imageUrl: "" },
   { id: "4", title: "Moot Court Competition", type: "Event", author: "Admin", date: "2023-07-12", imageUrl: "", location: "University Moot Court Room", eventDate: "July 12-14, 2023 | 9:00 AM - 5:00 PM daily" },
@@ -658,7 +658,7 @@ const AdminNews = () => {
         <DialogContent className="sm:max-w-[550px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Item</DialogTitle>
-            <DialogDescription>Create a new news article or event for the LSPS website.</DialogDescription>
+            <DialogDescription>Create a new news article or event for the Law Students' Society Press website.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
