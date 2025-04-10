@@ -114,14 +114,14 @@ const Contact = () => {
                   <Mail className="h-6 w-6 text-law-accent mr-4 mt-1" />
                   <div>
                     <h3 className="font-medium text-law-DEFAULT">Email</h3>
-                    <a href="mailto:info@lsps.org" className="text-gray-600 mt-1 hover:text-law-accent transition-colors">info@lsps.org</a>
+                    <a href="mailto:Lsspressdirect@gmail.com" className="text-gray-600 mt-1 hover:text-law-accent transition-colors">Lsspressdirect@gmail.com</a>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <Phone className="h-6 w-6 text-law-accent mr-4 mt-1" />
                   <div>
                     <h3 className="font-medium text-law-DEFAULT">Phone</h3>
-                    <a href="tel:+2348012345678" className="text-gray-600 mt-1 hover:text-law-accent transition-colors">+234 801 234 5678</a>
+                    <a href="tel:+2347043416921" className="text-gray-600 mt-1 hover:text-law-accent transition-colors">+234 704 341 6921</a>
                   </div>
                 </div>
               </div>
