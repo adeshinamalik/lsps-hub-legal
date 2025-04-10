@@ -44,15 +44,15 @@ const Contact = () => {
 
       // Send email via EmailJS
       await emailjs.send(
-        "YOUR_SERVICE_ID",
-        "YOUR_TEMPLATE_ID",
+        "service_odztqcj",
+        "template_d7381dp",
         {
           name: formData.name,
           email: formData.email,
           subject: formData.subject,
           message: formData.message,
         },
-        "YOUR_PUBLIC_KEY"
+        "sJC3LgZHc8PkY5bQa"
       );
 
       console.log("Form submitted:", submission);
@@ -161,7 +161,7 @@ const Contact = () => {
                     <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Message</label>
                     <Textarea id="message" name="message" required value={formData.message} onChange={handleChange} className="bg-white border-gray-200 min-h-[150px]" placeholder="Type your message here..." />
                   </div>
-                  <Button type="submit" className="w-full bg-law-DEFAULT hover:bg-law-light text-white" disabled={isSubmitting}>
+                  <Button type="submit" className="w-full bg-law-light hover:bg-law-light text-white" disabled={isSubmitting}>
                     {isSubmitting ? "Sending..." : "Send Message"}
                   </Button>
                 </form>
