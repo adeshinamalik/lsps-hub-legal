@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { Instagram, Twitter, Youtube, Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -30,22 +30,22 @@ const Footer = () => {
       <div className="container mx-auto px-6 md:px-10 lg:px-20 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="space-y-4">
-            <h3 className="text-2xl font-serif font-bold mb-6">LSPS</h3>
+            <h3 className="text-2xl font-serif font-bold mb-6">LSSP</h3>
             <p className="text-gray-300 leading-relaxed">
-              The Law Students' Press Society of the University of Ilorin is dedicated to promoting legal journalism and nurturing the next generation of legal writers.
+              The Law Students' Society Press of the University of Ilorin is dedicated to promoting legal journalism and nurturing the next generation of legal writers.
             </p>
             <div className="flex space-x-4 pt-4">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-white hover:text-law-accent transition-colors">
-                <Facebook size={20} />
-                <span className="sr-only">Facebook</span>
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-white hover:text-law-accent transition-colors">
-                <Twitter size={20} />
-                <span className="sr-only">Twitter</span>
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-white hover:text-law-accent transition-colors">
+              <a href="https://www.instagram.com/lss_press?igsh=amtsbnZmZTF3bHox" target="_blank" rel="noopener noreferrer" className="text-white hover:text-law-accent transition-colors">
                 <Instagram size={20} />
                 <span className="sr-only">Instagram</span>
+              </a>
+              <a href="https://x.com/lss_press?t=i6AvJQRl__bxThGw0ZMKMg&s=09" target="_blank" rel="noopener noreferrer" className="text-white hover:text-law-accent transition-colors">
+                <Twitter size={20} />
+                <span className="sr-only">X (Twitter)</span>
+              </a>
+              <a href="https://youtube.com/@lsspress?si=HPsSNyUbCwdw6Rfm" target="_blank" rel="noopener noreferrer" className="text-white hover:text-law-accent transition-colors">
+                <Youtube size={20} />
+                <span className="sr-only">YouTube</span>
               </a>
             </div>
           </div>
@@ -123,7 +123,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-law-light mt-12 pt-8 text-center text-gray-400 text-sm">
-          <p>© {new Date().getFullYear()} Law Students' Press Society. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Law Students' Society Press. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -1,3 +1,4 @@
+
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
@@ -44,9 +45,9 @@ const About = () => {
       <div className="pt-28 pb-16 md:pt-32 md:pb-20 px-6 md:px-10 lg:px-20 bg-law-muted">
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-law-DEFAULT mb-6">About LSPS</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-law-DEFAULT mb-6">About LSSP</h1>
             <p className="text-lg text-gray-600 leading-relaxed">
-              Learn more about the Law Students' Press Society, our mission, values, and the team behind our publications.
+              Learn more about the Law Students' Society Press, our mission, values, and the team behind our publications.
             </p>
           </div>
         </div>
@@ -58,7 +59,7 @@ const About = () => {
             <div className="order-2 lg:order-1 animate-fade-up">
               <h2 className="text-3xl font-bold text-law-DEFAULT mb-6">Our Mission & Vision</h2>
               <p className="text-gray-600 mb-6 leading-relaxed">
-                The Law Students' Press Society (LSPS) was established in 1992 as the official media body of the Faculty of Law, University of Ilorin. Our mission is to promote legal journalism, foster intellectual discourse among law students, and nurture the next generation of legal writers.
+                The Law Students' Society Press (LSSP) was established in 1992 as the official media body of the Faculty of Law, University of Ilorin. Our mission is to promote legal journalism, foster intellectual discourse among law students, and nurture the next generation of legal writers.
               </p>
               <p className="text-gray-600 mb-6 leading-relaxed">
                 We believe that effective legal writing is an essential skill for every law student and future legal practitioner. Through our publications, workshops, and events, we aim to provide a platform for law students to develop their writing and analytical skills.
@@ -80,7 +81,7 @@ const About = () => {
             <div className="order-1 lg:order-2 relative">
               <img
                 src="public/lovable-uploads/eedd66e1-c2d9-49d3-814f-a415331d2a90.png"
-                alt="LSPS Logo"
+                alt="LSSP Logo"
                 className="rounded-lg shadow-subtle w-4/5 mx-auto h-auto object-contain animate-fade-up bg-white p-8"
               />
               <div className="absolute -bottom-6 -right-6 w-36 h-36 bg-law-accent rounded-lg -z-10"></div>
@@ -95,7 +96,7 @@ const About = () => {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-law-DEFAULT mb-6">What We Do</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              The Law Students' Press Society engages in a variety of activities aimed at promoting legal journalism and developing the writing skills of law students.
+              The Law Students' Society Press engages in a variety of activities aimed at promoting legal journalism and developing the writing skills of law students.
             </p>
           </div>
           
@@ -138,7 +139,7 @@ const About = () => {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-law-DEFAULT mb-6">Our Team</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Meet the dedicated team of law students who lead the Law Students' Press Society and ensure the quality and impact of our initiatives.
+              Meet the dedicated team of law students who lead the Law Students' Society Press and ensure the quality and impact of our initiatives.
             </p>
           </div>
           
