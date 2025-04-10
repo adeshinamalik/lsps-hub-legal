@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, NavLink as RouterNavLink, useNavigate } from "react-router-dom";
 import { Menu, X, ShieldCheck } from "lucide-react";
@@ -71,7 +72,7 @@ const Navbar = () => {
       <div className="container mx-auto px-6 md:px-10 lg:px-20">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="font-serif text-2xl font-bold text-law-DEFAULT">LSPS</div>
+            <div className="font-serif text-2xl font-bold text-law-DEFAULT">LSSP</div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { MapPin, Mail, Phone, Facebook, Twitter, Instagram } from "lucide-react";
+import { MapPin, Mail, Phone, Instagram, Twitter, Youtube } from "lucide-react";
 import { db } from "@/firebase/Firebase";
 import { addDoc, collection } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
@@ -88,7 +89,7 @@ const Contact = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-law-DEFAULT mb-6">Contact Us</h1>
             <p className="text-lg text-gray-600 leading-relaxed">
-              Have questions or want to get involved? Reach out to the Law Students' Press Society.
+              Have questions or want to get involved? Reach out to the Law Students' Society Press.
             </p>
           </div>
         </div>
@@ -99,7 +100,7 @@ const Contact = () => {
             <div className="animate-fade-up">
               <h2 className="text-3xl font-bold text-law-DEFAULT mb-6">Get In Touch</h2>
               <p className="text-gray-600 mb-8 leading-relaxed">
-                Whether you have questions about our publications, want to join LSPS, or have suggestions for improvement, we'd love to hear from you. Fill out the form, and we'll get back to you as soon as possible.
+                Whether you have questions about our publications, want to join LSS Press, or have suggestions for improvement, we'd love to hear from you. Fill out the form, and we'll get back to you as soon as possible.
               </p>
               <div className="space-y-6 mb-8">
                 <div className="flex items-start">
@@ -127,17 +128,17 @@ const Contact = () => {
               <div>
                 <h3 className="font-medium text-law-DEFAULT mb-3">Follow Us</h3>
                 <div className="flex space-x-4">
-                  <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="bg-law-muted hover:bg-law-accent/10 text-law-DEFAULT hover:text-law-accent w-10 h-10 rounded-full flex items-center justify-center transition-colors">
-                    <Facebook size={20} />
-                    <span className="sr-only">Facebook</span>
-                  </a>
-                  <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="bg-law-muted hover:bg-law-accent/10 text-law-DEFAULT hover:text-law-accent w-10 h-10 rounded-full flex items-center justify-center transition-colors">
-                    <Twitter size={20} />
-                    <span className="sr-only">Twitter</span>
-                  </a>
-                  <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="bg-law-muted hover:bg-law-accent/10 text-law-DEFAULT hover:text-law-accent w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                  <a href="https://www.instagram.com/lss_press?igsh=amtsbnZmZTF3bHox" target="_blank" rel="noopener noreferrer" className="bg-law-muted hover:bg-law-accent/10 text-law-DEFAULT hover:text-law-accent w-10 h-10 rounded-full flex items-center justify-center transition-colors">
                     <Instagram size={20} />
                     <span className="sr-only">Instagram</span>
+                  </a>
+                  <a href="https://x.com/lss_press?t=i6AvJQRl__bxThGw0ZMKMg&s=09" target="_blank" rel="noopener noreferrer" className="bg-law-muted hover:bg-law-accent/10 text-law-DEFAULT hover:text-law-accent w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                    <Twitter size={20} />
+                    <span className="sr-only">X (Twitter)</span>
+                  </a>
+                  <a href="https://youtube.com/@lsspress?si=HPsSNyUbCwdw6Rfm" target="_blank" rel="noopener noreferrer" className="bg-law-muted hover:bg-law-accent/10 text-law-DEFAULT hover:text-law-accent w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                    <Youtube size={20} />
+                    <span className="sr-only">YouTube</span>
                   </a>
                 </div>
               </div>
