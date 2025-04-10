@@ -143,7 +143,7 @@ const Index = () => {
         const articlesQuery = query(
           collection(db, 'publications'),
           where('status', '==', 'Published'),
-          orderBy('createdAt', 'desc'),
+          // orderBy('createdAt', 'desc'),
           limit(3)
         );
         
