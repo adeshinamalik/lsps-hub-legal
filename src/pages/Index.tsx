@@ -97,9 +97,9 @@ const Index = () => {
   const staticNewsItems = [
     {
       id: "1",
-      title: "LSPS Welcomes New Editorial Board",
+      title: "LSSP Welcomes New Editorial Board",
       date: "May 28, 2023",
-      description: "The Law Students' Press Society is pleased to announce the appointment of a new editorial board for the 2023/2024 academic session.",
+      description: "The Law Students' Society Press is pleased to announce the appointment of a new editorial board for the 2023/2024 academic session.",
       type: "news" as const,
       imageSrc: "https://images.unsplash.com/photo-1528901166007-3784c7dd3653?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
     },
@@ -116,7 +116,7 @@ const Index = () => {
   const staticEventItems = [
     {
       id: "1",
-      title: "LSPS Annual Legal Writing Workshop",
+      title: "LSSP Annual Legal Writing Workshop",
       date: "Posted on June 5, 2023",
       description: "Join us for our annual legal writing workshop designed to enhance your legal writing skills. Expert speakers from leading law firms will be in attendance.",
       type: "event" as const,
@@ -128,7 +128,7 @@ const Index = () => {
       id: "3",
       title: "National Moot Court Competition",
       date: "Posted on May 15, 2023",
-      description: "LSPS is proud to be a media partner for the upcoming National Moot Court Competition. Coverage will be provided throughout the event.",
+      description: "LSSP is proud to be a media partner for the upcoming National Moot Court Competition. Coverage will be provided throughout the event.",
       type: "event" as const,
       eventDate: "August 5-7, 2023",
       location: "Supreme Court Complex, Abuja",
@@ -278,9 +278,9 @@ const Index = () => {
       <section className="py-20 px-6 md:px-10 lg:px-20">
         <div className="container mx-auto">
           <div className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-law-DEFAULT mb-6">Welcome to LSPS</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-law-DEFAULT mb-6">Welcome to LSSP</h2>
             <p className="text-lg text-gray-600 leading-relaxed">
-              The Law Students' Press Society (LSPS) is the official media body of the Faculty of Law, University of Ilorin. We are dedicated to promoting legal journalism, fostering intellectual discourse, and nurturing the next generation of legal writers.
+              The Law Students' Society Press (LSSP) is the official media body of the Faculty of Law, University of Ilorin. We are dedicated to promoting legal journalism, fostering intellectual discourse, and nurturing the next generation of legal writers.
             </p>
           </div>
 
