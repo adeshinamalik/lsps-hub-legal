@@ -419,7 +419,7 @@ const AdminUsers = () => {
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
             <DialogDescription>
-              Create a new user account for the LSPS admin panel.
+              Create a new user account for the LSSP admin panel.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">

@@ -35,7 +35,7 @@ const EventsSection = ({ className, items }: EventsSectionProps) => {
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-law-DEFAULT mb-3">Upcoming Events</h2>
               <p className="text-law-text-light max-w-xl">
-                Join us at these upcoming events organized by the Law Students' Press Society.
+                Join us at these upcoming events organized by the Law Students' Society Press.
               </p>
             </div>
           </div>

@@ -10,11 +10,11 @@ import { toast } from "sonner";
 const newsItems = [
   {
     id: "1",
-    title: "LSPS Welcomes New Editorial Board",
+    title: "LSSP Welcomes New Editorial Board",
     date: "May 28, 2023",
-    description: "The Law Students' Press Society is pleased to announce the appointment of a new editorial board for the 2023/2024 academic session. The new board, led by Daniel Ehigiator as Editor-in-Chief, will oversee all publications and media activities of the society.",
+    description: "The Law Students' Society Press is pleased to announce the appointment of a new editorial board for the 2023/2024 academic session. The new board, led by Daniel Ehigiator as Editor-in-Chief, will oversee all publications and media activities of the society.",
     content: `
-      <p>The Law Students' Press Society (LSPS) is pleased to announce the appointment of a new editorial board for the 2023/2024 academic session. The new board, led by Daniel Ehigiator as Editor-in-Chief, will oversee all publications and media activities of the society.</p>
+      <p>The Law Students' Society Press(LSSP) is pleased to announce the appointment of a new editorial board for the 2023/2024 academic session. The new board, led by Daniel Ehigiator as Editor-in-Chief, will oversee all publications and media activities of the society.</p>
       
       <p>The appointment followed a rigorous selection process that considered the candidates' previous contributions to the society, their writing and editing skills, and their vision for the society's growth.</p>
       
@@ -28,11 +28,11 @@ const newsItems = [
         <li>Grace Nwachukwu - Media and Communications Editor</li>
       </ul>
       
-      <p>Speaking after the appointment, Daniel Ehigiator expressed gratitude for the opportunity to lead the society and pledged to maintain the high standards of journalism that the LSPS is known for.</p>
+      <p>Speaking after the appointment, Daniel Ehigiator expressed gratitude for the opportunity to lead the society and pledged to maintain the high standards of journalism that the LSSP is known for.</p>
       
-      <p>"Our goal is to make the LSPS a more vibrant platform for legal discourse and to provide opportunities for law students to develop their writing and research skills," he said. "We also aim to expand our online presence and engage more with the legal community beyond the university."</p>
+      <p>"Our goal is to make the LSSP a more vibrant platform for legal discourse and to provide opportunities for law students to develop their writing and research skills," he said. "We also aim to expand our online presence and engage more with the legal community beyond the university."</p>
       
-      <p>The Faculty Advisor to the LSPS, Dr. Ifeoma Okoli, congratulated the new board and urged them to uphold the ethical standards of journalism in all their activities.</p>
+      <p>The Faculty Advisor to the LSSP, Dr. Ifeoma Okoli, congratulated the new board and urged them to uphold the ethical standards of journalism in all their activities.</p>
       
       <p>The new editorial board will formally assume office on June 1, 2023, following a handover ceremony from the outgoing board.</p>
     `,
@@ -43,9 +43,9 @@ const newsItems = [
     id: "2",
     title: "Law Faculty Honors Outstanding Student Journalists",
     date: "April 15, 2023",
-    description: "The Faculty of Law recently recognized five student journalists from the LSPS for their exceptional contributions to legal journalism. The award ceremony, which was part of the Faculty's annual dinner, celebrated the students' dedication to promoting legal literacy through their writings.",
+    description: "The Faculty of Law recently recognized five student journalists from the LSSP for their exceptional contributions to legal journalism. The award ceremony, which was part of the Faculty's annual dinner, celebrated the students' dedication to promoting legal literacy through their writings.",
     content: `
-      <p>The Faculty of Law at the University of Nigeria recently recognized five student journalists from the Law Students' Press Society (LSPS) for their exceptional contributions to legal journalism. The award ceremony, which was part of the Faculty's annual dinner, celebrated the students' dedication to promoting legal literacy through their writings.</p>
+      <p>The Faculty of Law at the University of Nigeria recently recognized five student journalists from the Law Students' Society Press (LSSP) for their exceptional contributions to legal journalism. The award ceremony, which was part of the Faculty's annual dinner, celebrated the students' dedication to promoting legal literacy through their writings.</p>
       
       <p>The honorees were selected based on their outstanding performance in various areas of legal journalism, including:</p>
       <ul>
@@ -61,18 +61,18 @@ const newsItems = [
       
       <p>The award recipients expressed gratitude for the recognition and pledged to continue using their skills to promote legal awareness and advocate for justice.</p>
       
-      <p>The Law Students' Press Society has a long tradition of producing outstanding legal journalists who have gone on to make significant contributions to the legal profession and the media industry.</p>
+      <p>The Law Students' Society Press has a long tradition of producing outstanding legal journalists who have gone on to make significant contributions to the legal profession and the media industry.</p>
     `,
     type: "news" as const,
     imageSrc: "https://images.unsplash.com/photo-1569038786784-24a715a36507?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
   },
   {
     id: "3",
-    title: "LSPS Partners with National Bar Association for Legal Writing Program",
+    title: "LSSP Partners with National Bar Association for Legal Writing Program",
     date: "March 22, 2023",
-    description: "The Law Students' Press Society has announced a partnership with the Nigerian Bar Association to launch a comprehensive legal writing program for law students. The program aims to enhance the writing skills of aspiring lawyers through workshops, mentoring, and practical exercises.",
+    description: "The Law Students' Society Press has announced a partnership with the Nigerian Bar Association to launch a comprehensive legal writing program for law students. The program aims to enhance the writing skills of aspiring lawyers through workshops, mentoring, and practical exercises.",
     content: `
-      <p>The Law Students' Press Society (LSPS) has announced a partnership with the Nigerian Bar Association (NBA) to launch a comprehensive legal writing program for law students. The program aims to enhance the writing skills of aspiring lawyers through workshops, mentoring, and practical exercises.</p>
+      <p>The Law Students' Society Press (LSSP) has announced a partnership with the Nigerian Bar Association (NBA) to launch a comprehensive legal writing program for law students. The program aims to enhance the writing skills of aspiring lawyers through workshops, mentoring, and practical exercises.</p>
       
       <p>The partnership was formalized at a signing ceremony held at the NBA headquarters in Abuja. The President of the NBA, Mr. Yakubu Maikyau, SAN, expressed delight at the collaboration and pledged the association's full support for the program.</p>
       
@@ -86,24 +86,24 @@ const newsItems = [
         <li>Legal ethics and professionalism</li>
       </ul>
       
-      <p>The program will be delivered through a combination of workshops, mentoring, and online resources. Students will also have the opportunity to participate in writing competitions and to have their work published in the LSPS Law Journal.</p>
+      <p>The program will be delivered through a combination of workshops, mentoring, and online resources. Students will also have the opportunity to participate in writing competitions and to have their work published in the LSSP Law Journal.</p>
       
-      <p>The legal writing program is open to all law students in Nigeria. Interested students are encouraged to apply through the LSPS website.</p>
+      <p>The legal writing program is open to all law students in Nigeria. Interested students are encouraged to apply through the LSSP website.</p>
     `,
     type: "news" as const,
     imageSrc: "https://images.unsplash.com/photo-1573497019236-61f323342eb9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
   },
   {
     id: "4",
-    title: "LSPS Journal Recognized for Excellence in Student Publications",
+    title: "LSSP Journal Recognized for Excellence in Student Publications",
     date: "February 10, 2023",
-    description: "The LSPS Law Journal has been recognized as one of the top three student-run legal publications in Nigeria by the Association of Legal Editors. The recognition comes after a rigorous evaluation of the journal's content, editorial standards, and overall impact on legal discourse.",
+    description: "The LSSP Law Journal has been recognized as one of the top three student-run legal publications in Nigeria by the Association of Legal Editors. The recognition comes after a rigorous evaluation of the journal's content, editorial standards, and overall impact on legal discourse.",
     content: `
-      <p>The Law Students' Press Society (LSPS) Law Journal has been recognized as one of the top three student-run legal publications in Nigeria by the Association of Legal Editors (ALE). The recognition comes after a rigorous evaluation of the journal's content, editorial standards, and overall impact on legal discourse.</p>
+      <p>The Law Students' Society Press (LSSP) Law Journal has been recognized as one of the top three student-run legal publications in Nigeria by the Association of Legal Editors (ALE). The recognition comes after a rigorous evaluation of the journal's content, editorial standards, and overall impact on legal discourse.</p>
       
       <p>The ALE is a professional organization for legal editors and publishers in Nigeria. Its annual awards recognize excellence in legal publishing across various categories, including law journals, law reports, and legal textbooks.</p>
       
-      <p>The LSPS Law Journal was evaluated based on several criteria, including:</p>
+      <p>The LSSP Law Journal was evaluated based on several criteria, including:</p>
       <ul>
         <li>Originality and quality of articles</li>
         <li>Relevance to contemporary legal issues</li>
@@ -112,11 +112,11 @@ const newsItems = [
         <li>Editorial standards and peer review process</li>
       </ul>
       
-      <p>The editors of the LSPS Law Journal expressed delight at the recognition and pledged to continue upholding the highest standards of legal publishing.</p>
+      <p>The editors of the LSSP Law Journal expressed delight at the recognition and pledged to continue upholding the highest standards of legal publishing.</p>
       
-      <p>"This award is a testament to the hard work and dedication of our editorial team, our contributors, and our peer reviewers," said the Editor-in-Chief of the LSPS Law Journal, Miss Aisha Mohammed. "We are committed to providing a platform for law students to showcase their research and writing skills and to contribute to the development of legal thought in Nigeria."</p>
+      <p>"This award is a testament to the hard work and dedication of our editorial team, our contributors, and our peer reviewers," said the Editor-in-Chief of the LSSP Law Journal, Miss Aisha Mohammed. "We are committed to providing a platform for law students to showcase their research and writing skills and to contribute to the development of legal thought in Nigeria."</p>
       
-      <p>The LSPS Law Journal has been published annually since 2005 and has become a leading forum for legal scholarship in Nigeria. Its articles have been cited in numerous court decisions and academic publications.</p>
+      <p>The LSSP Law Journal has been published annually since 2005 and has become a leading forum for legal scholarship in Nigeria. Its articles have been cited in numerous court decisions and academic publications.</p>
     `,
     type: "news" as const,
     imageSrc: "https://images.unsplash.com/photo-1554377740-071519c3c6cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1444&q=80"
@@ -126,11 +126,11 @@ const newsItems = [
 const eventItems = [
   {
     id: "1",
-    title: "LSPS Annual Legal Writing Workshop",
+    title: "LSSP Annual Legal Writing Workshop",
     date: "Posted on June 5, 2023",
     description: "Join us for our annual legal writing workshop designed to enhance your legal writing skills. Expert speakers from leading law firms will be in attendance to share insights on effective legal drafting, research methods, and citation techniques.",
     content: `
-      <p>The Law Students' Press Society (LSPS) is thrilled to invite you to our Annual Legal Writing Workshop, a comprehensive program designed to enhance your legal writing skills and prepare you for success in your academic and professional journey.</p>
+      <p>The Law Students' Society Press (LSSP) is thrilled to invite you to our Annual Legal Writing Workshop, a comprehensive program designed to enhance your legal writing skills and prepare you for success in your academic and professional journey.</p>
       
       <h2>Workshop Overview</h2>
       <p>The workshop will cover a wide range of topics related to legal writing, including:</p>
@@ -170,7 +170,7 @@ const eventItems = [
       </ul>
       
       <h2>Registration</h2>
-      <p>The workshop is open to all law students. Registration is free but mandatory due to limited space. To register, please fill out the registration form at the LSPS office or send an email to lsps@unilorin.edu.ng with your full name, level, and preferred breakout session.</p>
+      <p>The workshop is open to all law students. Registration is free but mandatory due to limited space. To register, please fill out the registration form at the LSSP office or send an email to lssp@unilorin.edu.ng with your full name, level, and preferred breakout session.</p>
       
       <p>Don't miss this opportunity to enhance your legal writing skills and network with leading legal professionals. We look forward to your participation!</p>
     `,
@@ -185,15 +185,15 @@ const eventItems = [
     id: "2",
     title: "National Moot Court Competition",
     date: "Posted on May 15, 2023",
-    description: "LSPS is proud to be a media partner for the upcoming National Moot Court Competition. Our team will provide comprehensive coverage of the event, including live updates, interviews with participants, and analysis of the moot court cases.",
+    description: "LSSP is proud to be a media partner for the upcoming National Moot Court Competition. Our team will provide comprehensive coverage of the event, including live updates, interviews with participants, and analysis of the moot court cases.",
     content: `
-      <p>The Law Students' Press Society (LSPS) is proud to announce its media partnership with the upcoming National Moot Court Competition, the premier mooting event for law students in Nigeria. As a media partner, the LSPS will provide comprehensive coverage of the event, including live updates, interviews with participants, and analysis of the moot court cases.</p>
+      <p>The Law Students' Society Press (LSSP) is proud to announce its media partnership with the upcoming National Moot Court Competition, the premier mooting event for law students in Nigeria. As a media partner, the LSSP will provide comprehensive coverage of the event, including live updates, interviews with participants, and analysis of the moot court cases.</p>
       
       <h2>About the National Moot Court Competition</h2>
       <p>The National Moot Court Competition is an annual event that brings together law students from across Nigeria to compete in simulated court proceedings. The competition provides students with the opportunity to develop their legal research, writing, and oral advocacy skills.</p>
       
-      <h2>LSPS Coverage</h2>
-      <p>The LSPS team will be on the ground at the competition to provide live coverage of the event. Our coverage will include:</p>
+      <h2>LSSP Coverage</h2>
+      <p>The LSSP team will be on the ground at the competition to provide live coverage of the event. Our coverage will include:</p>
       <ul>
         <li>Live updates on the progress of the competition</li>
         <li>Interviews with participants, judges, and organizers</li>
@@ -202,7 +202,7 @@ const eventItems = [
       </ul>
       
       <h2>Follow Us</h2>
-      <p>To stay up-to-date on the latest news from the National Moot Court Competition, follow the LSPS on our social media channels and visit our website regularly.</p>
+      <p>To stay up-to-date on the latest news from the National Moot Court Competition, follow the LSSP on our social media channels and visit our website regularly.</p>
       
       <p>We look forward to bringing you all the action from this exciting event!</p>
     `,
@@ -216,9 +216,9 @@ const eventItems = [
     id: "3",
     title: "Legal Journalism Masterclass",
     date: "Posted on April 30, 2023",
-    description: "LSPS invites all interested students to a masterclass on legal journalism. The session will be facilitated by experienced legal journalists from leading media organizations who will share practical insights on reporting legal issues, court proceedings, and legislative developments.",
+    description: "LSSP invites all interested students to a masterclass on legal journalism. The session will be facilitated by experienced legal journalists from leading media organizations who will share practical insights on reporting legal issues, court proceedings, and legislative developments.",
     content: `
-      <p>The Law Students' Press Society (LSPS) cordially invites all interested students to a masterclass on legal journalism. This exclusive session will be facilitated by experienced legal journalists from leading media organizations who will share practical insights on reporting legal issues, court proceedings, and legislative developments.</p>
+      <p>The Law Students' Society Press (LSSP) cordially invites all interested students to a masterclass on legal journalism. This exclusive session will be facilitated by experienced legal journalists from leading media organizations who will share practical insights on reporting legal issues, court proceedings, and legislative developments.</p>
       
       <h2>What You Will Learn</h2>
       <p>Participants in this masterclass will gain valuable knowledge and skills in the following areas:</p>
@@ -243,7 +243,7 @@ const eventItems = [
       <p>This masterclass is open to all law students who are interested in pursuing a career in legal journalism or who simply want to improve their legal writing and reporting skills.</p>
       
       <h2>Registration</h2>
-      <p>To register for this masterclass, please send an email to lsps@unilorin.edu.ng with your full name, level, and contact information. Space is limited, so early registration is encouraged.</p>
+      <p>To register for this masterclass, please send an email to lssp@unilorin.edu.ng with your full name, level, and contact information. Space is limited, so early registration is encouraged.</p>
       
       <p>Don't miss this opportunity to learn from the best in the business and to take your legal journalism skills to the next level!</p>
     `,
@@ -257,9 +257,9 @@ const eventItems = [
     id: "4",
     title: "Editorial Skills Development Series",
     date: "Posted on March 25, 2023",
-    description: "LSPS presents a four-part series on editorial skills development for aspiring editors. The series will cover topics such as copy editing, content planning, editorial ethics, and managing an editorial team. Each session will include practical exercises and feedback.",
+    description: "LSSP presents a four-part series on editorial skills development for aspiring editors. The series will cover topics such as copy editing, content planning, editorial ethics, and managing an editorial team. Each session will include practical exercises and feedback.",
     content: `
-      <p>The Law Students' Press Society (LSPS) is pleased to present a four-part series on editorial skills development for aspiring editors. This series is designed to equip participants with the knowledge and skills they need to excel in editorial roles in legal publications and beyond.</p>
+      <p>The Law Students' Society Press (LSSP) is pleased to present a four-part series on editorial skills development for aspiring editors. This series is designed to equip participants with the knowledge and skills they need to excel in editorial roles in legal publications and beyond.</p>
       
       <h2>Series Overview</h2>
       <p>The series will cover the following topics:</p>
@@ -271,7 +271,7 @@ const eventItems = [
       </ul>
       
       <h2>Who Should Attend</h2>
-      <p>This series is open to all law students who are interested in developing their editorial skills. Whether you are a current member of the LSPS or simply interested in learning more about editing, we encourage you to attend.</p>
+      <p>This series is open to all law students who are interested in developing their editorial skills. Whether you are a current member of the LSSP or simply interested in learning more about editing, we encourage you to attend.</p>
       
       <h2>Schedule</h2>
       <p>The series will be held on the following dates:</p>
@@ -282,15 +282,15 @@ const eventItems = [
         <li>Session 4: July 1, 2023</li>
       </ul>
       
-      <p>All sessions will be held from 10:00 AM to 12:00 PM at the LSPS Office, Faculty of Law.</p>
+      <p>All sessions will be held from 10:00 AM to 12:00 PM at the LSSP Office, Faculty of Law.</p>
       
       <h2>Registration</h2>
-      <p>To register for this series, please send an email to lsps@unilorin.edu.ng with your full name, level, and contact information. Space is limited, so early registration is encouraged.</p>
+      <p>To register for this series, please send an email to lssp@unilorin.edu.ng with your full name, level, and contact information. Space is limited, so early registration is encouraged.</p>
     `,
     type: "event" as const,
     eventDate: "June 10, 17, 24, July 1, 2023",
     time: "10:00 AM - 12:00 PM each Saturday",
-    location: "LSPS Office, Faculty of Law",
+    location: "LSSP Office, Faculty of Law",
     imageSrc: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80"
   },
 ];

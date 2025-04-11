@@ -111,6 +111,14 @@ const Index = () => {
       type: "news" as const,
       imageSrc: myImages.image1
     },
+    {
+      id: "3",
+      title: "Mock Trial Competition Results",
+      date: "June 10, 2023",
+      description: "Congratulations to Team Equity for winning this year's mock trial competition. Their exceptional advocacy skills impressed the panel of judges.",
+      type: "news" as const,
+      imageSrc: myImages.image1
+    },
   ];
 
   const staticEventItems = [
@@ -123,6 +131,16 @@ const Index = () => {
       eventDate: "July 20, 2023",
       location: "Faculty of Law Auditorium",
       imageSrc: myImages.image3
+    },
+    {
+      id: "2",
+      title: "National Moot Court Competition",
+      date: "Posted on May 15, 2023",
+      description: "LSSP is proud to be a media partner for the upcoming National Moot Court Competition. Coverage will be provided throughout the event.",
+      type: "event" as const,
+      eventDate: "August 5-7, 2023",
+      location: "Supreme Court Complex, Abuja",
+      imageSrc: "https://images.unsplash.com/photo-1505664194779-8beaceb93744?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
     },
     {
       id: "3",
@@ -327,7 +345,7 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-bold text-law-DEFAULT mb-4">Events</h3>
               <p className="text-law-text-light mb-6">
-                Participate in workshops, seminars, and conferences organized by LSPS throughout the academic year.
+                Participate in workshops, seminars, and conferences organized by LSSP throughout the academic year.
               </p>
               <Button
                 variant="ghost"

@@ -106,19 +106,19 @@ const JoinUs = () => {
 
   const faqItems = [
     {
-      question: "Who can join LSPS?",
-      answer: "LSPS is open to all law students at the University of Ilorin, from first year to final year. We welcome students with diverse interests and backgrounds who are passionate about legal writing and journalism."
+      question: "Who can join LSSP?",
+      answer: "LSSP is open to all law students at the University of Ilorin, from first year to final year. We welcome students with diverse interests and backgrounds who are passionate about legal writing and journalism."
     },
     {
       question: "What is the membership fee?",
       answer: "The annual membership fee is ₦2,500. This helps cover the cost of publications, events, and operational expenses."
     },
     {
-      question: "How often does LSPS meet?",
+      question: "How often does LSSP meet?",
       answer: "We hold general meetings once a month, but editorial teams and committees meet more frequently depending on ongoing projects and publications."
     },
     {
-      question: "What roles can I take on within LSPS?",
+      question: "What roles can I take on within LSSP?",
       answer: "Members can serve as writers, editors, photographers, graphic designers, event coordinators, social media managers, or research assistants, depending on their interests and skills."
     },
     {
@@ -140,7 +140,7 @@ const JoinUs = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-law-DEFAULT mb-6">Join Our Society</h1>
             <p className="text-lg text-gray-600 leading-relaxed">
-              Become a member of the Law Students' Press Society and develop your skills in legal writing, editing, and publishing.
+              Become a member of the Law Students' Society Press and develop your skills in legal writing, editing, and publishing.
             </p>
           </div>
         </div>
@@ -172,7 +172,7 @@ const JoinUs = () => {
             <div>
               <h2 className="text-3xl font-bold text-law-DEFAULT mb-6">Membership Application</h2>
               <p className="text-law-text-light mb-8">
-                Fill out the form below to apply for membership in the Law Students' Press Society. We'll review your application and get back to you shortly.
+                Fill out the form below to apply for membership in the Law Students' Society Press. We'll review your application and get back to you shortly.
               </p>
               
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -311,7 +311,7 @@ const JoinUs = () => {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
-                    {["Style Guide for Legal Writing", "Editorial Templates", "Publication Guidelines", "Past LSPS Articles"].map((item, index) => (
+                    {["Style Guide for Legal Writing", "Editorial Templates", "Publication Guidelines", "Past LSSP Articles"].map((item, index) => (
                       <li key={index} className="flex items-center">
                         <Check className="mr-2 h-4 w-4 text-law-accent" />
                         <span>{item}</span>

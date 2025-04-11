@@ -125,7 +125,7 @@ const staticEvents: Event[] = [
       </ul>
       
       <h2>Registration</h2>
-      <p>Registration fee: ₦1,500 for LSPS members and ₦3,000 for non-members. The fee includes workshop materials, certificate of participation, and refreshments.</p>
+      <p>Registration fee: ₦1,500 for LSSP members and ₦3,000 for non-members. The fee includes workshop materials, certificate of participation, and refreshments.</p>
       
       <p>Spaces are limited, so early registration is encouraged!</p>
     `,
@@ -142,7 +142,7 @@ const staticEvents: Event[] = [
     description:
       "Connect with potential employers and explore career opportunities in various fields of law at our annual Law Career Fair.",
     content: `
-      <p>The Law Students' Press Society is proud to present the Annual Law Career Fair, an excellent opportunity for law students to connect with potential employers and explore various career paths in the legal profession.</p>
+      <p>The Law Students' Society Press is proud to present the Annual Law Career Fair, an excellent opportunity for law students to connect with potential employers and explore various career paths in the legal profession.</p>
       
       <h2>Event Highlights</h2>
       <p>The Law Career Fair will feature:</p>

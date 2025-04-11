@@ -33,7 +33,7 @@ const NewsSection = ({ className, items }: NewsSectionProps) => {
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-law-DEFAULT mb-3">Latest News</h2>
               <p className="text-law-text-light max-w-xl">
-                Stay informed with the latest updates from the Law Students' Press Society.
+                Stay informed with the latest updates from the Law Students' Society Press.
               </p>
             </div>
           </div>

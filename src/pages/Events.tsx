@@ -113,7 +113,7 @@ const Events = () => {
       <Navbar />
 
       <Hero
-        title="Law Students' Press Society Events"
+        title="Law Students' Society Press Events"
         subtitle="Stay updated with upcoming events and opportunities."
         ctaText="Join Our Events"
         ctaLink="/join-us"
@@ -195,7 +195,7 @@ const Events = () => {
               <div>
                 <h2 className="text-3xl font-bold text-law-DEFAULT mb-6">Host an Event with Us</h2>
                 <p className="text-gray-600 mb-6">
-                  Are you interested in hosting a legal event or workshop with the Law Students' Press Society? We
+                  Are you interested in hosting a legal event or workshop with the Law Students' Society Press? We
                   welcome collaborations with law firms, NGOs, and other academic institutions.
                 </p>
                 <p className="text-gray-600 mb-6">
