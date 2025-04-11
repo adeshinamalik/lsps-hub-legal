@@ -74,7 +74,7 @@ const AdminLayout = () => {
           <div className="flex h-full flex-col">
             <div className="border-b p-4">
               <h2 className="text-lg font-semibold text-law-DEFAULT">
-                LSPS Admin
+                LSSP Admin
               </h2>
               {currentUser && (
                 <p className="text-sm text-gray-500">{currentUser.email}</p>
@@ -104,7 +104,7 @@ const AdminLayout = () => {
         <div className="flex h-full flex-col">
           <div className="border-b p-4">
             <h2 className="text-lg font-semibold text-law-DEFAULT">
-              LSPS Admin
+              LSSP Admin
             </h2>
             {currentUser && (
               <p className="text-sm text-gray-500">{currentUser.email}</p>

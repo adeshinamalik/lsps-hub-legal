@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
 const newsItems = [
   {
     id: "1",
-    title: "LSPS Welcomes New Editorial Board",
+    title: "LSSP Welcomes New Editorial Board",
     date: "May 28, 2023",
-    description: "The Law Students' Press Society is pleased to announce the appointment of a new editorial board for the 2023/2024 academic session. The new board, led by Daniel Ehigiator as Editor-in-Chief, will oversee all publications and media activities of the society.",
+    description: "The Law Students' Society Press is pleased to announce the appointment of a new editorial board for the 2023/2024 academic session. The new board, led by Daniel Ehigiator as Editor-in-Chief, will oversee all publications and media activities of the society.",
     type: "news" as const,
     imageSrc: "https://images.unsplash.com/photo-1528901166007-3784c7dd3653?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
   },
@@ -23,23 +23,23 @@ const newsItems = [
     id: "2",
     title: "Law Faculty Honors Outstanding Student Journalists",
     date: "April 15, 2023",
-    description: "The Faculty of Law recently recognized five student journalists from the LSPS for their exceptional contributions to legal journalism. The award ceremony, which was part of the Faculty's annual dinner, celebrated the students' dedication to promoting legal literacy through their writings.",
+    description: "The Faculty of Law recently recognized five student journalists from the LSSP for their exceptional contributions to legal journalism. The award ceremony, which was part of the Faculty's annual dinner, celebrated the students' dedication to promoting legal literacy through their writings.",
     type: "news" as const,
     imageSrc: "https://images.unsplash.com/photo-1569038786784-24a715a36507?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
   },
   {
     id: "3",
-    title: "LSPS Partners with National Bar Association for Legal Writing Program",
+    title: "LSSP Partners with National Bar Association for Legal Writing Program",
     date: "March 22, 2023",
-    description: "The Law Students' Press Society has announced a partnership with the Nigerian Bar Association to launch a comprehensive legal writing program for law students. The program aims to enhance the writing skills of aspiring lawyers through workshops, mentoring, and practical exercises.",
+    description: "The Law Students' Society Press has announced a partnership with the Nigerian Bar Association to launch a comprehensive legal writing program for law students. The program aims to enhance the writing skills of aspiring lawyers through workshops, mentoring, and practical exercises.",
     type: "news" as const,
     imageSrc: "https://images.unsplash.com/photo-1573497019236-61f323342eb9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
   },
   {
     id: "4",
-    title: "LSPS Journal Recognized for Excellence in Student Publications",
+    title: "LSSP Journal Recognized for Excellence in Student Publications",
     date: "February 10, 2023",
-    description: "The LSPS Law Journal has been recognized as one of the top three student-run legal publications in Nigeria by the Association of Legal Editors. The recognition comes after a rigorous evaluation of the journal's content, editorial standards, and overall impact on legal discourse.",
+    description: "The LSSP Law Journal has been recognized as one of the top three student-run legal publications in Nigeria by the Association of Legal Editors. The recognition comes after a rigorous evaluation of the journal's content, editorial standards, and overall impact on legal discourse.",
     type: "news" as const,
     imageSrc: "https://images.unsplash.com/photo-1554377740-071519c3c6cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1444&q=80"
   },
@@ -49,7 +49,7 @@ const newsItems = [
 const eventItems = [
   {
     id: "1",
-    title: "LSPS Annual Legal Writing Workshop",
+    title: "LSSP Annual Legal Writing Workshop",
     date: "Posted on June 5, 2023",
     description: "Join us for our annual legal writing workshop designed to enhance your legal writing skills. Expert speakers from leading law firms will be in attendance to share insights on effective legal drafting, research methods, and citation techniques.",
     type: "event" as const,
@@ -62,7 +62,7 @@ const eventItems = [
     id: "2",
     title: "National Moot Court Competition",
     date: "Posted on May 15, 2023",
-    description: "LSPS is proud to be a media partner for the upcoming National Moot Court Competition. Our team will provide comprehensive coverage of the event, including live updates, interviews with participants, and analysis of the moot court cases.",
+    description: "LSSP is proud to be a media partner for the upcoming National Moot Court Competition. Our team will provide comprehensive coverage of the event, including live updates, interviews with participants, and analysis of the moot court cases.",
     type: "event" as const,
     eventDate: "August 5-7, 2023",
     time: "9:00 AM - 5:00 PM daily",
@@ -73,7 +73,7 @@ const eventItems = [
     id: "3",
     title: "Legal Journalism Masterclass",
     date: "Posted on April 30, 2023",
-    description: "LSPS invites all interested students to a masterclass on legal journalism. The session will be facilitated by experienced legal journalists from leading media organizations who will share practical insights on reporting legal issues, court proceedings, and legislative developments.",
+    description: "LSSP invites all interested students to a masterclass on legal journalism. The session will be facilitated by experienced legal journalists from leading media organizations who will share practical insights on reporting legal issues, court proceedings, and legislative developments.",
     type: "event" as const,
     eventDate: "June 15, 2023",
     time: "2:00 PM - 5:00 PM",
@@ -84,11 +84,11 @@ const eventItems = [
     id: "4",
     title: "Editorial Skills Development Series",
     date: "Posted on March 25, 2023",
-    description: "LSPS presents a four-part series on editorial skills development for aspiring editors. The series will cover topics such as copy editing, content planning, editorial ethics, and managing an editorial team. Each session will include practical exercises and feedback.",
+    description: "LSSP presents a four-part series on editorial skills development for aspiring editors. The series will cover topics such as copy editing, content planning, editorial ethics, and managing an editorial team. Each session will include practical exercises and feedback.",
     type: "event" as const,
     eventDate: "June 10, 17, 24, July 1, 2023",
     time: "10:00 AM - 12:00 PM each Saturday",
-    location: "LSPS Office, Faculty of Law",
+    location: "LSSP Office, Faculty of Law",
     imageSrc: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80"
   },
 ];
@@ -113,7 +113,7 @@ const News = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-law-DEFAULT mb-6">News & Events</h1>
             <p className="text-lg text-gray-600 leading-relaxed">
-              Stay updated with the latest news and upcoming events from the Law Students' Press Society.
+              Stay updated with the latest news and upcoming events from the Law Students' Society Press.
             </p>
           </div>
         </div>

@@ -35,7 +35,7 @@ const mockNewsItems: NewsItem[] = [
     title: "LSPS Announces New Editorial Board",
     date: "2023-05-15", // Standardized to YYYY-MM-DD
     description:
-      "The Law Students' Press Society is pleased to announce the appointment of its new editorial board for the 2023/2024 academic session.",
+      "The Law Students' Society Press is pleased to announce the appointment of its new editorial board for the 2023/2024 academic session.",
     imageSrc: "public/lovable-uploads/f67f9f3d-612f-46cc-ab7e-1fab15f564e8.png",
     category: "Announcements",
   },
@@ -64,7 +64,7 @@ const mockNewsItems: NewsItem[] = [
     title: "LSPS Members Win National Essay Competition",
     date: "2023-04-10",
     description:
-      "Three members of the Law Students' Press Society have emerged as winners in the National Law Students Essay Competition.",
+      "Three members of the Law Students' Society Press have emerged as winners in the National Law Students Essay Competition.",
     imageSrc:
       "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
     category: "Achievements",
@@ -74,7 +74,7 @@ const mockNewsItems: NewsItem[] = [
     title: "LSPS Launches New Website",
     date: "2023-03-15",
     description:
-      "The Law Students' Press Society has launched its new website.",
+      "The Law Students' Society Press has launched its new website.",
     imageSrc:
       "https://images.unsplash.com/photo-1560472355-536de3962603?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
     category: "Announcements",
@@ -94,7 +94,7 @@ const mockNewsItems: NewsItem[] = [
     title: "LSPS Hosts Legal Writing Workshop",
     date: "2023-01-30",
     description:
-      "The Law Students' Press Society organized a successful legal writing workshop.",
+      "The Law Students' Society Press organized a successful legal writing workshop.",
     imageSrc:
       "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
     category: "Events",
@@ -144,7 +144,7 @@ const mockNewsItems: NewsItem[] = [
     title: "LSPS Launches Mentorship Program",
     date: "2022-11-10",
     description:
-      "The Law Students' Press Society has launched a mentorship program pairing experienced student journalists with new members.",
+      "The Law Students' Society Press has launched a mentorship program pairing experienced student journalists with new members.",
     imageSrc:
       "https://images.unsplash.com/photo-1553484771-371a605b060b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
     category: "Announcements",
@@ -228,7 +228,7 @@ const NewsPage = () => {
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h2 className="text-3xl font-bold text-law-DEFAULT mb-6">News & Announcements</h2>
             <p className="text-lg text-gray-600">
-              Stay updated with the latest news, announcements, and achievements from the Law Students' Press Society at University of Ilorin.
+              Stay updated with the latest news, announcements, and achievements from the Law Students' Society Press at University of Ilorin.
             </p>
 
             <div className="mt-8 max-w-xl mx-auto">

@@ -42,7 +42,7 @@ const staticResources = [
       <h2>Citation Guide</h2>
       <p>When citing this resource in your academic work, please use the following format:</p>
       <blockquote>
-        Law Students' Press Society, "Nigerian Constitution (1999) - Annotated Version" (University of Ilorin, 2023).
+        Law Students' Society Press, "Nigerian Constitution (1999) - Annotated Version" (University of Ilorin, 2023).
       </blockquote>
       
       <p>This resource is made available for educational purposes only. While every effort has been made to ensure accuracy, users should verify information with original sources when using it for official or academic purposes.</p>

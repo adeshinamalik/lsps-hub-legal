@@ -205,7 +205,7 @@ const AdminDashboard = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-law-DEFAULT">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome to the LSPS admin dashboard.
+            Welcome to the LSSP admin dashboard.
           </p>
         </div>
       </div>
@@ -214,7 +214,7 @@ const AdminDashboard = () => {
         <BarChart className="h-4 w-4" />
         <AlertTitle>Welcome to the Admin Panel</AlertTitle>
         <AlertDescription>
-          From here, you can manage all content for the LSPS website. Navigate using the sidebar to access different sections.
+          From here, you can manage all content for the LSSP website. Navigate using the sidebar to access different sections.
         </AlertDescription>
       </Alert>
 

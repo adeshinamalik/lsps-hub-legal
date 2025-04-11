@@ -31,7 +31,7 @@ const NewsHighlights = ({ className, items }: NewsHighlightsProps) => {
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-law-DEFAULT mb-3">News & Events</h2>
             <p className="text-law-text-light max-w-xl">
-              Stay updated with the latest news and upcoming events from the Law Students' Press Society.
+              Stay updated with the latest news and upcoming events from the Law Students' Society Press.
             </p>
           </div>
           <Button 
