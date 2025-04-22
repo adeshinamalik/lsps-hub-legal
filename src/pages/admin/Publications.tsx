@@ -199,7 +199,7 @@ const AdminPublications = () => {
     console.log("trying upload image");
 
     if (!imageFile) return "";
-    
+
     console.log("uploading image");
     try {
       setIsUploading(true);

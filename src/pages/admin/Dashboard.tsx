@@ -1,15 +1,8 @@
-
 import { useEffect, useState } from "react";
-import { 
-  FileText, 
-  Calendar, 
-  Users, 
-  Image, 
-  BarChart 
-} from "lucide-react";
+import { FileText, Calendar, Users, Image, BarChart } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { db } from "@/firebase/Firebase";
 import { collection, getDocs, query, orderBy, limit, where, Timestamp } from "firebase/firestore";
 import { supabase } from "@/supabase/supabase";
@@ -18,9 +11,10 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     publications: 0,
-    newsEvents: 0,
+    news: 0, // Split from newsEvents
+    events: 0, // Split from newsEvents
     users: 0,
-    media: 0
+    media: 0,
   });
   const [recentActivity, setRecentActivity] = useState<{
     type: string;
@@ -35,60 +29,69 @@ const AdminDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        
-        // Fetch publications count
-        const publicationsQuery = query(collection(db, 'articles'));
+
+        // Fetch publications count (assuming 'articles' collection)
+        const publicationsQuery = query(collection(db, "publications"));
         const publicationsSnapshot = await getDocs(publicationsQuery);
-        
-        // Fetch news & events count
-        const newsEventsQuery = query(collection(db, 'newsEvents'));
-        const newsEventsSnapshot = await getDocs(newsEventsQuery);
-        
+
+        // Fetch news count
+        const newsQuery = query(collection(db, "news"));
+        const newsSnapshot = await getDocs(newsQuery);
+
+        // Fetch events count
+        const eventsQuery = query(collection(db, "events"));
+        const eventsSnapshot = await getDocs(eventsQuery);
+
         // Fetch users count
-        const usersQuery = query(collection(db, 'users'));
+        const usersQuery = query(collection(db, "users"));
         const usersSnapshot = await getDocs(usersQuery);
-        
+
         // Fetch media count from Supabase
         const { count: mediaCount } = await supabase
-          .from('storage.objects')
-          .select('*', { count: 'exact', head: true });
-          
+          .from("storage.objects")
+          .select("*", { count: "exact", head: true });
+
         // Update stats
         setStats({
           publications: publicationsSnapshot.size,
-          newsEvents: newsEventsSnapshot.size,
+          news: newsSnapshot.size,
+          events: eventsSnapshot.size,
           users: usersSnapshot.size,
-          media: mediaCount || 0
+          media: mediaCount || 0,
         });
-        
+
         // Fetch recent activity
         const recentPublicationsQuery = query(
-          collection(db, 'articles'),
-          orderBy('createdAt', 'desc'),
+          collection(db, "articles"),
+          orderBy("createdAt", "desc"),
           limit(1)
         );
-        
+        const recentNewsQuery = query(
+          collection(db, "news"),
+          orderBy("createdAt", "desc"),
+          limit(1)
+        );
         const recentEventsQuery = query(
-          collection(db, 'newsEvents'),
-          orderBy('createdAt', 'desc'),
+          collection(db, "events"),
+          orderBy("createdAt", "desc"),
           limit(1)
         );
-        
         const recentUsersQuery = query(
-          collection(db, 'users'),
-          orderBy('createdAt', 'desc'),
+          collection(db, "users"),
+          orderBy("createdAt", "desc"),
           limit(1)
         );
-        
-        const [recentPubSnapshot, recentEventSnapshot, recentUserSnapshot] = 
+
+        const [recentPubSnapshot, recentNewsSnapshot, recentEventSnapshot, recentUserSnapshot] =
           await Promise.all([
             getDocs(recentPublicationsQuery),
+            getDocs(recentNewsQuery),
             getDocs(recentEventsQuery),
-            getDocs(recentUsersQuery)
+            getDocs(recentUsersQuery),
           ]);
-        
+
         const activities = [];
-        
+
         if (!recentPubSnapshot.empty) {
           const pubDoc = recentPubSnapshot.docs[0];
           const pubData = pubDoc.data();
@@ -97,22 +100,34 @@ const AdminDashboard = () => {
             title: pubData.title || "New article",
             time: formatTimeAgo(pubData.createdAt),
             icon: FileText,
-            color: "bg-blue-100 p-2 text-blue-500"
+            color: "bg-blue-100 p-2 text-blue-500",
           });
         }
-        
+
+        if (!recentNewsSnapshot.empty) {
+          const newsDoc = recentNewsSnapshot.docs[0];
+          const newsData = newsDoc.data();
+          activities.push({
+            type: "News added",
+            title: newsData.title || "News update",
+            time: formatTimeAgo(newsData.createdAt),
+            icon: Calendar,
+            color: "bg-green-100 p-2 text-green-500",
+          });
+        }
+
         if (!recentEventSnapshot.empty) {
           const eventDoc = recentEventSnapshot.docs[0];
           const eventData = eventDoc.data();
           activities.push({
-            type: eventData.type === "event" ? "Event updated" : "News added",
-            title: eventData.title || "News/Event update",
+            type: "Event updated",
+            title: eventData.title || "Event update",
             time: formatTimeAgo(eventData.createdAt),
             icon: Calendar,
-            color: "bg-green-100 p-2 text-green-500"
+            color: "bg-teal-100 p-2 text-teal-500",
           });
         }
-        
+
         if (!recentUserSnapshot.empty) {
           const userDoc = recentUserSnapshot.docs[0];
           const userData = userDoc.data();
@@ -121,10 +136,10 @@ const AdminDashboard = () => {
             title: userData.displayName || userData.email || "New user",
             time: formatTimeAgo(userData.createdAt),
             icon: Users,
-            color: "bg-purple-100 p-2 text-purple-500"
+            color: "bg-purple-100 p-2 text-purple-500",
           });
         }
-        
+
         setRecentActivity(activities);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -132,30 +147,31 @@ const AdminDashboard = () => {
         setLoading(false);
       }
     };
-    
+
     fetchDashboardData();
   }, []);
-  
+
   const formatTimeAgo = (timestamp: Timestamp | undefined) => {
     if (!timestamp) return "recently";
-    
     const now = new Date();
     const timeValue = timestamp.toDate();
     const diffInSeconds = Math.floor((now.getTime() - timeValue.getTime()) / 1000);
-    
     if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
     return `${Math.floor(diffInSeconds / 86400)} days ago`;
   };
-  
+
   const handleQuickAction = (action: string) => {
     switch (action) {
       case "publication":
         navigate("/admin/publications");
         break;
-      case "event":
+      case "news": // Updated from "event" to "news"
         navigate("/admin/news");
+        break;
+      case "event": // Added for events
+        navigate("/admin/events"); // Adjust route as needed
         break;
       case "users":
         navigate("/admin/users");
@@ -177,11 +193,18 @@ const AdminDashboard = () => {
       color: "bg-blue-500",
     },
     {
-      title: "News & Events",
-      value: loading ? "..." : stats.newsEvents.toString(),
-      description: "Press Releases, Events",
+      title: "News",
+      value: loading ? "..." : stats.news.toString(),
+      description: "Press Releases",
       icon: Calendar,
       color: "bg-green-500",
+    },
+    {
+      title: "Events",
+      value: loading ? "..." : stats.events.toString(),
+      description: "Upcoming Events",
+      icon: Calendar,
+      color: "bg-teal-500", // Different color to distinguish from News
     },
     {
       title: "Members",
@@ -204,9 +227,7 @@ const AdminDashboard = () => {
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-law-DEFAULT">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome to the LSSP admin dashboard.
-          </p>
+          <p className="text-muted-foreground">Welcome to the LSSP admin dashboard.</p>
         </div>
       </div>
 
@@ -218,22 +239,18 @@ const AdminDashboard = () => {
         </AlertDescription>
       </Alert>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5"> {/* Updated to 5 columns */}
         {statCards.map((card) => (
           <Card key={card.title}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                {card.title}
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
               <div className={`${card.color} rounded-full p-2 text-white`}>
                 <card.icon className="h-4 w-4" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{card.value}</div>
-              <p className="text-xs text-muted-foreground">
-                {card.description}
-              </p>
+              <p className="text-xs text-muted-foreground">{card.description}</p>
             </CardContent>
           </Card>
         ))}
@@ -243,9 +260,7 @@ const AdminDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              Latest actions taken in the admin panel
-            </CardDescription>
+            <CardDescription>Latest actions taken in the admin panel</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -279,43 +294,35 @@ const AdminDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>
-              Shortcuts to common tasks
-            </CardDescription>
+            <CardDescription>Shortcuts to common tasks</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              <Card 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleQuickAction("publication")}
-              >
+              <Card className="cursor-pointer hover:bg-gray-50" onClick={() => handleQuickAction("publication")}>
                 <CardContent className="flex flex-col items-center justify-center p-6">
                   <FileText className="mb-2 h-6 w-6 text-blue-500" />
                   <p className="text-sm font-medium">Add Publication</p>
                 </CardContent>
               </Card>
-              <Card 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleQuickAction("event")}
-              >
+              <Card className="cursor-pointer hover:bg-gray-50" onClick={() => handleQuickAction("news")}>
                 <CardContent className="flex flex-col items-center justify-center p-6">
                   <Calendar className="mb-2 h-6 w-6 text-green-500" />
+                  <p className="text-sm font-medium">Add News</p>
+                </CardContent>
+              </Card>
+              <Card className="cursor-pointer hover:bg-gray-50" onClick={() => handleQuickAction("event")}>
+                <CardContent className="flex flex-col items-center justify-center p-6">
+                  <Calendar className="mb-2 h-6 w-6 text-teal-500" />
                   <p className="text-sm font-medium">Add Event</p>
                 </CardContent>
               </Card>
-              <Card 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleQuickAction("users")}
-              >
+              <Card className="cursor-pointer hover:bg-gray-50" onClick={() => handleQuickAction("users")}>
                 <CardContent className="flex flex-col items-center justify-center p-6">
                   <Users className="mb-2 h-6 w-6 text-purple-500" />
                   <p className="text-sm font-medium">Manage Users</p>
                 </CardContent>
               </Card>
-              <Card 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleQuickAction("media")}
-              >
+              <Card className="cursor-pointer hover:bg-gray-50" onClick={() => handleQuickAction("media")}>
                 <CardContent className="flex flex-col items-center justify-center p-6">
                   <Image className="mb-2 h-6 w-6 text-orange-500" />
                   <p className="text-sm font-medium">Upload Media</p>
