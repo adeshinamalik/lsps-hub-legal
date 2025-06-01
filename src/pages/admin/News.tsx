@@ -204,7 +204,7 @@ const AdminNews = () => {
       toast.error("Location and Event Date are required for events.");
       return;
     }
-
+    console.log("adding item");
     try {
       setIsUploading(true);
       const imageUrl = await uploadImage();
