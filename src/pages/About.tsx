@@ -1,10 +1,9 @@
-
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Users, PenTool, BookOpen, Target, Heart, Shield } from "lucide-react";
+import { Users, PenTool, BookOpen, Target, Heart, Shield, Scale, MessageSquare, GraduationCap, HandHeart, Mic } from "lucide-react";
 import CommentSection from "@/components/CommentSection";
 
 const About = () => {
@@ -101,93 +100,97 @@ const About = () => {
       </section>
 
       {/* Redesigned Aims and Objectives Section */}
-      <section className="py-16 md:py-20 px-6 md:px-10 lg:px-20 bg-gradient-to-br from-law-DEFAULT to-law-light text-white">
-        <div className="container mx-auto">
+      <section className="py-16 md:py-20 px-6 md:px-10 lg:px-20 bg-gray-50">
+        <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-6">
-              <Target className="h-8 w-8 text-white" />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-law-DEFAULT/10 rounded-full mb-6">
+              <Target className="h-8 w-8 text-law-DEFAULT" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Aims & Objectives</h2>
-            <p className="text-lg text-white/90 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Our Aims & Objectives</h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
               These core principles guide our mission and define our commitment to excellence in legal journalism and student development.
             </p>
           </div>
           
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: Heart,
-                  title: "Foster Unity & Progress",
-                  description: "To foster peace, unity and progress among the students"
-                },
-                {
-                  icon: PenTool,
-                  title: "Promote Faculty Journalism",
-                  description: "To promote faculty journalism"
-                },
-                {
-                  icon: BookOpen,
-                  title: "Improve Consciousness",
-                  description: "To improve the level of consciousness of the members"
-                },
-                {
-                  icon: Users,
-                  title: "Inculcate Values",
-                  description: "To inculcate the right values, norms and attitudes of humanity in our members and the general public"
-                },
-                {
-                  icon: PenTool,
-                  title: "Instill Discipline",
-                  description: "To instill discipline in the students through educative and constructive writing"
-                },
-                {
-                  icon: Shield,
-                  title: "Protect Rights",
-                  description: "To protect the fundamental human rights of the students on campus"
-                },
-                {
-                  icon: Users,
-                  title: "Effective Communication",
-                  description: "To establish an effective group communication with the University management so that the rights of the students are protected"
-                },
-                {
-                  icon: BookOpen,
-                  title: "Objective Reporting",
-                  description: "To report objectively the events and happenings on campus"
-                },
-                {
-                  icon: Shield,
-                  title: "Promote University Name",
-                  description: "To promote the good name of the University and uphold and defend its integrity"
-                },
-                {
-                  icon: Heart,
-                  title: "Student Well-being",
-                  description: "To cater for the well-being of the students within the faculty"
-                },
-                {
-                  icon: Users,
-                  title: "Train in Public Speaking",
-                  description: "To train members in the art of Public speaking, Intellectual discuss and debating"
-                }
-              ].map((objective, index) => (
-                <div key={index} className="group">
-                  <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 h-full transition-all duration-300 hover:bg-white/20 hover:transform hover:scale-105">
-                    <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mr-4">
-                        <objective.icon className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="w-8 h-8 bg-white/30 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                        {String.fromCharCode(65 + index)}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              {
+                icon: Heart,
+                title: "Foster Unity & Progress",
+                description: "To foster peace, unity and progress among the students"
+              },
+              {
+                icon: PenTool,
+                title: "Promote Faculty Journalism",
+                description: "To promote faculty journalism"
+              },
+              {
+                icon: BookOpen,
+                title: "Improve Consciousness",
+                description: "To improve the level of consciousness of the members"
+              },
+              {
+                icon: Users,
+                title: "Inculcate Values",
+                description: "To inculcate the right values, norms and attitudes of humanity in our members and the general public"
+              },
+              {
+                icon: GraduationCap,
+                title: "Instill Discipline",
+                description: "To instill discipline in the students through educative and constructive writing"
+              },
+              {
+                icon: Shield,
+                title: "Protect Rights",
+                description: "To protect the fundamental human rights of the students on campus"
+              },
+              {
+                icon: MessageSquare,
+                title: "Effective Communication",
+                description: "To establish an effective group communication with the University management so that the rights of the students are protected"
+              },
+              {
+                icon: Scale,
+                title: "Objective Reporting",
+                description: "To report objectively the events and happenings on campus"
+              },
+              {
+                icon: Shield,
+                title: "Promote University Name",
+                description: "To promote the good name of the University and uphold and defend its integrity"
+              },
+              {
+                icon: HandHeart,
+                title: "Student Well-being",
+                description: "To cater for the well-being of the students within the faculty"
+              },
+              {
+                icon: Mic,
+                title: "Train in Public Speaking",
+                description: "To train members in the art of Public speaking, Intellectual discuss and debating"
+              }
+            ].map((objective, index) => (
+              <div key={index} className="group">
+                <div className="bg-white rounded-xl border border-gray-200 p-6 h-full transition-all duration-300 hover:shadow-lg hover:border-law-DEFAULT/20 hover:-translate-y-1">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 bg-law-DEFAULT/10 rounded-lg flex items-center justify-center group-hover:bg-law-DEFAULT/20 transition-colors duration-300">
+                        <objective.icon className="h-6 w-6 text-law-DEFAULT" />
                       </div>
                     </div>
-                    <h3 className="text-lg font-semibold text-white mb-3">{objective.title}</h3>
-                    <p className="text-white/80 leading-relaxed text-sm">{objective.description}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <h3 className="text-lg font-semibold text-gray-900 leading-tight">{objective.title}</h3>
+                        <div className="w-6 h-6 bg-law-DEFAULT/20 text-law-DEFAULT rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+                          {String.fromCharCode(65 + index)}
+                        </div>
+                      </div>
+                      <p className="text-gray-600 leading-relaxed text-sm">{objective.description}</p>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
