@@ -23,6 +23,18 @@ interface FeaturedArticlesProps {
 const FeaturedArticles = ({ className, articles }: FeaturedArticlesProps) => {
   const navigate = useNavigate();
 
+  // Add "Gist" as a special category that gets highlighted
+  const getArticleCategory = (category: string) => {
+    return category === "Gist" ? "Gist Column" : category;
+  };
+
+  const getCategoryStyle = (category: string) => {
+    if (category === "Gist") {
+      return "bg-law-accent/90 text-white";
+    }
+    return "bg-white/90 backdrop-blur-xs text-law-DEFAULT";
+  };
+
   return (
     <section className={cn("py-20 px-6 md:px-10 lg:px-20", className)}>
       <div className="container mx-auto">
@@ -30,7 +42,7 @@ const FeaturedArticles = ({ className, articles }: FeaturedArticlesProps) => {
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-law-DEFAULT mb-3">Featured Articles</h2>
             <p className="text-law-text-light max-w-xl">
-              Explore our selected articles on legal developments, student perspectives, and jurisprudential analysis.
+              Explore our selected articles on legal developments, student perspectives, jurisprudential analysis, and our popular Gist column.
             </p>
           </div>
           <Button 
@@ -63,8 +75,11 @@ const FeaturedArticles = ({ className, articles }: FeaturedArticlesProps) => {
                   className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                 />
                 <div className="absolute top-4 left-4">
-                  <span className="inline-block bg-white/90 backdrop-blur-xs px-3 py-1 text-xs font-medium text-law-DEFAULT rounded-full">
-                    {article.category}
+                  <span className={cn(
+                    "inline-block px-3 py-1 text-xs font-medium rounded-full",
+                    getCategoryStyle(article.category)
+                  )}>
+                    {getArticleCategory(article.category)}
                   </span>
                 </div>
               </div>

@@ -30,7 +30,7 @@ const Footer = () => {
       <div className="container mx-auto px-6 md:px-10 lg:px-20 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="space-y-4">
-            <h3 className="text-2xl font-serif font-bold mb-6">LSSP</h3>
+            <h3 className="text-2xl font-serif font-bold mb-6">LSS Press</h3>
             <p className="text-gray-300 leading-relaxed">
               The Law Students' Society Press of the University of Ilorin is dedicated to promoting legal journalism and nurturing the next generation of legal writers.
             </p>
@@ -64,6 +64,12 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/news" className="text-gray-300 hover:text-black transition-colors">News & Events</Link>
+              </li>
+              <li>
+                <Link to="/magazine" className="text-gray-300 hover:text-black transition-colors">Magazine</Link>
+              </li>
+              <li>
+                <Link to="/multimedia" className="text-gray-300 hover:text-black transition-colors">Multimedia</Link>
               </li>
               <li>
                 <Link to="/gallery" className="text-gray-300 hover:text-black transition-colors">Gallery</Link>

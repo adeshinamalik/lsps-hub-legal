@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
@@ -22,6 +21,8 @@ import { Toaster } from "@/components/ui/toaster";
 import JoinUs from './pages/JoinUs';
 import Gallery from './pages/Gallery';
 import Resources from './pages/Resources';
+import Multimedia from './pages/Multimedia';
+import Magazine from './pages/Magazine';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -45,6 +46,8 @@ const App = () => {
             <Route path="/join-us" element={<JoinUs />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/resources" element={<Resources />} />
+            <Route path="/multimedia" element={<Multimedia />} />
+            <Route path="/magazine" element={<Magazine />} />
             <Route path="/login" element={<Login />} />
 
             {/* Protected Admin Routes */}
