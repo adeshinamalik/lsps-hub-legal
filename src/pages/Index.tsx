@@ -85,11 +85,11 @@ const Index = () => {
     },
     {
       id: "3",
-      title: "Legal Technology and the Future of Legal Practice in Africa",
-      excerpt: "This paper explores how technological innovations are reshaping legal practice in Africa, with implications for legal education, access to justice, and professional ethics.",
+      title: "Campus Chronicles: A Week in the Life of a Law Student",
+      excerpt: "From midnight study sessions to heated moot court debates - an inside look at the daily experiences, challenges, and triumphs of university life.",
       date: "March 10, 2023",
       author: "Michael Ibrahim",
-      category: "Legal Technology",
+      category: "Gist",
       imageSrc: myImages.image2
     },
   ];
@@ -296,9 +296,9 @@ const Index = () => {
       <section className="py-20 px-6 md:px-10 lg:px-20">
         <div className="container mx-auto">
           <div className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-law-DEFAULT mb-6">Welcome to LSSP</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-law-DEFAULT mb-6">Welcome to LSS Press</h2>
             <p className="text-lg text-gray-600 leading-relaxed">
-              The Law Students' Society Press (LSSP) is the official media body of the Faculty of Law, University of Ilorin. We are dedicated to promoting legal journalism, fostering intellectual discourse, and nurturing the next generation of legal writers.
+              The Law Students' Society Press (LSS Press) is the official media body of the Faculty of Law, University of Ilorin. We are dedicated to promoting legal journalism, fostering intellectual discourse, and nurturing the next generation of legal writers.
             </p>
           </div>
 
@@ -309,7 +309,7 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-bold text-law-DEFAULT mb-4">Publications</h3>
               <p className="text-law-text-light mb-6">
-                Discover thought-provoking articles, case analyses, and legal opinions written by law students.
+                Discover thought-provoking articles, case analyses, legal opinions, and our popular Gist column written by law students.
               </p>
               <Button
                 variant="ghost"
@@ -345,7 +345,7 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-bold text-law-DEFAULT mb-4">Events</h3>
               <p className="text-law-text-light mb-6">
-                Participate in workshops, seminars, and conferences organized by LSSP throughout the academic year.
+                Participate in workshops, seminars, and conferences organized by LSS Press throughout the academic year.
               </p>
               <Button
                 variant="ghost"
