@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Users, PenTool, BookOpen } from "lucide-react";
+import { Users, PenTool, BookOpen, Target, Heart, Shield } from "lucide-react";
 import CommentSection from "@/components/CommentSection";
 
 const About = () => {
@@ -15,13 +15,13 @@ const About = () => {
     {
       name: "Adio Faidat Oluwapelumi",
       position: "Editor-in-Chief",
-      image: "/lovable-uploads/3f4fe2a0-eb5c-4ac7-b0d7-c53686034464.png",
+      image: "/lovable-uploads/6c90b523-2f2b-40bb-987e-09d8aad37de3.png",
       bio: "Adio Faidat Oluwapelumi is the Editor-in-Chief of LSS Press. She oversees editorial works and contributes engaging content, ensuring that the publication reflects diverse perspectives. She is skilled in project management. A dedicated team player, she values collaboration and is committed to creating a platform that meets students' needs in publication. She has a keen interest in lifestyle writing."
     },
     {
       name: "Sogbade Hafsat",
       position: "Deputy Editor-in-Chief",
-      image: "/lovable-uploads/92315fe1-8349-436c-b37e-e4003e78c3b1.png",
+      image: "/lovable-uploads/a1db8af2-6e9a-4c04-8739-d290907a1023.png",
       bio: "Sogbade Hafsat is a 400-level law student at the University of Ilorin with a strong passion for legal studies and academic pursuits. As the Deputy Editor-in-Chief of the Law Students' Society Press, she contributes to the development of editorial content and strategy. Beyond law, Hafsat enjoys writing and is deeply interested in education and literature. She is dedicated to collaborating with the team."
     },
     {
@@ -89,7 +89,7 @@ const About = () => {
             
             <div className="order-1 lg:order-2 relative">
               <img
-                src="public/lovable-uploads/eedd66e1-c2d9-49d3-814f-a415331d2a90.png"
+                src="/lovable-uploads/21b83501-660a-4549-ac69-7c903bb1cf71.png"
                 alt="LSS Press Logo"
                 className="rounded-lg shadow-subtle w-4/5 mx-auto h-auto object-contain animate-fade-up bg-white p-8"
               />
@@ -100,39 +100,92 @@ const About = () => {
         </div>
       </section>
 
-      {/* Aims and Objectives Section */}
-      <section className="py-16 md:py-20 px-6 md:px-10 lg:px-20 bg-law-muted">
+      {/* Redesigned Aims and Objectives Section */}
+      <section className="py-16 md:py-20 px-6 md:px-10 lg:px-20 bg-gradient-to-br from-law-DEFAULT to-law-light text-white">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-law-DEFAULT mb-6">Aims and Objectives</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Our core objectives guide our mission and activities as the official press organization of the Law Students' Society.
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-6">
+              <Target className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Aims & Objectives</h2>
+            <p className="text-lg text-white/90 max-w-3xl mx-auto">
+              These core principles guide our mission and define our commitment to excellence in legal journalism and student development.
             </p>
           </div>
           
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
-                "To foster peace, unity and progress among the students",
-                "To promote faculty journalism",
-                "To improve the level of consciousness of the members",
-                "To inculcate the right values, norms and attitudes of humanity in our members and the general public",
-                "To instill discipline in the students through educative and constructive writing",
-                "To protect the fundamental human rights of the students on campus",
-                "To establish an effective group communication with the University management so that the rights of the students are protected",
-                "To report objectively the events and happenings on campus",
-                "To promote the good name of the University and uphold and defend its integrity",
-                "To cater for the well-being of the students within the faculty",
-                "To train members in the art of Public speaking, Intellectual discuss and debating"
+                {
+                  icon: Heart,
+                  title: "Foster Unity & Progress",
+                  description: "To foster peace, unity and progress among the students"
+                },
+                {
+                  icon: PenTool,
+                  title: "Promote Faculty Journalism",
+                  description: "To promote faculty journalism"
+                },
+                {
+                  icon: BookOpen,
+                  title: "Improve Consciousness",
+                  description: "To improve the level of consciousness of the members"
+                },
+                {
+                  icon: Users,
+                  title: "Inculcate Values",
+                  description: "To inculcate the right values, norms and attitudes of humanity in our members and the general public"
+                },
+                {
+                  icon: PenTool,
+                  title: "Instill Discipline",
+                  description: "To instill discipline in the students through educative and constructive writing"
+                },
+                {
+                  icon: Shield,
+                  title: "Protect Rights",
+                  description: "To protect the fundamental human rights of the students on campus"
+                },
+                {
+                  icon: Users,
+                  title: "Effective Communication",
+                  description: "To establish an effective group communication with the University management so that the rights of the students are protected"
+                },
+                {
+                  icon: BookOpen,
+                  title: "Objective Reporting",
+                  description: "To report objectively the events and happenings on campus"
+                },
+                {
+                  icon: Shield,
+                  title: "Promote University Name",
+                  description: "To promote the good name of the University and uphold and defend its integrity"
+                },
+                {
+                  icon: Heart,
+                  title: "Student Well-being",
+                  description: "To cater for the well-being of the students within the faculty"
+                },
+                {
+                  icon: Users,
+                  title: "Train in Public Speaking",
+                  description: "To train members in the art of Public speaking, Intellectual discuss and debating"
+                }
               ].map((objective, index) => (
-                <Card key={index} className="border-none shadow-subtle p-6 bg-white animate-fade-up" style={{ animationDelay: `${index * 50}ms` }}>
-                  <div className="flex items-start gap-4">
-                    <div className="w-8 h-8 bg-law-DEFAULT text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-1">
-                      {String.fromCharCode(65 + index)}
+                <div key={index} className="group">
+                  <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 h-full transition-all duration-300 hover:bg-white/20 hover:transform hover:scale-105">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mr-4">
+                        <objective.icon className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="w-8 h-8 bg-white/30 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        {String.fromCharCode(65 + index)}
+                      </div>
                     </div>
-                    <p className="text-gray-600 leading-relaxed">{objective}</p>
+                    <h3 className="text-lg font-semibold text-white mb-3">{objective.title}</h3>
+                    <p className="text-white/80 leading-relaxed text-sm">{objective.description}</p>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
           </div>

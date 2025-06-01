@@ -71,8 +71,13 @@ const Navbar = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm">
       <div className="container mx-auto px-6 md:px-10 lg:px-20">
         <div className="flex items-center justify-between h-20">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="font-serif text-2xl font-bold text-law-DEFAULT">LSSP</div>
+          <Link to="/" className="flex items-center gap-3">
+            <img 
+              src="/lovable-uploads/21b83501-660a-4549-ac69-7c903bb1cf71.png" 
+              alt="LSS Press Logo" 
+              className="h-12 w-12 object-contain"
+            />
+            <div className="font-serif text-xl font-bold text-law-DEFAULT">LSS Press</div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
