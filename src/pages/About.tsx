@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Users, PenTool, BookOpen, Target, Heart, Shield, Scale, MessageSquare, GraduationCap, HandHeart, Mic } from "lucide-react";
-import CommentSection from "@/components/CommentSection";
 
 const About = () => {
   const navigate = useNavigate();
@@ -69,9 +68,7 @@ const About = () => {
               <p className="text-gray-600 mb-6 leading-relaxed">
                 LSS Press is the official press organization of the Law Students' Society, dedicated to delivering timely news, insightful articles, and engaging interviews to the student populace. With a team of 60 committed members, we cover a wide range of topics, from legal education and student affairs to lifestyle and motivation. In addition to written content, we produce video reports and features, ensuring a dynamic and interactive media presence.
               </p>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                The LSS Press was established in 1992 as the official media body of the Faculty of Law, University of Ilorin. Our mission is to promote legal journalism, foster intellectual discourse among law students, and nurture the next generation of legal writers.
-              </p>
+
               <p className="text-gray-600 mb-6 leading-relaxed">
                 We believe that effective legal writing is an essential skill for every law student and future legal practitioner. Through our publications, workshops, and events, we aim to provide a platform for law students to develop their writing and analytical skills.
               </p>
@@ -276,11 +273,7 @@ const About = () => {
         </div>
       </section>
       
-      <div className="container mx-auto px-6 lg:px-8 py-16">
-        <div className="max-w-4xl mx-auto mt-16">
-          <CommentSection itemId="about-page" itemType="publication" />
-        </div>
-      </div>
+
       
       <Footer />
     </div>

@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.ql-container {
+  min-height: 250px;
+  border-radius: 0 0 8px 8px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-family: 'Inter', sans-serif;
+}
+
+.ql-toolbar.ql-snow {
+  border-radius: 8px 8px 0 0;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 10px;
+}
+
+.image-preview {
+  max-width: 100%;
+  margin: 12px 0;
+  border-radius: 6px;
+  cursor: move;
+  position: relative;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.image-preview:hover {
+  transform: scale(1.02);
+}
+
+.resizer {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #6366f1;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  cursor: se-resize;
+  bottom: -4px;
+  right: -4px;
+  transition: background 0.2s ease;
+}
+
+.resizer:hover {
+  background: #4f46e5;
+}

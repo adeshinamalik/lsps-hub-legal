@@ -2,13 +2,13 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Search, 
-  Filter, 
-  FileText, 
-  Download, 
-  BookOpen, 
-  Bookmark, 
+import {
+  Search,
+  Filter,
+  FileText,
+  Download,
+  BookOpen,
+  Bookmark,
   ExternalLink,
   Link as LinkIcon,
   Video,
@@ -31,7 +31,6 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import CommentSection from "@/components/CommentSection";
 
 // Mock data for resources
 const resources = [
@@ -164,15 +163,15 @@ const categories = [
 const Resources = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  
+
   // Filter resources based on search query and selected category
   const filteredResources = resources.filter(resource => {
-    const matchesSearch = 
-      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch =
+      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       resource.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesCategory = selectedCategory === "All Categories" || resource.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -197,7 +196,7 @@ const Resources = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <div className="pt-28 pb-16 md:pt-32 md:pb-20 px-6 md:px-10 lg:px-20 bg-law-muted">
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center">
@@ -208,7 +207,7 @@ const Resources = () => {
           </div>
         </div>
       </div>
-      
+
       <section className="py-16 md:py-20 px-6 md:px-10 lg:px-20">
         <div className="container mx-auto">
           <Tabs defaultValue="downloads" className="w-full mb-16">
@@ -217,7 +216,7 @@ const Resources = () => {
               <TabsTrigger value="external" className="flex-1">External Resources</TabsTrigger>
               <TabsTrigger value="videos" className="flex-1">Video Tutorials</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="downloads">
               <div className="mb-12">
                 <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -231,7 +230,7 @@ const Resources = () => {
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                  
+
                   <div className="flex flex-wrap gap-3">
                     {categories.map(category => (
                       <Button
@@ -248,21 +247,21 @@ const Resources = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 <div className="text-gray-600 mb-8">
                   Showing {filteredResources.length} {filteredResources.length === 1 ? "resource" : "resources"}
                   {selectedCategory !== "All Categories" && ` in ${selectedCategory}`}
                   {searchQuery && ` for "${searchQuery}"`}
                 </div>
               </div>
-              
+
               {filteredResources.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredResources.map((resource, index) => (
-                    <Card 
+                    <Card
                       key={resource.id}
                       className="border-none shadow-subtle hover:shadow-glass transition-all duration-200 animate-fade-up"
-                      style={{ 
+                      style={{
                         animationDelay: `${index * 100}ms`,
                         animationFillMode: 'both',
                       }}
@@ -283,7 +282,7 @@ const Resources = () => {
                       </CardContent>
                       <CardFooter className="flex justify-between items-center">
                         <div className="text-sm text-gray-500">{resource.size}</div>
-                        <Button 
+                        <Button
                           className="gap-2 bg-law-DEFAULT hover:bg-law-light"
                           onClick={() => handleDownload(resource)}
                         >
@@ -299,8 +298,8 @@ const Resources = () => {
                   <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
                   <h3 className="text-xl font-bold text-law-DEFAULT mb-3">No resources found</h3>
                   <p className="text-gray-600 mb-6">Try adjusting your search criteria or browse all categories</p>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="border-law-DEFAULT text-law-DEFAULT hover:bg-law-DEFAULT hover:text-white"
                     onClick={() => {
                       setSearchQuery("");
@@ -312,18 +311,18 @@ const Resources = () => {
                 </div>
               )}
             </TabsContent>
-            
+
             <TabsContent value="external">
               <div className="max-w-4xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {externalResources.map((resource, index) => (
-                    <a 
-                      key={index} 
-                      href={resource.url} 
-                      target="_blank" 
+                    <a
+                      key={index}
+                      href={resource.url}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="group animate-fade-up"
-                      style={{ 
+                      style={{
                         animationDelay: `${index * 100}ms`,
                         animationFillMode: 'both',
                       }}
@@ -349,23 +348,23 @@ const Resources = () => {
                 </div>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="videos">
               <div className="max-w-4xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {videoTutorials.map((video, index) => (
-                    <Card 
+                    <Card
                       key={video.id}
                       className="overflow-hidden border-none shadow-subtle hover:shadow-glass transition-all duration-200 animate-fade-up cursor-pointer"
-                      style={{ 
+                      style={{
                         animationDelay: `${index * 100}ms`,
                         animationFillMode: 'both',
                       }}
                       onClick={() => toast.info("Video player would open here")}
                     >
                       <div className="relative h-48">
-                        <img 
-                          src={video.thumbnail} 
+                        <img
+                          src={video.thumbnail}
                           alt={video.title}
                           className="w-full h-full object-cover"
                         />
@@ -390,13 +389,7 @@ const Resources = () => {
           </Tabs>
         </div>
       </section>
-      
-      <div className="container mx-auto px-6 lg:px-8 py-16">
-        <div className="max-w-4xl mx-auto mt-8">
-          <CommentSection itemId="resources-page" itemType="publication" />
-        </div>
-      </div>
-      
+
       <Footer />
     </div>
   );

@@ -1,13 +1,82 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { useState } from "react";
+import { Link, NavLink as RouterNavLink, useNavigate } from "react-router-dom";
+import { Menu, X, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { useAuth } from "@/contexts/AuthContext";
+
+
+interface MobileNavLinkProps {
+  to: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+
+
+const MobileNavLink = ({ to, children, onClick }: MobileNavLinkProps) => {
+  return (
+    <Link to={to} onClick={onClick} className="block text-lg font-medium text-gray-700 hover:text-law-DEFAULT transition-colors focus:text-accent-foreground">
+      {children}
+    </Link>
+  );
+};
+
+
+interface NavLinkProps {
+  to: string;
+  children: React.ReactNode;
+}
+
+
+const NavLink = ({ to, children }: NavLinkProps) => {
+  return (
+    <RouterNavLink
+      to={to}
+      className={({ isActive }) =>
+        cn(
+          "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-gray-700 hover:text-law-DEFAULT",
+          isActive ? "text-law-DEFAULT" : "text-gray-700"
+        )
+      }
+    >
+      {children}
+    </RouterNavLink>
+  );
+};
+
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isContentMenuOpen, setIsContentMenuOpen] = useState(false);
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+
+  const handleAdminRedirect = () => {
+    navigate(currentUser ? '/admin' : '/login');
+    closeMobileMenu();
+  };
+
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm">
       <div className="container mx-auto px-6 md:px-10 lg:px-20">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center space-x-3">
@@ -18,114 +87,184 @@ const Navbar = () => {
             />
             <span className="text-2xl font-serif font-bold text-law-DEFAULT">LSS Press</span>
           </Link>
-          
-          <div className="hidden lg:flex items-center space-x-8">
-            <Link to="/" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium">
-              Home
-            </Link>
-            <Link to="/about" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium">
-              About
-            </Link>
-            <div className="relative group">
-              <button className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium flex items-center">
-                Content
-                <ChevronDown className="ml-1 h-4 w-4 group-hover:rotate-180 transition-transform duration-200" />
-              </button>
-              <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="p-2">
-                  <Link to="/publications" className="block px-4 py-3 text-law-text-dark hover:text-law-DEFAULT hover:bg-law-muted/50 rounded-md transition-colors duration-200">
-                    <div className="font-medium">Publications</div>
-                    <div className="text-sm text-gray-500">Articles & Research</div>
-                  </Link>
-                  <Link to="/news" className="block px-4 py-3 text-law-text-dark hover:text-law-DEFAULT hover:bg-law-muted/50 rounded-md transition-colors duration-200">
-                    <div className="font-medium">News & Events</div>
-                    <div className="text-sm text-gray-500">Latest Updates</div>
-                  </Link>
-                  <Link to="/magazine" className="block px-4 py-3 text-law-text-dark hover:text-law-DEFAULT hover:bg-law-muted/50 rounded-md transition-colors duration-200">
-                    <div className="font-medium">Magazine</div>
-                    <div className="text-sm text-gray-500">PDF Publications</div>
-                  </Link>
-                  <Link to="/multimedia" className="block px-4 py-3 text-law-text-dark hover:text-law-DEFAULT hover:bg-law-muted/50 rounded-md transition-colors duration-200">
-                    <div className="font-medium">Multimedia</div>
-                    <div className="text-sm text-gray-500">Podcasts & Videos</div>
-                  </Link>
-                </div>
-              </div>
-            </div>
-            <Link to="/gallery" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium">
-              Gallery
-            </Link>
-            <Link to="/resources" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium">
-              Resources
-            </Link>
-            <Link to="/join-us" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium">
-              Join Us
-            </Link>
-            <Link to="/contact" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium">
-              Contact
-            </Link>
-          </div>
 
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-md text-law-text-dark hover:text-law-DEFAULT hover:bg-law-muted/50 transition-colors duration-200"
-          >
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-gray-100">
-            <div className="flex flex-col space-y-3">
-              <Link to="/" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium py-2">
-                Home
-              </Link>
-              <Link to="/about" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium py-2">
-                About
-              </Link>
-              <button
-                onClick={() => setIsContentMenuOpen(!isContentMenuOpen)}
-                className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium py-2 flex items-center justify-between"
+
+          <nav className="hidden md:flex items-center gap-6">
+            <ul className="flex items-center gap-6">
+              <li>
+                <NavLink to="/">Home</NavLink>
+              </li>
+              <li>
+                <NavLink to="/about">About</NavLink>
+              </li>
+              <li>
+                <NavLink to="/publications">Publications</NavLink>
+              </li>
+              <li>
+                <NavigationMenu>
+                  <NavigationMenuList>
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="bg-transparent text-gray-700">News & Events</NavigationMenuTrigger>
+                      <NavigationMenuContent>
+                        <ul className="grid w-[200px] gap-3 p-4">
+                          <li>
+                            <Link
+                              to="/news"
+                              className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                              onClick={closeMobileMenu}
+                            >
+                              <div className="text-sm font-medium leading-none">News</div>
+                              <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                Latest updates and announcements
+                              </p>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/events"
+                              className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                              onClick={closeMobileMenu}
+                            >
+                              <div className="text-sm font-medium leading-none">Events</div>
+                              <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                Upcoming workshops and activities
+                              </p>
+                            </Link>
+                          </li>
+                        </ul>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                  </NavigationMenuList>
+                </NavigationMenu>
+              </li>
+              <li>
+                <NavLink to="/multimedia">
+                  <div>Multimedia</div>
+                  {/* <div className="text-sm text-gray-500">Podcasts & Videos</div> */}
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/gallery">Gallery</NavLink>
+              </li>
+              <li>
+                <NavLink to="/resources">Resources</NavLink>
+              </li>
+              <li>
+                <NavLink to="/contact">Contact</NavLink>
+              </li>
+            </ul>
+            <div className="flex items-center gap-3">
+              <Button asChild className="bg-law-light hover:bg-law-light">
+                <Link to="/join-us">Join Us</Link>
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleAdminRedirect}
+                title={currentUser ? "Go to Admin Dashboard" : "Admin Login"}
+                className="rounded-full bg-white border-gray-200 hover:bg-gray-100"
               >
-                Content
-                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isContentMenuOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {isContentMenuOpen && (
-                <div className="pl-4 space-y-3">
-                  <Link to="/publications" className="block text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 py-2">
-                    Publications
-                  </Link>
-                  <Link to="/news" className="block text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 py-2">
-                    News & Events
-                  </Link>
-                  <Link to="/magazine" className="block text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 py-2">
-                    Magazine
-                  </Link>
-                  <Link to="/multimedia" className="block text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 py-2">
-                    Multimedia
-                  </Link>
-                </div>
-              )}
-              <Link to="/gallery" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium py-2">
-                Gallery
-              </Link>
-              <Link to="/resources" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium py-2">
-                Resources
-              </Link>
-              <Link to="/join-us" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium py-2">
-                Join Us
-              </Link>
-              <Link to="/contact" className="text-law-text-dark hover:text-law-DEFAULT transition-colors duration-200 font-medium py-2">
-                Contact
-              </Link>
+                <ShieldCheck className="h-5 w-5 text-law-DEFAULT" />
+              </Button>
             </div>
+          </nav>
+
+
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleMobileMenu}
+              className="h-10 w-10 text-law-DEFAULT"
+              aria-label="Menu"
+            >
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
           </div>
-        )}
+        </div>
       </div>
-    </nav>
+
+
+      {/* Mobile menu */}
+      <div
+        className={cn(
+          "fixed inset-x-0 top-20 bg-white shadow-md md:hidden transition-all duration-300 ease-in-out overflow-hidden",
+          isMobileMenuOpen
+            ? "max-h-screen opacity-100"
+            : "max-h-0 opacity-0"
+        )}
+      >
+        <div className="container mx-auto px-6 py-5">
+          <ul className="flex flex-col gap-4">
+            <li>
+              <MobileNavLink to="/" onClick={closeMobileMenu}>
+                Home
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/about" onClick={closeMobileMenu}>
+                About
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/publications" onClick={closeMobileMenu}>
+                Publications
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/news" onClick={closeMobileMenu}>
+                News
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/events" onClick={closeMobileMenu}>
+                Events
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/gallery" onClick={closeMobileMenu}>
+                Gallery
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/resources" onClick={closeMobileMenu}>
+                Resources
+              </MobileNavLink>
+            </li>
+            <li>
+              <MobileNavLink to="/contact" onClick={closeMobileMenu}>
+                Contact
+              </MobileNavLink>
+            </li>
+            <li>
+              <Button
+                asChild
+                className="w-full mt-2 bg-law-DEFAULT hover:bg-law-light"
+              >
+                <Link to="/join-us" onClick={closeMobileMenu}>
+                  Join Us
+                </Link>
+              </Button>
+            </li>
+            <li>
+              <Button
+                onClick={handleAdminRedirect}
+                className="w-full mt-2 flex items-center justify-center gap-2 border border-gray-200 bg-white text-law-DEFAULT hover:bg-gray-50"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                {currentUser ? "Admin Dashboard" : "Admin Login"}
+              </Button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
   );
 };
 
+
 export default Navbar;
+
+
+

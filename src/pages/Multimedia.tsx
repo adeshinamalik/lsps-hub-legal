@@ -4,7 +4,6 @@ import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Headphones, Video, Calendar, Clock } from "lucide-react";
-import CommentSection from "@/components/CommentSection";
 
 const Multimedia = () => {
   // Sample podcast episodes
@@ -19,7 +18,7 @@ const Multimedia = () => {
       thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"
     },
     {
-      id: "2", 
+      id: "2",
       title: "Student Rights and Campus Justice",
       description: "Exploring student rights, campus disciplinary procedures, and the intersection of academic and legal justice.",
       duration: "38 min",
@@ -31,7 +30,7 @@ const Multimedia = () => {
       id: "3",
       title: "Constitutional Law Simplified",
       description: "Breaking down complex constitutional principles for law students and the general public.",
-      duration: "52 min", 
+      duration: "52 min",
       date: "February 10, 2024",
       audioUrl: "#",
       thumbnail: "https://images.unsplash.com/photo-1591291621164-2c6367723315?ixlib=rb-4.0.3&auto=format&fit=crop&w=1471&q=80"
@@ -54,7 +53,7 @@ const Multimedia = () => {
       title: "Senior Advocate's Career Journey",
       description: "A seasoned Senior Advocate shares insights on building a successful legal career.",
       duration: "32 min",
-      date: "March 5, 2024", 
+      date: "March 5, 2024",
       videoUrl: "#",
       thumbnail: "https://images.unsplash.com/photo-1528901166007-3784c7dd3653?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"
     },
@@ -72,7 +71,7 @@ const Multimedia = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <div className="pt-28 pb-16 md:pt-32 md:pb-20 px-6 md:px-10 lg:px-20 bg-law-muted">
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center">
@@ -174,11 +173,6 @@ const Multimedia = () => {
         </div>
       </section>
 
-      <div className="container mx-auto px-6 lg:px-8 py-16">
-        <div className="max-w-4xl mx-auto">
-          <CommentSection itemId="multimedia-page" itemType="publication" />
-        </div>
-      </div>
 
       <Footer />
     </div>

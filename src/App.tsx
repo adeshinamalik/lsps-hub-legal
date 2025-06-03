@@ -27,6 +27,7 @@ import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import EventDetail from './pages/EventDetail';
+import BlogEditor from '@/components/BlogEditor';
 
 const App = () => {
   return (
@@ -34,6 +35,14 @@ const App = () => {
       <AuthProvider>
         <main className="min-h-screen bg-white flex flex-col">
           <Routes>
+            <Route path="/editor" element={
+              <div className="w-full max-w-3xl p-6 bg-gradient-to-br from-[#f0f9ff] to-[#f8fafc] rounded-xl shadow-lg">
+                <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center font-['Inter']">
+                  Create Your Blog Post
+                </h1>
+                <BlogEditor />
+              </div>
+            } />
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
