@@ -2,7 +2,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
-import { PenTool, Eye, Upload, Sparkles, FileText, Image as ImageIcon } from 'lucide-react';
+import { PenTool, Eye, Upload, FileText, Image as ImageIcon, ArrowLeft } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const BlogEditor = () => {
   const [title, setTitle] = useState('');
@@ -13,6 +19,7 @@ const BlogEditor = () => {
   const quillRef = useRef(null);
   const editorRef = useRef(null);
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (previewMode) return;
@@ -32,13 +39,14 @@ const BlogEditor = () => {
           ['clean'],
         ],
       },
-      placeholder: 'Start writing your masterpiece...',
+      placeholder: 'Start writing your article...',
     });
 
     quill.on('text-change', () => {
       const html = quill.root.innerHTML;
       setContent(html);
-      setWordCount(quill.getText().trim().split(/\s+/).length);
+      const text = quill.getText().trim();
+      setWordCount(text.length > 0 ? text.split(/\s+/).length : 0);
     });
 
     quillRef.current = quill;
@@ -144,9 +152,9 @@ const BlogEditor = () => {
       publishedAt: new Date().toISOString(),
     };
     console.log('Post Data:', postData);
-    alert('✨ Your masterpiece has been published! Check console for details.');
+    alert('Article published successfully! Check console for details.');
     
-    // Reset form with animation
+    // Reset form
     setTitle('');
     setContent('');
     setImages([]);
@@ -163,253 +171,252 @@ const BlogEditor = () => {
     setPreviewMode(!previewMode);
   };
 
+  const goBack = () => {
+    navigate('/admin');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-lg">
-              <PenTool className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={goBack}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-law-DEFAULT rounded-lg">
+                <PenTool className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-law-DEFAULT">Blog Editor</h1>
+                <p className="text-sm text-gray-600">Create and publish articles for LSS Press</p>
+              </div>
             </div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Beautiful Editor
-            </h1>
-            <Sparkles className="w-8 h-8 text-purple-500 animate-pulse" />
           </div>
-          <p className="text-xl text-gray-600 font-medium">Craft your thoughts into beautiful stories</p>
-        </div>
-
-        {/* Main Editor Card */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-          {/* Top Bar */}
-          <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-white">
-                  <FileText className="w-5 h-5" />
-                  <span className="font-medium">
-                    {wordCount > 0 ? `${wordCount} words` : 'Start writing...'}
-                  </span>
-                </div>
+          
+          <div className="flex items-center gap-4">
+            {wordCount > 0 && (
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="gap-1">
+                  <FileText className="w-3 h-3" />
+                  {wordCount} words
+                </Badge>
                 {images.length > 0 && (
-                  <div className="flex items-center gap-2 text-white/90">
-                    <ImageIcon className="w-4 h-4" />
-                    <span className="text-sm">{images.length} image{images.length !== 1 ? 's' : ''}</span>
-                  </div>
+                  <Badge variant="secondary" className="gap-1">
+                    <ImageIcon className="w-3 h-3" />
+                    {images.length} image{images.length !== 1 ? 's' : ''}
+                  </Badge>
                 )}
-              </div>
-              
-              <button
-                onClick={togglePreview}
-                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl transition-all duration-300 font-medium backdrop-blur-sm"
-              >
-                {previewMode ? (
-                  <>
-                    <PenTool className="w-4 h-4" />
-                    Edit Mode
-                  </>
-                ) : (
-                  <>
-                    <Eye className="w-4 h-4" />
-                    Preview
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Content Area */}
-          <div className="p-8">
-            {previewMode ? (
-              /* Preview Mode */
-              <div className="space-y-8 animate-fade-in">
-                <div className="border-b border-gray-200 pb-6">
-                  <h1 className="text-4xl font-bold text-gray-800 leading-tight">
-                    {title || 'Untitled Masterpiece'}
-                  </h1>
-                  <div className="flex items-center gap-4 mt-4 text-gray-500">
-                    <span>{new Date().toLocaleDateString()}</span>
-                    <span>•</span>
-                    <span>{wordCount} words</span>
-                    <span>•</span>
-                    <span>{Math.ceil(wordCount / 200)} min read</span>
-                  </div>
-                </div>
-                
-                <div 
-                  className="prose prose-lg prose-indigo max-w-none prose-headings:font-bold prose-a:text-indigo-600 prose-img:rounded-xl prose-img:shadow-lg"
-                  dangerouslySetInnerHTML={{ 
-                    __html: content || '<p class="text-gray-500 italic">Your beautiful content will appear here...</p>' 
-                  }}
-                />
-                
-                <div className="pt-8 border-t border-gray-200">
-                  <button
-                    onClick={handleSubmit}
-                    className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white py-4 rounded-2xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 font-bold text-lg"
-                  >
-                    ✨ Publish Your Masterpiece
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* Edit Mode */
-              <div className="space-y-8 animate-fade-in">
-                {/* Title Input */}
-                <div className="space-y-3">
-                  <label className="block text-gray-700 font-semibold text-lg">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full p-4 text-2xl font-bold border-2 border-gray-200 rounded-2xl bg-gray-50/50 text-gray-800 focus:outline-none focus:border-indigo-400 focus:bg-white transition-all duration-300 placeholder-gray-400"
-                    placeholder="Enter your captivating title..."
-                  />
-                </div>
-                
-                {/* Rich Text Editor */}
-                <div className="space-y-3">
-                  <label className="block text-gray-700 font-semibold text-lg">
-                    Content
-                  </label>
-                  <div className="border-2 border-gray-200 rounded-2xl overflow-hidden bg-white shadow-inner">
-                    <div ref={editorRef} className="editor-container min-h-[400px]" />
-                  </div>
-                </div>
-                
-                {/* Image Upload */}
-                <div className="space-y-3">
-                  <label className="block text-gray-700 font-semibold text-lg">
-                    Add Images
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full p-6 border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50/50 hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-300 flex items-center justify-center gap-3 text-gray-600 hover:text-indigo-600"
-                    >
-                      <Upload className="w-6 h-6" />
-                      <span className="font-medium">Click to upload images or drag them into the editor</span>
-                    </button>
-                  </div>
-                  <p className="text-sm text-gray-500 italic">
-                    💡 Pro tip: After uploading, drag images to reposition and resize by pulling the corner handle
-                  </p>
-                </div>
               </div>
             )}
+            
+            <Button
+              onClick={togglePreview}
+              variant={previewMode ? "default" : "outline"}
+              className="gap-2"
+            >
+              {previewMode ? (
+                <>
+                  <PenTool className="w-4 h-4" />
+                  Edit Mode
+                </>
+              ) : (
+                <>
+                  <Eye className="w-4 h-4" />
+                  Preview
+                </>
+              )}
+            </Button>
           </div>
         </div>
-        
-        <style jsx>{`
-          @keyframes fade-in {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          
-          .animate-fade-in {
-            animation: fade-in 0.5s ease-out;
-          }
-          
-          .ql-container {
-            min-height: 400px;
-            border: none !important;
-            font-family: 'Inter', sans-serif;
-            font-size: 16px;
-            line-height: 1.6;
-          }
-          
-          .ql-toolbar.ql-snow {
-            border: none !important;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 16px;
-            border-radius: 16px 16px 0 0;
-          }
-          
-          .ql-toolbar .ql-stroke {
-            stroke: #6366f1;
-          }
-          
-          .ql-toolbar .ql-fill {
-            fill: #6366f1;
-          }
-          
-          .ql-toolbar button:hover {
-            background: #e0e7ff;
-            border-radius: 8px;
-          }
-          
-          .ql-editor {
-            padding: 24px;
-            color: #1f2937;
-          }
-          
-          .ql-editor.ql-blank::before {
-            color: #9ca3af;
-            font-style: italic;
-          }
-          
-          .image-preview {
-            max-width: 100%;
-            margin: 20px 0;
-            border-radius: 16px;
-            cursor: move;
-            position: relative;
-            display: inline-block;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid transparent;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-          }
-          
-          .image-preview:hover {
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            border-color: #818cf8;
-          }
-          
-          .resizer {
-            position: absolute;
-            width: 18px;
-            height: 18px;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            border: 3px solid white;
-            border-radius: 50%;
-            cursor: se-resize;
-            bottom: -6px;
-            right: -6px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-          }
-          
-          .resizer:hover {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            transform: scale(1.2);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
-          }
-          
-          .prose img {
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-          }
-          
-          .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-            background: linear-gradient(135deg, #1f2937 0%, #4f46e5 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-          }
-        `}</style>
       </div>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {previewMode ? (
+          /* Preview Mode */
+          <Card className="max-w-4xl mx-auto">
+            <CardHeader className="border-b">
+              <CardTitle className="text-3xl font-bold text-law-DEFAULT leading-tight">
+                {title || 'Untitled Article'}
+              </CardTitle>
+              <div className="flex items-center gap-4 text-sm text-gray-500 pt-2">
+                <span>{new Date().toLocaleDateString()}</span>
+                <span>•</span>
+                <span>{wordCount} words</span>
+                <span>•</span>
+                <span>{Math.ceil(wordCount / 200)} min read</span>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="pt-8">
+              <div 
+                className="prose prose-lg prose-law max-w-none prose-headings:text-law-DEFAULT prose-a:text-law-DEFAULT prose-img:rounded-lg prose-img:shadow-md"
+                dangerouslySetInnerHTML={{ 
+                  __html: content || '<p class="text-gray-500 italic">Your content will appear here...</p>' 
+                }}
+              />
+              
+              <div className="pt-8 mt-8 border-t">
+                <Button
+                  onClick={handleSubmit}
+                  className="w-full bg-law-DEFAULT hover:bg-law-light text-white py-3 text-lg font-semibold"
+                >
+                  Publish Article
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          /* Edit Mode */
+          <div className="max-w-5xl mx-auto space-y-6">
+            {/* Title Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Article Title</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="text-xl font-semibold border-0 shadow-none px-0 focus-visible:ring-0"
+                  placeholder="Enter your article title..."
+                />
+              </CardContent>
+            </Card>
+            
+            {/* Editor Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Content</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="editor-wrapper border-0">
+                  <div ref={editorRef} className="editor-container min-h-[500px]" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Image Upload Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5" />
+                  Add Images
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="relative">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-center gap-3 text-gray-600"
+                  >
+                    <Upload className="w-6 h-6" />
+                    <div className="text-center">
+                      <p className="font-medium">Click to upload images</p>
+                      <p className="text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                    </div>
+                  </button>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">
+                  💡 After uploading, you can drag images to reposition them and resize by dragging the corner handles
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
+      
+      <style jsx>{`
+        .ql-container {
+          border: none !important;
+          font-family: 'Inter', sans-serif;
+          font-size: 16px;
+          line-height: 1.6;
+        }
+        
+        .ql-toolbar.ql-snow {
+          border: none !important;
+          border-bottom: 1px solid #e5e7eb !important;
+          background: #f9fafb;
+          padding: 16px;
+        }
+        
+        .ql-toolbar .ql-stroke {
+          stroke: #1e40af;
+        }
+        
+        .ql-toolbar .ql-fill {
+          fill: #1e40af;
+        }
+        
+        .ql-toolbar button:hover {
+          background: #e0e7ff;
+          border-radius: 6px;
+        }
+        
+        .ql-editor {
+          padding: 24px;
+          color: #1f2937;
+          min-height: 500px;
+        }
+        
+        .ql-editor.ql-blank::before {
+          color: #9ca3af;
+          font-style: italic;
+        }
+        
+        .image-preview {
+          max-width: 100%;
+          margin: 20px 0;
+          border-radius: 8px;
+          cursor: move;
+          position: relative;
+          display: inline-block;
+          transition: all 0.2s ease;
+          border: 2px solid transparent;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .image-preview:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+          border-color: #1e40af;
+        }
+        
+        .resizer {
+          position: absolute;
+          width: 12px;
+          height: 12px;
+          background: #1e40af;
+          border: 2px solid white;
+          border-radius: 50%;
+          cursor: se-resize;
+          bottom: -6px;
+          right: -6px;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
+        }
+        
+        .resizer:hover {
+          background: #1d4ed8;
+          transform: scale(1.2);
+        }
+        
+        .prose-law h1, .prose-law h2, .prose-law h3, .prose-law h4, .prose-law h5, .prose-law h6 {
+          color: #1e40af;
+        }
+      `}</style>
     </div>
   );
 };

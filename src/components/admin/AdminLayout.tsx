@@ -11,7 +11,8 @@ import {
   Users, 
   Image,
   LogOut,
-  ImageIcon
+  ImageIcon,
+  PenTool
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ const AdminLayout = () => {
     { name: "Publications", href: "/admin/publications", icon: FileText },
     { name: "News & Events", href: "/admin/news", icon: Calendar },
     { name: "Gallery", href: "/admin/gallery", icon: ImageIcon },
+    { name: "Blog Editor", href: "/editor", icon: PenTool },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Media Library", href: "/admin/media", icon: Image },
   ];
@@ -39,7 +41,7 @@ const AdminLayout = () => {
       className={cn(
         "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
         isActive(item.href)
-          ? "bg-law-light/10 text-gray-500"
+          ? "bg-law-light/10 text-law-DEFAULT"
           : "text-gray-500 hover:bg-law-light/10 hover:text-law-DEFAULT"
       )}
       onClick={() => setOpen(false)}
