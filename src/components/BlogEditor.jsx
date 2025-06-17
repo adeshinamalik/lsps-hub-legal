@@ -1,14 +1,16 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 import { PenTool, Eye, Upload, FileText, Image as ImageIcon, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { db, storage } from '../firebase/Firebase'; // Adjust path to your firebase.js
+import { collection, addDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import './BlogEditor.css';
 
 const BlogEditor = () => {
   const [title, setTitle] = useState('');
@@ -51,7 +53,6 @@ const BlogEditor = () => {
 
     quillRef.current = quill;
 
-    // Custom image handling
     const handleImageDrag = (e) => {
       e.target.style.opacity = '0.7';
       e.target.style.transform = 'scale(1.02)';
@@ -86,6 +87,33 @@ const BlogEditor = () => {
       document.addEventListener('mouseup', stopResize);
     };
 
+    const setupImage = (img, imageData) => {
+      if (img.src === imageData.src && !img.classList.contains('processed')) {
+        img.className = 'image-preview processed';
+        img.setAttribute('draggable', true);
+        img.addEventListener('dragstart', handleImageDrag);
+        img.addEventListener('dragend', handleImageDrop);
+        const resizer = document.createElement('div');
+        resizer.className = 'resizer';
+        resizer.addEventListener('mousedown', (e) => handleResize(e, img));
+        img.parentNode.insertBefore(resizer, img.nextSibling);
+      }
+    };
+
+    // Use MutationObserver to detect image additions
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length) {
+          const imgs = quill.root.querySelectorAll('img');
+          imgs.forEach((img) => {
+            const matchingImage = images.find(i => i.src === img.src);
+            if (matchingImage) setupImage(img, matchingImage);
+          });
+        }
+      });
+    });
+    observer.observe(editorRef.current, { childList: true, subtree: true });
+
     const editor = editorRef.current;
     editor.addEventListener('dragover', (e) => e.preventDefault());
     editor.addEventListener('drop', (e) => {
@@ -98,10 +126,11 @@ const BlogEditor = () => {
     });
 
     return () => {
-      editor.removeEventListener('dragover', () => {});
-      editor.removeEventListener('drop', () => {});
+      editor.removeEventListener('dragover', () => { });
+      editor.removeEventListener('drop', () => { });
+      observer.disconnect();
     };
-  }, [previewMode]);
+  }, [previewMode, images]);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -114,56 +143,59 @@ const BlogEditor = () => {
 
     const quill = quillRef.current;
     const range = quill.getSelection(true) || { index: quill.getLength() };
-    
     newImages.forEach((image) => {
       quill.insertEmbed(range.index, 'image', image.src);
-      
-      setTimeout(() => {
-        quill.root.querySelectorAll('img').forEach((img) => {
-          if (img.src === image.src && !img.classList.contains('processed')) {
-            img.className = 'image-preview processed';
-            img.setAttribute('draggable', true);
-            img.addEventListener('dragstart', handleImageDrag);
-            img.addEventListener('dragend', handleImageDrop);
-            
-            const resizer = document.createElement('div');
-            resizer.className = 'resizer';
-            resizer.addEventListener('mousedown', (e) => handleResize(e, img));
-            img.parentNode.insertBefore(resizer, img.nextSibling);
-          }
-        });
-      }, 100);
-      
       range.index++;
     });
     setContent(quill.root.innerHTML);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const postData = {
-      title,
-      content,
-      wordCount,
-      images: images.map((img) => ({
-        name: img.file.name,
-        src: img.src,
-      })),
-      publishedAt: new Date().toISOString(),
-    };
-    console.log('Post Data:', postData);
-    alert('Article published successfully! Check console for details.');
-    
-    // Reset form
-    setTitle('');
-    setContent('');
-    setImages([]);
-    setWordCount(0);
-    if (quillRef.current) {
-      quillRef.current.root.innerHTML = '';
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    try {
+      // Replace blob URLs with Firebase Storage URLs in content
+      let updatedContent = content;
+      const uploadedImages = await Promise.all(
+        images.map(async (img) => {
+          const storageRef = ref(storage, `images/${img.file.name}-${img.id}`);
+          await uploadBytes(storageRef, img.file);
+          const url = await getDownloadURL(storageRef);
+          // Replace blob URL with Firebase URL in content
+          updatedContent = updatedContent.replace(img.src, url);
+          return { name: img.file.name, src: url };
+        })
+      );
+
+      // Update content state with Firebase URLs
+      setContent(updatedContent);
+
+      // Prepare post data
+      const postData = {
+        title,
+        content: updatedContent,
+        wordCount,
+        images: uploadedImages,
+        publishedAt: new Date().toISOString(),
+      };
+
+      // Save to Firestore
+      await addDoc(collection(db, 'posts'), postData);
+
+      alert('Article published successfully to Firebase!');
+      // Reset form
+      setTitle('');
+      setContent('');
+      setImages([]);
+      setWordCount(0);
+      if (quillRef.current) {
+        quillRef.current.root.innerHTML = '';
+      }
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Error publishing to Firebase:', error);
+      alert('Failed to publish article: ' + error.message);
     }
   };
 
@@ -194,7 +226,7 @@ const BlogEditor = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-4">
             {wordCount > 0 && (
               <div className="flex items-center gap-2">
@@ -210,7 +242,7 @@ const BlogEditor = () => {
                 )}
               </div>
             )}
-            
+
             <Button
               onClick={togglePreview}
               variant={previewMode ? "default" : "outline"}
@@ -249,15 +281,15 @@ const BlogEditor = () => {
                 <span>{Math.ceil(wordCount / 200)} min read</span>
               </div>
             </CardHeader>
-            
+
             <CardContent className="pt-8">
-              <div 
+              <div
                 className="prose prose-lg prose-law max-w-none prose-headings:text-law-DEFAULT prose-a:text-law-DEFAULT prose-img:rounded-lg prose-img:shadow-md"
-                dangerouslySetInnerHTML={{ 
-                  __html: content || '<p class="text-gray-500 italic">Your content will appear here...</p>' 
+                dangerouslySetInnerHTML={{
+                  __html: content || '<p class="text-gray-500 italic">Your content will appear here...</p>'
                 }}
               />
-              
+
               <div className="pt-8 mt-8 border-t">
                 <Button
                   onClick={handleSubmit}
@@ -286,7 +318,7 @@ const BlogEditor = () => {
                 />
               </CardContent>
             </Card>
-            
+
             {/* Editor Section */}
             <Card>
               <CardHeader>
@@ -298,7 +330,7 @@ const BlogEditor = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Image Upload Section */}
             <Card>
               <CardHeader>
@@ -336,87 +368,6 @@ const BlogEditor = () => {
           </div>
         )}
       </div>
-      
-      <style jsx>{`
-        .ql-container {
-          border: none !important;
-          font-family: 'Inter', sans-serif;
-          font-size: 16px;
-          line-height: 1.6;
-        }
-        
-        .ql-toolbar.ql-snow {
-          border: none !important;
-          border-bottom: 1px solid #e5e7eb !important;
-          background: #f9fafb;
-          padding: 16px;
-        }
-        
-        .ql-toolbar .ql-stroke {
-          stroke: #1e40af;
-        }
-        
-        .ql-toolbar .ql-fill {
-          fill: #1e40af;
-        }
-        
-        .ql-toolbar button:hover {
-          background: #e0e7ff;
-          border-radius: 6px;
-        }
-        
-        .ql-editor {
-          padding: 24px;
-          color: #1f2937;
-          min-height: 500px;
-        }
-        
-        .ql-editor.ql-blank::before {
-          color: #9ca3af;
-          font-style: italic;
-        }
-        
-        .image-preview {
-          max-width: 100%;
-          margin: 20px 0;
-          border-radius: 8px;
-          cursor: move;
-          position: relative;
-          display: inline-block;
-          transition: all 0.2s ease;
-          border: 2px solid transparent;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .image-preview:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-          border-color: #1e40af;
-        }
-        
-        .resizer {
-          position: absolute;
-          width: 12px;
-          height: 12px;
-          background: #1e40af;
-          border: 2px solid white;
-          border-radius: 50%;
-          cursor: se-resize;
-          bottom: -6px;
-          right: -6px;
-          transition: all 0.2s ease;
-          box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
-        }
-        
-        .resizer:hover {
-          background: #1d4ed8;
-          transform: scale(1.2);
-        }
-        
-        .prose-law h1, .prose-law h2, .prose-law h3, .prose-law h4, .prose-law h5, .prose-law h6 {
-          color: #1e40af;
-        }
-      `}</style>
     </div>
   );
 };
